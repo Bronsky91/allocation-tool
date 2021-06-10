@@ -1,0 +1,67 @@
+body {
+  padding: 10px;
+  font-family: sans-serif;
+}
+.row {
+  display: flex;
+  flex-direction: row;
+}
+.center {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+.form {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+.formLabel {
+  padding-right: 5px;
+}
+.formRow {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 5px;
+}
+
+.accountsColumn {
+  display: flex;
+  flex-direction: column;
+}
+
+.allocationsColumn {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.allocationRow {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  width: 900px;
+  padding: 5px;
+}
+
+.allocationAmount {
+  width: 10%;
+}
+
+.createJournalEntryContainer {
+  align-self: end;
+}
+.createJournalEntryButton {
+  padding: 10px;
+}
+
+.red {
+  color: red;
+}
+
+.dropDown {
+  margin-left: 5px;
+}
