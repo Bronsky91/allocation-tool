@@ -1,10 +1,15 @@
 import React, { useState } from "react";
 
-export const Segment = ({ data, handleChangeFormData }) => {
+export const Segment = ({
+  data,
+  handleChangeFormData,
+  handledSelectedSegments,
+}) => {
   const [selectedSegment, setSelectedSegment] = useState(data.subSegments[0]);
-
   const handleChangeSegment = (e) => {
-    setSelectedSegment(data.subSegments[e.target.value]);
+    const newSelectedSegment = data.subSegments[e.target.value];
+    setSelectedSegment(newSelectedSegment);
+    handledSelectedSegments(data._id, newSelectedSegment);
   };
 
   return (
@@ -12,7 +17,12 @@ export const Segment = ({ data, handleChangeFormData }) => {
       <h3>{data.description}</h3>
       <div className="formRow">
         <label className="formLabel">Description:</label>
-        <select onChange={handleChangeSegment}>
+        <select
+          value={data.subSegments.findIndex(
+            (subSegment) => subSegment.number === selectedSegment.number
+          )}
+          onChange={handleChangeSegment}
+        >
           {data.subSegments.map((subSegment, index) => {
             return (
               <option key={index} value={index}>
@@ -26,7 +36,7 @@ export const Segment = ({ data, handleChangeFormData }) => {
         <label className="formLabel">Number:</label>
         <div>{selectedSegment.number}</div>
       </div>
-      {data.isMain ? (
+      {data.type === "MAIN" ? (
         <div className="formRow">
           <label className="formLabel">Value:</label>
           <input

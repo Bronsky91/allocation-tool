@@ -4,7 +4,6 @@ import { saveAs } from "file-saver";
 export const CreateWorkbook = (data) => {
   workbookBuilder(data)
     .then((buffer) => {
-      console.log(buffer);
       saveAs(new Blob([buffer]), `${data.journalHeader}_journal_entry.csv`);
     })
     .catch((err) => {

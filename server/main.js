@@ -1,10 +1,12 @@
 import { Meteor } from "meteor/meteor";
 import { SegmentsCollection } from "/imports/api/segments";
 
-function insertSegment({ description, subSegments }) {
+function insertSegment({ description, subSegments, type, chartFieldOrder }) {
   SegmentsCollection.insert({
     description,
     subSegments,
+    type,
+    chartFieldOrder,
     createdAt: new Date(),
   });
 }
@@ -14,8 +16,12 @@ Meteor.startup(() => {
   if (SegmentsCollection.find().count() === 0) {
     insertSegment({
       description: "Main Account",
-      subSegments: [{ title: "Expense", number: 6000 }],
-      isMain: true,
+      subSegments: [
+        { title: "Payroll", number: 6100 },
+        { title: "Rent", number: 6200 },
+      ],
+      type: "MAIN",
+      chartFieldOrder: 2,
     });
 
     insertSegment({
@@ -26,7 +32,8 @@ Meteor.startup(() => {
         { title: "QC", number: 30 },
         { title: "Mesa", number: 40 },
       ],
-      isMain: false,
+      type: "STANDARD",
+      chartFieldOrder: 0,
     });
 
     insertSegment({
@@ -36,13 +43,24 @@ Meteor.startup(() => {
         { title: "Marketing", number: 2 },
         { title: "Ops", number: 3 },
       ],
-      isMain: false,
+      type: "STANDARD",
+      chartFieldOrder: 1,
     });
 
     insertSegment({
       description: "Sub-Account",
       subSegments: [{ title: "Nate's Favorite", number: 0001 }],
+      type: "STANDARD",
+      chartFieldOrder: 3,
     });
-    isMain: false;
+
+    insertSegment({
+      description: "Offset Account",
+      subSegments: [
+        { title: "Cash", number: 1000 }, // Should be 00-0-1000-0000 at the end
+        { title: "Accounts Receivable", number: 2000 },
+      ],
+      type: "OFFSET",
+    });
   }
 });

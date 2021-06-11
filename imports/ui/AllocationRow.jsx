@@ -1,25 +1,39 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
-export const AllocationRow = ({ row, setRow }) => (
-  <div className="allocationRow">
-    <input
-      type="text"
-      value={row.title}
-      onChange={(e) => setRow(row.id, "title", e.target.value)}
-    />
-    <input
-      type="text"
-      value={row.costCenterSegment}
-      onChange={(e) => setRow(row.id, "costCenterSegment", e.target.value)}
-    />
-    <div>
-      <input
-        type="number"
-        value={row.percentage}
-        onChange={(e) => setRow(row.id, "percentage", e.target.value)}
-      />
-      %
+export const AllocationRow = ({ row, setRow, segment, formData }) => {
+  // Default selectedSubSegment state to one that already isn't used
+
+  const handleChangeSelectedSubSegment = (e) => {
+    const newSelectedSubSegment = segment.subSegments[e.target.value];
+    setRow(row.id, "selectedSubSegment", newSelectedSubSegment);
+  };
+
+  return (
+    <div className="allocationRow">
+      <select
+        value={segment.subSegments.findIndex(
+          (subSegment) => subSegment.number === row.selectedSubSegment.number
+        )}
+        onChange={handleChangeSelectedSubSegment}
+      >
+        {segment.subSegments.map((subSegment, index) => {
+          return (
+            <option key={index} value={index}>
+              {subSegment.title}
+            </option>
+          );
+        })}
+      </select>
+      <div>
+        <input
+          className="allocationPercent"
+          type="number"
+          value={row.percentage}
+          onChange={(e) => setRow(row.id, "percentage", e.target.value)}
+        />
+        %
+      </div>
+      <div className="allocationAmount">{row.amount}</div>
     </div>
-    <div className="allocationAmount">{row.amount}</div>
-  </div>
-);
+  );
+};

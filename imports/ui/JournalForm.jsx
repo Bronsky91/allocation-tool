@@ -1,56 +1,129 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useTracker } from "meteor/react-meteor-data";
 import { AllocationRow } from "./AllocationRow";
 import { CreateWorkbook } from "../api/workbook";
 import { SegmentsCollection } from "../api/segments";
 import { Segment } from "./Segment";
+import PacmanLoader from "react-spinners/PacmanLoader";
 
 export const JournalForm = () => {
   const segments = useTracker(() => SegmentsCollection.find().fetch());
-  const [allocationSegment, setAllocationSegment] = useState(
-    segments[0] || { _id: "", description: "", subSegments: [] }
+  const allocationSegments = segments.filter(
+    (segment) => !["OFFSET", "MAIN"].includes(segment.type)
   );
+
+  const [allocationSegment, setAllocationSegment] = useState();
   const [formData, setFormData] = useState({
-    balancingAccountNumber: "",
-    balancingAccountTitle: "",
     mainSegmentValue: 0,
+    segments: [],
     allocationRows: [
       {
         id: 0,
-        allocationSegment: {},
         percentage: "",
         amount: 0,
+        selectedSubSegment: {},
       },
     ],
     journalHeader: "",
   });
 
+  useEffect(() => {
+    if (segments.length > 0) {
+      // Makes sure the first allocation segment is selected
+      if (!allocationSegment) {
+        setAllocationSegment(allocationSegments[0]);
+      }
+      // Populate the formData with the retrieved Segments
+      if (formData.segments.length === 0) {
+        const formSegments = segments.map((segment) => ({
+          _id: segment._id,
+          description: segment.description,
+          type: segment.type,
+          chartFieldOrder: segment.chartFieldOrder,
+          selectedSubSegment: segment.subSegments[0],
+        }));
+        handleChangeFormData("segments", formSegments);
+      }
+    }
+  }, [segments]);
+
+  useEffect(() => {
+    // When the allocationSegment changes, this updates the formData for the rows
+    // Currently it clears the rows and starts over with a single row with the first selectedSegment
+    if (allocationSegment) {
+      handleChangeFormData("allocationRows", [
+        {
+          id: 0,
+          percentage: "",
+          amount: 0,
+          selectedSubSegment: allocationSegment.subSegments[0],
+        },
+      ]);
+    }
+  }, [allocationSegment]);
+
+  useEffect(() => {
+    // Update all Allocation rows when the mainSegmentValue changes
+    setFormData((formData) => ({
+      ...formData,
+      allocationRows: formData.allocationRows.map((row) => {
+        return {
+          ...row,
+          amount: formData.mainSegmentValue * (row.percentage * 0.01),
+        };
+      }),
+    }));
+  }, [formData.mainSegmentValue]);
+
   const handleChangeFormData = (field, value) => {
-    setFormData({
+    console.log(formData);
+    setFormData((formData) => ({
       ...formData,
       [field]: value,
-    });
+    }));
+  };
+
+  const handledSelectedSegments = (segmentID, selectedSubSegment) => {
+    setFormData((formData) => ({
+      ...formData,
+      segments: formData.segments.map((segment) => {
+        if (segment._id === segmentID) {
+          return {
+            ...segment,
+            selectedSubSegment,
+          };
+        }
+        return segment;
+      }),
+    }));
   };
 
   const handleChangeAllocationSegment = (e) => {
-    const selectedSegment = segments[e.target.value];
+    const selectedSegment = allocationSegments[e.target.value];
     setAllocationSegment(selectedSegment);
   };
 
   const addAllocationRow = () => {
-    setFormData({
-      ...formData,
-      allocationRows: [
-        ...formData.allocationRows,
-        {
-          id: formData.allocationRows.length,
-          title: "",
-          costCenterSegment: "",
-          percentage: "",
-          amount: 0,
-        },
-      ],
-    });
+    // Makes sure allocation segment sub-segments don't outnumber allocation rows
+    if (formData.allocationRows.length < allocationSegment.subSegments.length) {
+      setFormData((formData) => ({
+        ...formData,
+        allocationRows: [
+          ...formData.allocationRows,
+          {
+            id: formData.allocationRows.length,
+            title: "",
+            percentage: "",
+            amount: 0,
+            selectedSubSegment: formData.allocationRows.find(
+              (r) =>
+                r.selectedSubSegment.number !==
+                allocationSegment.subSegments.number
+            ),
+          },
+        ],
+      }));
+    }
   };
 
   const setAllocationRow = (id, field, value) => {
@@ -63,8 +136,8 @@ export const JournalForm = () => {
             [field]: value,
             amount:
               field === "percentage"
-                ? formData.balancingAccountValue * (value * 0.01)
-                : row.percentage,
+                ? formData.mainSegmentValue * (value * 0.01)
+                : formData.mainSegmentValue * (row.percentage * 0.01),
           };
         }
         return row;
@@ -74,6 +147,7 @@ export const JournalForm = () => {
 
   const createJournalEntry = () => {
     console.log(formData);
+    // TODO: Fix workbook formatting
     CreateWorkbook(formData);
   };
 
@@ -81,46 +155,31 @@ export const JournalForm = () => {
     .map((row) => Number(row.amount))
     .reduce((a, b) => a + b, 0);
 
-  const isNotBalanced = journalValue !== Number(formData.balancingAccountValue);
+  const isNotBalanced = journalValue !== Number(formData.mainSegmentValue);
 
-  return (
+  return segments.length > 0 ? (
     <div className="form">
       <div className="accountsColumn">
-        <div>
-          <h3>Balancing Account</h3>
-          <div className="formRow">
-            <label className="formLabel">Title:</label>
-            <input
-              type="text"
-              onChange={(e) =>
-                handleChangeFormData("balancingAccountTitle", e.target.value)
-              }
+        {
+          <Segment
+            data={segments.find((segment) => segment.type === "OFFSET")}
+            handleChangeFormData={handleChangeFormData}
+            handledSelectedSegments={handledSelectedSegments}
+          />
+        }
+        {segments
+          .filter((segment) => segment.type !== "OFFSET")
+          .map((segment, index) => (
+            <Segment
+              key={index}
+              data={segment}
+              handleChangeFormData={handleChangeFormData}
+              handledSelectedSegments={handledSelectedSegments}
             />
-          </div>
-          <div className="formRow">
-            <label className="formLabel">Account Number:</label>
-            <input
-              type="text"
-              onChange={(e) =>
-                handleChangeFormData("balancingAccountNumber", e.target.value)
-              }
-            />
-          </div>
-          <div className="formRow">
-            <label className="formLabel">Value:</label>
-            <input
-              type="number"
-              onChange={(e) =>
-                handleChangeFormData("balancingAccountValue", e.target.value)
-              }
-            />
-          </div>
-        </div>
-        {segments.map((segment, index) => (
-          <Segment key={index} data={segment} />
-        ))}
+          ))}
 
         <hr />
+
         <div>
           <h3>Journal Entry Meta Data</h3>
           <div className="formRow">
@@ -145,15 +204,19 @@ export const JournalForm = () => {
       <div className="allocationsColumn">
         <div>
           <div className="center">
-            <h3 className="center">Choose Allocation Field:</h3>
+            <h3 className="center">Choose Allocation Segment:</h3>
             <select
               className="dropDown"
-              value={segments.findIndex(
-                (segment) => segment._id === allocationSegment._id
-              )}
+              value={
+                allocationSegment
+                  ? allocationSegments.findIndex(
+                      (segment) => segment._id === allocationSegment._id
+                    )
+                  : 0
+              }
               onChange={handleChangeAllocationSegment}
             >
-              {segments.map((segment, index) => {
+              {allocationSegments.map((segment, index) => {
                 return (
                   <option key={segment._id} value={index}>
                     {segment.description}
@@ -164,20 +227,23 @@ export const JournalForm = () => {
           </div>
           <div>
             <div className="allocationRow">
-              <div>Title</div>
-              <div>Cost Center Segment</div>
+              <div>Allocation Segment</div>
               <div>Percentage</div>
               <div>Amount</div>
             </div>
-            {formData.allocationRows.map((row) => {
-              return (
-                <AllocationRow
-                  key={row.id}
-                  row={row}
-                  setRow={setAllocationRow}
-                />
-              );
-            })}
+            {allocationSegment
+              ? formData.allocationRows.map((row) => {
+                  return (
+                    <AllocationRow
+                      key={row.id}
+                      row={row}
+                      setRow={setAllocationRow}
+                      segment={allocationSegment}
+                      formData={formData}
+                    />
+                  );
+                })
+              : null}
             <div className="center">
               <button onClick={addAllocationRow}>+</button>
             </div>
@@ -193,6 +259,10 @@ export const JournalForm = () => {
           </button>
         </div>
       </div>
+    </div>
+  ) : (
+    <div className="center">
+      <PacmanLoader loading={segments.length === 0} />
     </div>
   );
 };

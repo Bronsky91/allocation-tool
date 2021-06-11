@@ -43,19 +43,40 @@ body {
   display: flex;
   flex-direction: row;
   justify-content: space-evenly;
-  width: 900px;
+  width: 30em;
   padding: 5px;
+  margin-left: 8em;
+  /* border: black 1px solid; */
 }
 
 .allocationAmount {
   width: 10%;
 }
-
+.allocationPercent {
+  width: 3em;
+  margin-right: 0.5em;
+  margin-left: 5em;
+}
 .createJournalEntryContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 50em;
+  align-items: center;
   align-self: end;
 }
 .createJournalEntryButton {
   padding: 10px;
+}
+.chartFieldOrderContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.chartFieldOrder {
+  border: black 1px solid;
+  padding: 10px;
+  margin: 5px;
 }
 
 .red {
