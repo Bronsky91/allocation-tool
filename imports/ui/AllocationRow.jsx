@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from "react";
 
-export const AllocationRow = ({ row, setRow, segment, formData }) => {
+export const AllocationRow = ({
+  row,
+  setRow,
+  removeRow,
+  segment,
+  formData,
+}) => {
   // Default selectedSubSegment state to one that already isn't used
 
   const handleChangeSelectedSubSegment = (e) => {
@@ -34,6 +40,7 @@ export const AllocationRow = ({ row, setRow, segment, formData }) => {
         %
       </div>
       <div className="allocationAmount">{row.amount}</div>
+      <button onClick={(e) => removeRow(row.id)}>-</button>
     </div>
   );
 };

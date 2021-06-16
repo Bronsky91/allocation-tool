@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useTracker } from "meteor/react-meteor-data";
+import { v4 as uuidv4 } from "uuid";
 import { AllocationRow } from "./AllocationRow";
 import { CreateWorkbook } from "../api/workbook";
 import { SegmentsCollection } from "../api/segments";
@@ -111,7 +112,7 @@ export const JournalForm = () => {
         allocationRows: [
           ...formData.allocationRows,
           {
-            id: formData.allocationRows.length,
+            id: uuidv4(),
             title: "",
             percentage: "",
             amount: 0,
@@ -124,6 +125,13 @@ export const JournalForm = () => {
         ],
       }));
     }
+  };
+
+  const removeAllocationRow = (id) => {
+    setFormData((formData) => ({
+      ...formData,
+      allocationRows: formData.allocationRows.filter((row) => row.id !== id),
+    }));
   };
 
   const setAllocationRow = (id, field, value) => {
@@ -238,6 +246,7 @@ export const JournalForm = () => {
                       key={row.id}
                       row={row}
                       setRow={setAllocationRow}
+                      removeRow={removeAllocationRow}
                       segment={allocationSegment}
                       formData={formData}
                     />
