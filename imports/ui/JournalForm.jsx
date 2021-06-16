@@ -19,7 +19,7 @@ export const JournalForm = () => {
     segments: [],
     allocationRows: [
       {
-        id: 0,
+        id: uuidv4(),
         percentage: "",
         amount: 0,
         selectedSubSegment: {},
@@ -116,11 +116,13 @@ export const JournalForm = () => {
             title: "",
             percentage: "",
             amount: 0,
-            selectedSubSegment: formData.allocationRows.find(
-              (r) =>
-                r.selectedSubSegment.number !==
-                allocationSegment.subSegments.number
-            ),
+            // When the row is created, the initial selectedSubSegment is one that isn't being used in another row
+            selectedSubSegment: allocationSegment.subSegments.filter(
+              (subSegment) =>
+                !formData.allocationRows
+                  .map((r) => r.selectedSubSegment.number)
+                  .includes(subSegment.number)
+            )[0],
           },
         ],
       }));
