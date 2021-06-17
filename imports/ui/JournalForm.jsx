@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useTracker } from "meteor/react-meteor-data";
 import { v4 as uuidv4 } from "uuid";
 import { AllocationRow } from "./AllocationRow";
-import { CreateWorkbook } from "../api/workbook";
-import { SegmentsCollection } from "../api/segments";
+import { CreateWorkbook } from "../api/CreateWorkbook";
+import { SegmentsCollection } from "../api/Segments";
 import { Segment } from "./Segment";
 import PacmanLoader from "react-spinners/PacmanLoader";
 

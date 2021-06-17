@@ -11,7 +11,7 @@ export const CreateWorkbook = (data) => {
     });
 };
 
-export const workbookBuilder = (data) => {
+const workbookBuilder = (data) => {
   const workbook = new Workbook();
   const worksheet = workbook.addWorksheet(data.journalHeader);
 
@@ -25,6 +25,8 @@ export const workbookBuilder = (data) => {
     { header: "Debit", key: "debit", width: 15 },
     { header: "Credit", key: "credit", width: 15 },
   ];
+
+  worksheet.getColumnKey;
 
   for (const row of data.allocationRows) {
     // Loop through Allocation Rows
