@@ -5,7 +5,7 @@ import { ImportData } from "./ImportData.jsx";
 export const App = () => (
   <div>
     <h1 className="center">Lets Create a Journal Entry!</h1>
-
+    {/* <JournalForm /> */}
     <ImportData />
   </div>
 );

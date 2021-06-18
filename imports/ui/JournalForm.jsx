@@ -9,9 +9,7 @@ import PacmanLoader from "react-spinners/PacmanLoader";
 
 export const JournalForm = () => {
   const segments = useTracker(() => SegmentsCollection.find().fetch());
-  const allocationSegments = segments.filter(
-    (segment) => !["OFFSET", "MAIN"].includes(segment.type)
-  );
+  const allocationSegments = segments;
 
   const [allocationSegment, setAllocationSegment] = useState();
   const [formData, setFormData] = useState({
@@ -39,7 +37,6 @@ export const JournalForm = () => {
         const formSegments = segments.map((segment) => ({
           _id: segment._id,
           description: segment.description,
-          type: segment.type,
           chartFieldOrder: segment.chartFieldOrder,
           selectedSubSegment: segment.subSegments[0],
         }));
@@ -170,23 +167,14 @@ export const JournalForm = () => {
   return segments.length > 0 ? (
     <div className="form">
       <div className="accountsColumn">
-        {
+        {segments.map((segment, index) => (
           <Segment
-            data={segments.find((segment) => segment.type === "OFFSET")}
+            key={index}
+            data={segment}
             handleChangeFormData={handleChangeFormData}
             handledSelectedSegments={handledSelectedSegments}
           />
-        }
-        {segments
-          .filter((segment) => segment.type !== "OFFSET")
-          .map((segment, index) => (
-            <Segment
-              key={index}
-              data={segment}
-              handleChangeFormData={handleChangeFormData}
-              handledSelectedSegments={handledSelectedSegments}
-            />
-          ))}
+        ))}
 
         <hr />
 

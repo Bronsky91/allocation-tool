@@ -1,21 +1,37 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ReadWorkbook } from "../api/ReadWorkbook";
 import { useTracker } from "meteor/react-meteor-data";
 import { COLUMNS, CreateSegments, SegmentsCollection } from "../api/Segments";
 
 export const ImportData = () => {
   const segments = useTracker(() => SegmentsCollection.find().fetch());
+  const [hideSegments, setHideSegments] = useState(false);
+  const [hideMetrics, setHideMetrics] = useState(false);
 
-  const handleFile = async (e) => {
+  const handleChartOfAccountsFile = async (e) => {
     const file = e.target.files[0];
     const data = await ReadWorkbook(file);
     CreateSegments(data);
   };
 
+  const handleMetricFile = async (e) => {
+    const file = e.target.files[0];
+    const data = await ReadWorkbook(file);
+    console.log("import Data", data);
+  };
+
   return (
     <div>
-      <input type="file" onChange={handleFile}></input>
+      <h2>Import Chart of Accounts: </h2>
+      <input type="file" onChange={handleChartOfAccountsFile}></input>
       {segments.length > 0 ? (
+        <button
+          onClick={() => setHideSegments((hideSegments) => !hideSegments)}
+        >
+          {hideSegments ? "Hide" : "Show"} Segments
+        </button>
+      ) : null}
+      {hideSegments && segments.length > 0 ? (
         <div>
           <h2>Segments:</h2>
           {/* One table per sheet */}
@@ -48,6 +64,9 @@ export const ImportData = () => {
           })}
         </div>
       ) : null}
+
+      <h2>Import Metric: </h2>
+      <input type="file" onChange={handleMetricFile}></input>
     </div>
   );
 };

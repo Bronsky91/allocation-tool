@@ -4,6 +4,7 @@ export const Segment = ({
   data,
   handleChangeFormData,
   handledSelectedSegments,
+  segmentType,
 }) => {
   const [selectedSegment, setSelectedSegment] = useState(data.subSegments[0]);
   const handleChangeSegment = (e) => {
@@ -19,24 +20,24 @@ export const Segment = ({
         <label className="formLabel">Description:</label>
         <select
           value={data.subSegments.findIndex(
-            (subSegment) => subSegment.number === selectedSegment.number
+            (subSegment) => subSegment.segmentId === selectedSegment.segmentId
           )}
           onChange={handleChangeSegment}
         >
           {data.subSegments.map((subSegment, index) => {
             return (
               <option key={index} value={index}>
-                {subSegment.title}
+                {subSegment.description}
               </option>
             );
           })}
         </select>
       </div>
       <div className="formRow">
-        <label className="formLabel">Number:</label>
-        <div>{selectedSegment.number}</div>
+        <label className="formLabel">Segment ID:</label>
+        <div>{selectedSegment.segmentId}</div>
       </div>
-      {data.type === "MAIN" ? (
+      {segmentType === "MAIN" ? (
         <div className="formRow">
           <label className="formLabel">Value:</label>
           <input

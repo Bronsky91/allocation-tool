@@ -11,9 +11,9 @@ export const AllocationRow = ({
   const availableSubSegments = segment.subSegments.filter(
     (subSegment) =>
       !formData.allocationRows
-        .map((r) => r.selectedSubSegment.number)
-        .includes(subSegment.number) ||
-      subSegment.number === row.selectedSubSegment.number
+        .map((r) => r.selectedSubSegment.segmentId)
+        .includes(subSegment.segmentId) ||
+      subSegment.segmentId === row.selectedSubSegment.segmentId
   );
 
   // Default selectedSubSegment state to one that already isn't used
@@ -26,14 +26,15 @@ export const AllocationRow = ({
     <div className="allocationRow">
       <select
         value={availableSubSegments.findIndex(
-          (subSegment) => subSegment.number === row.selectedSubSegment.number
+          (subSegment) =>
+            subSegment.segmentId === row.selectedSubSegment.segmentId
         )}
         onChange={handleChangeSelectedSubSegment}
       >
         {availableSubSegments.map((subSegment, index) => {
           return (
             <option key={index} value={index}>
-              {subSegment.title}
+              {subSegment.description}
             </option>
           );
         })}
