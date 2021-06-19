@@ -12,7 +12,7 @@ export const CreateSegments = (data) => {
       .map((row) => {
         const subSegment = {};
         row.map((r, i) => {
-          subSegment[COLUMNS[i]] = r;
+          subSegment[COLUMNS[i]] = r.value;
         });
         return subSegment;
       });

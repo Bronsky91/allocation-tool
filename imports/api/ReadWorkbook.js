@@ -1,10 +1,8 @@
 import { Workbook } from "exceljs";
 
 export const ReadWorkbook = (file) => {
-  console.log("got file", file);
   return getWorkbookData(file)
     .then((res) => {
-      console.log("excelData", res);
       return res;
     })
     .catch((err) => {
@@ -17,6 +15,7 @@ const getWorkbookData = async (file) => {
     sheets: [],
   };
 
+  // TODO: Accept csv or xlsx
   const workbook = new Workbook();
   await workbook.xlsx.load(file);
   workbook.eachSheet((worksheet, sheetId) => {
@@ -27,13 +26,13 @@ const getWorkbookData = async (file) => {
         .filter((r) => r !== null)
         .map((r) => {
           if (r.result) {
-            return r.result;
+            return { rowNumber, value: r.result };
           }
-          return r;
+          return { rowNumber, value: r };
         });
       if (rowNumber === 1) {
         // Set columns
-        columns.push(...rowValues);
+        columns.push(...rowValues.map((r) => r.value));
       } else {
         // Set rows
         rows.push(rowValues);

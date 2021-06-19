@@ -1,17 +1,24 @@
 import { Meteor } from "meteor/meteor";
+import { MetricsCollection } from "../imports/api/Metrics";
 import { SegmentsCollection } from "/imports/api/Segments";
 
 Meteor.methods({
   insertSegment: ({ description, subSegments, chartFieldOrder }) => {
-    console.log("description", description);
-    console.log("subSegments", subSegments);
-    console.log("chartFieldOrder", chartFieldOrder);
-
     SegmentsCollection.insert({
       description,
       subSegments,
       chartFieldOrder,
       createdAt: new Date(),
+    });
+  },
+  insertMetric: ({ description, columns }) => {
+    // column = {
+    //   title: "",
+    //   rows: [{ value: "", rowNumber: 0 }],
+    // };
+    MetricsCollection.insert({
+      description,
+      columns,
     });
   },
 });

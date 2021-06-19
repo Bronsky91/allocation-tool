@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { ReadWorkbook } from "../api/ReadWorkbook";
 import { useTracker } from "meteor/react-meteor-data";
 import { COLUMNS, CreateSegments, SegmentsCollection } from "../api/Segments";
+import { CreateMetrics } from "../api/Metrics";
 
 export const ImportData = () => {
   const segments = useTracker(() => SegmentsCollection.find().fetch());
@@ -18,6 +19,7 @@ export const ImportData = () => {
     const file = e.target.files[0];
     const data = await ReadWorkbook(file);
     console.log("import Data", data);
+    CreateMetrics(data);
   };
 
   return (
