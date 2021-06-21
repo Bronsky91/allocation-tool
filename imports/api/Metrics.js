@@ -21,6 +21,10 @@ export const CreateMetrics = (data) => {
       };
     });
 
+    console.log("metric", {
+      description,
+      columns,
+    });
     Meteor.call("insertMetric", { description, columns }, (err, res) => {
       if (err) {
         console.log("err", err);

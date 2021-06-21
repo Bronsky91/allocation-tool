@@ -6,6 +6,13 @@ body {
   display: flex;
   flex-direction: row;
 }
+
+.importDataContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
 .center {
   display: flex;
   flex-direction: row;
@@ -85,4 +92,9 @@ body {
 
 .dropDown {
   margin-left: 5px;
+}
+
+.headerButton {
+  padding: 0.5em;
+  margin: 1em;
 }

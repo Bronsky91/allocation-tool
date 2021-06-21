@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-export const Segment = ({
+export const SegmentManual = ({
   data,
   handleChangeFormData,
   handledSelectedSegments,

@@ -2,12 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useTracker } from "meteor/react-meteor-data";
 import { v4 as uuidv4 } from "uuid";
 import { AllocationRow } from "./AllocationRow";
-import { CreateWorkbook } from "../api/CreateWorkbook";
-import { SegmentsCollection } from "../api/Segments";
-import { Segment } from "./Segment";
+import { CreateWorkbook } from "../../api/CreateWorkbook";
+import { SegmentsCollection } from "../../api/Segments";
+import { SegmentManual } from "./SegmentManual";
 import PacmanLoader from "react-spinners/PacmanLoader";
 
-export const JournalForm = () => {
+export const JournalFormManual = () => {
   const segments = useTracker(() => SegmentsCollection.find().fetch());
   const allocationSegments = segments;
 
@@ -20,7 +20,10 @@ export const JournalForm = () => {
         id: uuidv4(),
         percentage: "",
         amount: 0,
-        selectedSubSegment: {},
+        selectedSubSegment: {
+          segmentId: "",
+          description: "",
+        },
       },
     ],
     journalHeader: "",
@@ -117,8 +120,8 @@ export const JournalForm = () => {
             selectedSubSegment: allocationSegment.subSegments.filter(
               (subSegment) =>
                 !formData.allocationRows
-                  .map((r) => r.selectedSubSegment.number)
-                  .includes(subSegment.number)
+                  .map((r) => r.selectedSubSegment.segmentId)
+                  .includes(subSegment.segmentId)
             )[0],
           },
         ],
@@ -168,7 +171,7 @@ export const JournalForm = () => {
     <div className="form">
       <div className="accountsColumn">
         {segments.map((segment, index) => (
-          <Segment
+          <SegmentManual
             key={index}
             data={segment}
             handleChangeFormData={handleChangeFormData}
