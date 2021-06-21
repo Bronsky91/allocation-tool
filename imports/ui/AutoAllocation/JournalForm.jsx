@@ -68,6 +68,7 @@ export const JournalForm = () => {
 
   const handleAllocation = () => {
     // Opens Allocation Modal
+    // Use material UI
   };
 
   const createJournalEntry = () => {
