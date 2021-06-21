@@ -46,6 +46,12 @@ body {
   justify-content: space-between;
 }
 
+.autoAllocationColumn {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
 .allocationRow {
   display: flex;
   flex-direction: row;
@@ -94,7 +100,7 @@ body {
   margin-left: 5px;
 }
 
-.headerButton {
+.mediumButton {
   padding: 0.5em;
   margin: 1em;
 }

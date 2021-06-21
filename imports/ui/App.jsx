@@ -19,19 +19,19 @@ export const App = () => {
       <h1 className="center">DOPE CHODE JOURNAL ENTRY!</h1>
       <div className="center">
         <button
-          className="headerButton"
+          className="mediumButton"
           onClick={() => setSelectedPage("import")}
         >
           Import/Onboard
         </button>
         <button
-          className="headerButton"
+          className="mediumButton"
           onClick={() => setSelectedPage("manual")}
         >
           Manual Journal Entry
         </button>
         <button
-          className="headerButton"
+          className="mediumButton"
           onClick={() => setSelectedPage("auto")}
         >
           Auto Allocate Journal

@@ -29,12 +29,6 @@ export const ImportData = () => {
 
   if (metrics.length > 0) {
     console.log("metrics", metrics);
-
-    // Organize by column(s) (ex: Location)
-    // Set of locations
-    // If multiple then it will be D column in the example (ex: 010-100)
-    // Summing another column (WEMPV) by the first column (each location)
-    // Summing the result of the summed WEMPV for each location
   }
   return (
     <div className="importDataContainer">

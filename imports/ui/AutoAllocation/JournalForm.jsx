@@ -66,6 +66,10 @@ export const JournalForm = () => {
     }));
   };
 
+  const handleAllocation = () => {
+    // Opens Allocation Modal
+  };
+
   const createJournalEntry = () => {
     console.log(formData);
     // TODO: Fix workbook formatting
@@ -110,6 +114,14 @@ export const JournalForm = () => {
             />
           </div>
         </div>
+      </div>
+      <div className="autoAllocationColumn">
+        <button onClick={handleAllocation} className="mediumButton">
+          Time to Allocate!
+        </button>
+        <button onClick={createJournalEntry} className="mediumButton">
+          Download!
+        </button>
       </div>
     </div>
   );
