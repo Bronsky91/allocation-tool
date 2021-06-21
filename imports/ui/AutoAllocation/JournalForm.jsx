@@ -4,18 +4,26 @@ import { CreateWorkbook } from "../../api/CreateWorkbook";
 import { SegmentsCollection } from "../../api/Segments";
 import { GLSegment } from "./GLSegment";
 import { OtherSegment } from "./OtherSegment";
+import { AllocateModal } from "./AllocateModal";
+import { MetricsCollection } from "../../api/Metrics";
 
 export const JournalForm = () => {
   const segments = useTracker(() => SegmentsCollection.find().fetch());
+  const metrics = useTracker(() => MetricsCollection.find().fetch());
   // Temp array that should be done from onboarding
-  const metricSegments = ["Department", "Location"];
+  const metricSegmentNames = ["Department", "Location"];
   // TODO: Find a better way to get GL code segments
   const glCodeSegment = segments.find((s) => s.description === "GL Code");
   const nonMetricSegments = segments.filter(
     (s) =>
-      !metricSegments.includes(s.description) && s.description !== "GL Code"
+      !metricSegmentNames.includes(s.description) && s.description !== "GL Code"
+  );
+  const metricSegments = segments.filter((s) =>
+    metricSegmentNames.includes(s.description)
   );
 
+  const [allocationModalOpen, setAllocationModalOpen] = useState(false);
+  const [allocationComplete, setAllocationComplete] = useState(false);
   const [formData, setFormData] = useState({
     toBalanceSegmentValue: 0,
     selectedBalanceSegment: {},
@@ -66,9 +74,14 @@ export const JournalForm = () => {
     }));
   };
 
-  const handleAllocation = () => {
+  const openAllocationModal = () => {
+    setAllocationModalOpen(true);
     // Opens Allocation Modal
     // Use material UI
+  };
+
+  const closeAllocationModal = () => {
+    setAllocationModalOpen(false);
   };
 
   const createJournalEntry = () => {
@@ -79,6 +92,12 @@ export const JournalForm = () => {
 
   return (
     <div className="form">
+      <AllocateModal
+        open={allocationModalOpen}
+        handleClose={closeAllocationModal}
+        metricSegments={metricSegments}
+        metrics={metrics}
+      />
       <div className="accountsColumn">
         <GLSegment
           data={glCodeSegment}
@@ -117,12 +136,18 @@ export const JournalForm = () => {
         </div>
       </div>
       <div className="autoAllocationColumn">
-        <button onClick={handleAllocation} className="mediumButton">
+        <button onClick={openAllocationModal} className="mediumButton">
           Time to Allocate!
         </button>
-        <button onClick={createJournalEntry} className="mediumButton">
-          Download!
-        </button>
+        <div>
+          {allocationComplete ? (
+            <button onClick={createJournalEntry} className="mediumButton">
+              Download!
+            </button>
+          ) : (
+            <p>Press Allocation button to get your journal entry download</p>
+          )}
+        </div>
       </div>
     </div>
   );

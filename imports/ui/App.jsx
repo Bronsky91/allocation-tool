@@ -16,7 +16,7 @@ export const App = () => {
 
   return (
     <div>
-      <h1 className="center">DOPE CHODE JOURNAL ENTRY!</h1>
+      <h1 className="center">JOURNAL ENTRY!</h1>
       <div className="center">
         <button
           className="mediumButton"

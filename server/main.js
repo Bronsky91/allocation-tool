@@ -23,4 +23,4 @@ Meteor.methods({
   },
 });
 
-Meteor.startup(() => {});
+Meteor.startup(() => { });
