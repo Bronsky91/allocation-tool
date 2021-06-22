@@ -109,3 +109,16 @@ body {
   padding: 0.5em;
   margin: 1em;
 }
+
+.autoAllocationRow {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+.dropDownColumn {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 20em;
+}

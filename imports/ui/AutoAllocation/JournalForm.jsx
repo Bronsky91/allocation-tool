@@ -80,6 +80,7 @@ export const JournalForm = () => {
     // Use material UI
   };
 
+  // TODO: After modal is closed make sure the state is saved, Subsegments are gonna be an issue here
   const closeAllocationModal = () => {
     setAllocationModalOpen(false);
   };

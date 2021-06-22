@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import Modal from "@material-ui/core/Modal";
 import { makeStyles } from "@material-ui/core/styles";
 import MultiSelect from "react-multi-select-component";
+import { SubsegmentDropdown } from "./SubsegmentDropdown";
+import { useEffect } from "react";
 
 const getModalStyle = () => {
   const top = 50;
@@ -25,6 +27,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+// TODO: Use this to have scrollable modal https://material-ui.com/components/dialogs/#scrolling-long-content
 export const AllocateModal = ({
   open,
   handleClose,
@@ -39,20 +42,32 @@ export const AllocateModal = ({
     label: m.description,
     value: m._id,
   }));
-  const metricSubsegmentOptions = metricSegments;
 
   const [selectedMetricSegments, setSelectedMetricSegments] = useState([]);
-  // TODO: These MultiSelects need to be their own custom components so they can manage their useState themselves
-  // TODO: Reason being is because the number of "subsegment" dropdowns are determined by the selectedMetricSegments
-  const [selectedMetricSubsegments, setSelectedMetricSubsegments] = useState(
-    []
-  );
+  const [selectedMetrics, setSelectedMetrics] = useState([]);
+
+  const [subsegmentsComplete, setSubsegmentsComplete] = useState([]);
 
   // TODO: Find better way to do this, ie: onboarding
   const validMetricNames = ["FTE Status", "Labor %", "Weighted EMP Value"];
-  const validMetrics = metrics[0].columns.filter((c) =>
-    validMetricNames.includes(c.title)
-  );
+  const validMetricOptions = metrics[0].columns
+    .filter((c) => validMetricNames.includes(c.title))
+    .map((vm) => ({ label: vm.title, value: vm.title }));
+
+  const isSubsegmentCompleted = () => {
+    const selectedSegmentIds = selectedMetricSegments.map((sm) => sm.value);
+    console.log("selectedSegmentIds", selectedSegmentIds);
+    console.log("subsegmentsComplete", subsegmentsComplete);
+    return (
+      (selectedSegmentIds.length !== 0 || subsegmentsComplete.length !== 0) &&
+      selectedSegmentIds.length === subsegmentsComplete.length &&
+      selectedSegmentIds.every((s) => subsegmentsComplete.includes(s))
+    );
+  };
+
+  useEffect(() => {
+    // TODO: If a metric segment is unselected then remove all completed subsegments
+  }, [selectedMetricSegments]);
 
   // Organize by column(s) (ex: Location)
   // Set of locations
@@ -68,8 +83,10 @@ export const AllocateModal = ({
       aria-describedby="simple-modal-description"
     >
       <div style={modalStyle} className={classes.paper}>
-        <h2 id="simple-modal-title">Let's Allocate some stuff</h2>
-        <div className="row">
+        <h2 id="simple-modal-title" className="center">
+          Let's Allocate some stuff
+        </h2>
+        <div className="autoAllocationRow">
           <div className="column" style={{ width: 200 }}>
             <h3>Choose allocation by Segment</h3>
             <MultiSelect
@@ -79,33 +96,42 @@ export const AllocateModal = ({
               labelledBy="Select"
             />
           </div>
-          {selectedMetricSegments.length > 0 ? (
-            // TODO: Not only should this only appear if there are selected Metric Segments
-            // TODO: but also disply a multiselect PER selected Metric Segments in a map loop
 
-            // TODO: this also causes another issue, if there are say 4 segments selected then the list will be longer than the modal
-            // TODO: need to either make the modal scrollable... or come up with a different UI
-            // TODO: This looks promising: https://material-ui.com/components/dialogs/#scrolling-long-content
-            <div className="column" style={{ width: 200 }}>
-              <h3>Choose allocation by column</h3>
-              {/* <MultiSelect
-                options={options}
-                value={selected}
-                onChange={setSelected}
-                labelledBy="Select"
-              /> */}
-            </div>
-          ) : null}
+          <div className="dropDownColumn" style={{ width: 200 }}>
+            {selectedMetricSegments.map((segment, index) => {
+              // Gets full segment object, need subsegments
+              const segmentObject = metricSegments.find(
+                (ms) => ms._id === segment.value
+              );
+              return (
+                <SubsegmentDropdown
+                  key={index}
+                  segment={segmentObject}
+                  description={segment.label}
+                  setSubsegmentsComplete={setSubsegmentsComplete}
+                />
+              );
+            })}
+          </div>
+
           {/* // TODO: only show this once both columns of drop downs are done. */}
           <div className="column" style={{ width: 200 }}>
-            {/* <h3>Choose allocation by column</h3> */}
-            {/* <MultiSelect
-              options={options}
-              value={selected}
-              onChange={setSelected}
-              labelledBy="Select"
-            /> */}
+            {isSubsegmentCompleted() ? (
+              <div>
+                <h3>Choose allocation by metric</h3>
+                <MultiSelect
+                  options={validMetricOptions}
+                  value={selectedMetrics}
+                  onChange={setSelectedMetrics}
+                  labelledBy="Select"
+                />
+              </div>
+            ) : null}
           </div>
+        </div>
+        <div>
+          {/* //TODO: Only have appear after form is done */}
+          <button onClick={handleClose}>Complete Allocation</button>
         </div>
       </div>
     </Modal>
