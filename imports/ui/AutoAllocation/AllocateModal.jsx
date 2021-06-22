@@ -4,6 +4,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import MultiSelect from "react-multi-select-component";
 import { SubsegmentDropdown } from "./SubsegmentDropdown";
 import { useEffect } from "react";
+import { FormatColorResetOutlined } from "@material-ui/icons";
 
 const getModalStyle = () => {
   const top = 50;
@@ -43,31 +44,57 @@ export const AllocateModal = ({
     value: m._id,
   }));
 
+  // Lists the selected metric segments by label and _id
   const [selectedMetricSegments, setSelectedMetricSegments] = useState([]);
-  const [selectedMetrics, setSelectedMetrics] = useState([]);
-
-  const [subsegmentsComplete, setSubsegmentsComplete] = useState([]);
+  // State of all subsegment dropdowns that are based on the selected Metric Segments above
+  const [subsegmentFormData, setSubsegmentFormData] = useState({
+    // [segment._id]: [array of selected subsegmentIds]
+  });
 
   // TODO: Find better way to do this, ie: onboarding
   const validMetricNames = ["FTE Status", "Labor %", "Weighted EMP Value"];
-  const validMetricOptions = metrics[0].columns
+  const initialMetricOptions = metrics[0].columns
     .filter((c) => validMetricNames.includes(c.title))
     .map((vm) => ({ label: vm.title, value: vm.title }));
 
-  const isSubsegmentCompleted = () => {
-    const selectedSegmentIds = selectedMetricSegments.map((sm) => sm.value);
-    console.log("selectedSegmentIds", selectedSegmentIds);
-    console.log("subsegmentsComplete", subsegmentsComplete);
-    return (
-      (selectedSegmentIds.length !== 0 || subsegmentsComplete.length !== 0) &&
-      selectedSegmentIds.length === subsegmentsComplete.length &&
-      selectedSegmentIds.every((s) => subsegmentsComplete.includes(s))
-    );
+  // The options for the metric dropdown
+  const [metricOptions, setMetricOptions] = useState(initialMetricOptions);
+  // The selected metric from the metric dropdown
+  const [selectedMetrics, setSelectedMetrics] = useState([]);
+
+  const showMetricDropdown = () => {
+    for (const segmentId in subsegmentFormData) {
+      // Both subsegments dropdowns at least have on thing selected
+      if (subsegmentFormData[segmentId].length === 0) {
+        return false;
+      }
+    }
+    return true;
   };
 
   useEffect(() => {
-    // TODO: If a metric segment is unselected then remove all completed subsegments
-  }, [selectedMetricSegments]);
+    console.log(subsegmentFormData);
+  }, [subsegmentFormData]);
+
+  const handleSelectedMetrics = (selectedOptions) => {
+    // If not multi select dropdown after selection disable all other selections
+    if (selectedOptions.length === 1) {
+      // One option was selected, make all others disabled
+      setMetricOptions((options) =>
+        options.map((option) => {
+          if (option.value !== selectedOptions[0].value) {
+            return { ...option, disabled: true };
+          }
+          return option;
+        })
+      );
+    } else if (selectedOptions.length === 0) {
+      // The one option was deselected, make all options enabled
+      setMetricOptions((options) =>
+        options.map((option) => ({ ...option, disabled: false }))
+      );
+    }
+  };
 
   // Organize by column(s) (ex: Location)
   // Set of locations
@@ -98,31 +125,31 @@ export const AllocateModal = ({
           </div>
 
           <div className="dropDownColumn" style={{ width: 200 }}>
-            {selectedMetricSegments.map((segment, index) => {
-              // Gets full segment object, need subsegments
-              const segmentObject = metricSegments.find(
-                (ms) => ms._id === segment.value
-              );
-              return (
-                <SubsegmentDropdown
-                  key={index}
-                  segment={segmentObject}
-                  description={segment.label}
-                  setSubsegmentsComplete={setSubsegmentsComplete}
-                />
-              );
-            })}
+            {selectedMetricSegments.length > 0
+              ? metricSegments.map((segment, index) => {
+                  return (
+                    <SubsegmentDropdown
+                      key={index}
+                      segment={segment}
+                      isMultiSelect={selectedMetricSegments
+                        .map((sm) => sm.value)
+                        .includes(segment._id)}
+                      setSubsegmentFormData={setSubsegmentFormData}
+                    />
+                  );
+                })
+              : null}
           </div>
 
-          {/* // TODO: only show this once both columns of drop downs are done. */}
           <div className="column" style={{ width: 200 }}>
-            {isSubsegmentCompleted() ? (
+            {showMetricDropdown() ? (
               <div>
                 <h3>Choose allocation by metric</h3>
                 <MultiSelect
-                  options={validMetricOptions}
+                  hasSelectAll={false}
+                  options={metricOptions}
                   value={selectedMetrics}
-                  onChange={setSelectedMetrics}
+                  onChange={handleSelectedMetrics}
                   labelledBy="Select"
                 />
               </div>

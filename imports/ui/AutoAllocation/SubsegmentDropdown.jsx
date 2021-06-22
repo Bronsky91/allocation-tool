@@ -4,40 +4,56 @@ import MultiSelect from "react-multi-select-component";
 
 export const SubsegmentDropdown = ({
   segment,
-  description,
-  setSubsegmentsComplete,
+  setSubsegmentFormData,
+  isMultiSelect,
 }) => {
-  const [selected, setSelected] = useState([]);
   // Creates the options object for the dropdown
-  const options = segment?.subSegments.map((s) => ({
+  const initialOptions = segment?.subSegments.map((s) => ({
     label: s.description,
     value: s.segmentId,
+    disabled: false,
   }));
+  const [options, setOptions] = useState(initialOptions);
+  const [selected, setSelected] = useState([]);
+
+  const handleSelect = (selectedOptions) => {
+    if (!isMultiSelect) {
+      // If not multi select dropdown after selection disable all other selections
+      if (selectedOptions.length === 1) {
+        // One option was selected, make all others disabled
+        setOptions((options) =>
+          options.map((option) => {
+            if (option.value !== selectedOptions[0].value) {
+              return { ...option, disabled: true };
+            }
+            return option;
+          })
+        );
+      } else if (selectedOptions.length === 0) {
+        // The one option was deselected, make all options enabled
+        setOptions((options) =>
+          options.map((option) => ({ ...option, disabled: false }))
+        );
+      }
+    }
+    setSelected(() => [...selectedOptions]);
+  };
 
   useEffect(() => {
-    // TODO: This isn't working as expected
-    if (selected.length > 0) {
-      setSubsegmentsComplete((subsegmentsComplete) => {
-        if (!subsegmentsComplete.includes(segment._id)) {
-          return [...subsegmentsComplete, segment._id];
-        } else {
-          return subsegmentsComplete;
-        }
-      });
-    } else {
-      setSubsegmentsComplete((subsegmentsComplete) =>
-        subsegmentsComplete.filter((s) => s === segment._id)
-      );
-    }
+    setSubsegmentFormData((data) => ({
+      ...data,
+      [segment._id]: selected.map((s) => s.value),
+    }));
   }, [selected]);
 
   return (
     <div className="column" style={{ width: 200 }}>
-      <h3>Which {description} to include</h3>
+      <h3>Which {segment.description} to include</h3>
       <MultiSelect
+        hasSelectAll={isMultiSelect}
         options={options}
         value={selected}
-        onChange={setSelected}
+        onChange={handleSelect}
         labelledBy="Select"
       />
     </div>
