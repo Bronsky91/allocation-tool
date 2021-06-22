@@ -36,7 +36,7 @@ export const SubsegmentDropdown = ({
         );
       }
     }
-    setSelected(() => [...selectedOptions]);
+    setSelected(selectedOptions);
   };
 
   useEffect(() => {

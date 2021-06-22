@@ -4,7 +4,6 @@ import { makeStyles } from "@material-ui/core/styles";
 import MultiSelect from "react-multi-select-component";
 import { SubsegmentDropdown } from "./SubsegmentDropdown";
 import { useEffect } from "react";
-import { FormatColorResetOutlined } from "@material-ui/icons";
 
 const getModalStyle = () => {
   const top = 50;
@@ -51,7 +50,7 @@ export const AllocateModal = ({
     // [segment._id]: [array of selected subsegmentIds]
   });
 
-  // TODO: Find better way to do this, ie: onboarding
+  // TODO: Find a way to do this in onboarding
   const validMetricNames = ["FTE Status", "Labor %", "Weighted EMP Value"];
   const initialMetricOptions = metrics[0].columns
     .filter((c) => validMetricNames.includes(c.title))
@@ -73,9 +72,11 @@ export const AllocateModal = ({
   };
 
   useEffect(() => {
+    // For debugging purposes
     console.log(subsegmentFormData);
   }, [subsegmentFormData]);
 
+  // Makes Metric Dropdown single select
   const handleSelectedMetrics = (selectedOptions) => {
     // If not multi select dropdown after selection disable all other selections
     if (selectedOptions.length === 1) {
@@ -94,6 +95,7 @@ export const AllocateModal = ({
         options.map((option) => ({ ...option, disabled: false }))
       );
     }
+    setSelectedMetrics(selectedOptions);
   };
 
   // Organize by column(s) (ex: Location)
