@@ -158,7 +158,7 @@ export const JournalFormManual = () => {
   const createJournalEntry = () => {
     console.log(formData);
     // TODO: Fix workbook formatting
-    CreateWorkbook(formData);
+    // CreateWorkbook(formData);
   };
 
   const journalValue = formData.allocationRows

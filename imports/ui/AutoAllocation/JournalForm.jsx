@@ -10,6 +10,7 @@ import { MetricsCollection } from "../../api/Metrics";
 
 export const JournalForm = () => {
   const segments = useTracker(() => SegmentsCollection.find().fetch());
+  console.log("segments", segments);
   const metrics = useTracker(() => MetricsCollection.find().fetch());
   // TODO: Temp array that should be done from onboarding
   const metricSegmentNames = ["Department", "Location"];
@@ -29,17 +30,24 @@ export const JournalForm = () => {
   );
 
   const [allocationModalOpen, setAllocationModalOpen] = useState(false);
-  const [allocationComplete, setAllocationComplete] = useState(false);
   const [formData, setFormData] = useState({
     toBalanceSegmentValue: 0,
     selectedBalanceSegment: {},
     selectedAllocationSegment: {},
+    subGLSegment: {},
     otherSegments: [],
-    journalHeader: "",
+    journalDescription: "",
+    typicalBalance: "",
+    allocationValueOfBalancePerChartField: {},
   });
 
   const readyToAllocate =
-    formData.toBalanceSegmentValue > 0 && formData.journalHeader.length > 0;
+    formData.toBalanceSegmentValue > 0 &&
+    formData.journalDescription.length > 0;
+
+  const allocationComplete =
+    readyToAllocate &&
+    Object.keys(formData.allocationValueOfBalancePerChartField).length > 0;
 
   // TODO: Select default selectedBalanceSegment and selectedAllocationSegment
   // TODO: Make sure the two above segments are never the same
@@ -96,7 +104,7 @@ export const JournalForm = () => {
   const createJournalEntry = () => {
     console.log(formData);
     // TODO: Fix workbook formatting
-    CreateWorkbook(formData);
+    CreateWorkbook(formData, segments);
   };
 
   return (
@@ -107,6 +115,7 @@ export const JournalForm = () => {
         metricSegments={metricSegments}
         metrics={metrics}
         toBalanceValue={formData.toBalanceSegmentValue}
+        handleChangeFormData={handleChangeFormData}
       />
       <div className="accountsColumn">
         <GLSegment
@@ -142,7 +151,7 @@ export const JournalForm = () => {
             <input
               type="text"
               onChange={(e) =>
-                handleChangeFormData("journalHeader", e.target.value)
+                handleChangeFormData("journalDescription", e.target.value)
               }
             />
           </div>

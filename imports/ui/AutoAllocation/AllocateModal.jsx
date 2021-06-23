@@ -34,6 +34,7 @@ export const AllocateModal = ({
   metricSegments,
   metrics,
   toBalanceValue,
+  handleChangeFormData,
 }) => {
   const classes = useStyles();
   // getModalStyle is not a pure function, we roll the style only on the first render
@@ -103,24 +104,21 @@ export const AllocateModal = ({
   };
 
   const completeAllocation = () => {
-    // Array of the Selected Segment Data, sorted by chart field order
-    const selectedSegmentData = metricSegments
-      .filter((ms) =>
-        selectedMetricSegments.map((sm) => sm.value).includes(ms._id)
-      )
-      .sort((a, b) => a.chartFieldOrder - b.chartFieldOrder);
-
+    const orderedMetricSegments = metricSegments.sort(
+      (a, b) => a.chartFieldOrder - b.chartFieldOrder
+    );
     // The metric that was selected
     const selectedMetric = validMetrics.filter((vm) =>
       selectedMetrics.map((sm) => sm.value).includes(vm.title)
     )[0];
-
     const chartFieldSegments = [];
     // An array of all Chart Field arrays that were selected by segment
     // EX: [[010, 020], [110, 120], ...]
-    for (const segment of selectedSegmentData) {
+    for (const segment of orderedMetricSegments) {
       chartFieldSegments.push(subsegmentFormData[segment.description]);
     }
+
+    console.log("chartFieldSegments", chartFieldSegments);
 
     // Generates all combinations of chart field array elements:
     // Generator Function found here: https://stackoverflow.com/questions/15298912/javascript-generating-combinations-from-n-arrays-with-m-elements
@@ -186,17 +184,29 @@ export const AllocateModal = ({
       const chartFieldSum = new Decimal(chartFieldSumObject[chartField]);
       const allocationValue = chartFieldSum.dividedBy(sumOfSelectedMetric);
       // chartFieldSumObject[chartField] / sumOfSelectedMetric;
-      if (allocationValue === 0) {
+      if (allocationValue.equals(0)) {
         // Do not include chart fields that have a 0 allocation value
         continue;
       }
       allocationValuePerChartField[chartField] = allocationValue;
     }
 
+    const allocationValueOfBalancePerChartField = {};
     for (const chartField in allocationValuePerChartField) {
+      const allocationValueOfBalance = Number(
+        allocationValuePerChartField[chartField]
+          .times(new Decimal(toBalanceValue))
+          .toFixed(2)
+      );
+      allocationValueOfBalancePerChartField[chartField] =
+        allocationValueOfBalance;
     }
 
-    // handleClose()
+    handleChangeFormData(
+      "allocationValueOfBalancePerChartField",
+      allocationValueOfBalancePerChartField
+    );
+    // handleClose();
   };
 
   return (

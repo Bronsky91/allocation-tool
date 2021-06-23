@@ -27,9 +27,12 @@ export const SubGLSegment = ({ data, handleChangeFormData }) => {
 
   useEffect(() => {
     if (!showSubGLSegment) {
-      handleChangeFormData("SubGLSegment", {});
+      handleChangeFormData("subGLSegment", {
+        segmentId: "0000",
+        description: "Blank",
+      });
     } else {
-      handleChangeFormData("SubGLSegment", {
+      handleChangeFormData("subGLSegment", {
         ...selectedSegment,
         selectedOption,
       });
