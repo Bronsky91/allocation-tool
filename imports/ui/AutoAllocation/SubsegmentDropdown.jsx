@@ -42,7 +42,7 @@ export const SubsegmentDropdown = ({
   useEffect(() => {
     setSubsegmentFormData((data) => ({
       ...data,
-      [segment._id]: selected.map((s) => s.value),
+      [segment.description]: selected.map((s) => s.value),
     }));
   }, [selected]);
 
