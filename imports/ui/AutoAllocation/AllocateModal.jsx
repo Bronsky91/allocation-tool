@@ -3,7 +3,7 @@ import Modal from "@material-ui/core/Modal";
 import { makeStyles } from "@material-ui/core/styles";
 import MultiSelect from "react-multi-select-component";
 import { SubsegmentDropdown } from "./SubsegmentDropdown";
-import { useEffect } from "react";
+import { Decimal } from "decimal.js";
 
 const getModalStyle = () => {
   const top = 50;
@@ -33,6 +33,7 @@ export const AllocateModal = ({
   handleClose,
   metricSegments,
   metrics,
+  toBalanceValue,
 }) => {
   const classes = useStyles();
   // getModalStyle is not a pure function, we roll the style only on the first render
@@ -160,8 +161,8 @@ export const AllocateModal = ({
 
       // The sum of the metric for the common row numbers for this chart field
       const sumOfSelectedMetric = selectedMetricRows
-        .map((row) => row.value)
-        .reduce((a, b) => a + b, 0);
+        .map((row) => new Decimal(row.value))
+        .reduce((a, b) => a.plus(b), new Decimal(0));
 
       // Places the sum of the chart field into an object with the chart field shown as connected with dashes
       chartFieldSumObject[chartField.join("-")] = sumOfSelectedMetric;
@@ -174,16 +175,17 @@ export const AllocateModal = ({
     }
 
     // The final sum of the selected Metric
-    const sumOfSelectedMetric = chartFieldSums.reduce((a, b) => a + b, 0);
-    console.log("chartFieldSumObject", chartFieldSumObject);
-    console.log("sumOfSelectedMetric", sumOfSelectedMetric);
-    // handleClose()
+    const sumOfSelectedMetric = chartFieldSums.reduce(
+      (a, b) => a.plus(b),
+      new Decimal(0)
+    );
 
     // The result of dividing each chart field sum by the the sum of the selected Metric
     const allocationValuePerChartField = {};
     for (const chartField in chartFieldSumObject) {
-      const allocationValue =
-        chartFieldSumObject[chartField] / sumOfSelectedMetric;
+      const chartFieldSum = new Decimal(chartFieldSumObject[chartField]);
+      const allocationValue = chartFieldSum.dividedBy(sumOfSelectedMetric);
+      // chartFieldSumObject[chartField] / sumOfSelectedMetric;
       if (allocationValue === 0) {
         // Do not include chart fields that have a 0 allocation value
         continue;
@@ -191,7 +193,10 @@ export const AllocateModal = ({
       allocationValuePerChartField[chartField] = allocationValue;
     }
 
-    console.log("allocationValuePerChartField", allocationValuePerChartField);
+    for (const chartField in allocationValuePerChartField) {
+    }
+
+    // handleClose()
   };
 
   return (

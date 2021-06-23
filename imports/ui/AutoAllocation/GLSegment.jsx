@@ -47,12 +47,25 @@ export const GLSegment = ({ data, handleChangeFormData, segmentType }) => {
       {segmentType === "toBalance" ? (
         <div className="formRow">
           <label className="formLabel">Value:</label>
+          {/* //TODO: Make sure no negative number can be entered */}
           <input
-            type="text"
+            type="number"
             onChange={(e) =>
-              handleChangeFormData("toBalanceSegmentValue", e.target.value)
+              handleChangeFormData(
+                "toBalanceSegmentValue",
+                Number(e.target.value)
+              )
             }
           />
+        </div>
+      ) : null}
+      {segmentType === "toAllocate" ? (
+        <div>
+          <label>Typical Balance:</label>
+          <select>
+            <option>Debit</option>
+            <option>Credit</option>
+          </select>
         </div>
       ) : null}
     </div>

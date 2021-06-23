@@ -3,6 +3,7 @@ import { useTracker } from "meteor/react-meteor-data";
 import { CreateWorkbook } from "../../api/CreateWorkbook";
 import { SegmentsCollection } from "../../api/Segments";
 import { GLSegment } from "./GLSegment";
+import { SubGLSegment } from "./SubGLSegment";
 import { OtherSegment } from "./OtherSegment";
 import { AllocateModal } from "./AllocateModal";
 import { MetricsCollection } from "../../api/Metrics";
@@ -10,13 +11,18 @@ import { MetricsCollection } from "../../api/Metrics";
 export const JournalForm = () => {
   const segments = useTracker(() => SegmentsCollection.find().fetch());
   const metrics = useTracker(() => MetricsCollection.find().fetch());
-  // Temp array that should be done from onboarding
+  // TODO: Temp array that should be done from onboarding
   const metricSegmentNames = ["Department", "Location"];
+  const GLSegmentNames = ["GL Code", "Sub-GL Code"];
   // TODO: Find a better way to get GL code segments
   const glCodeSegment = segments.find((s) => s.description === "GL Code");
+  const subGLCodeSegment = segments.find(
+    (s) => s.description === "Sub-GL Code"
+  );
   const nonMetricSegments = segments.filter(
     (s) =>
-      !metricSegmentNames.includes(s.description) && s.description !== "GL Code"
+      !metricSegmentNames.includes(s.description) &&
+      !GLSegmentNames.includes(s.description)
   );
   const metricSegments = segments.filter((s) =>
     metricSegmentNames.includes(s.description)
@@ -32,9 +38,11 @@ export const JournalForm = () => {
     journalHeader: "",
   });
 
+  const readyToAllocate =
+    formData.toBalanceSegmentValue > 0 && formData.journalHeader.length > 0;
+
   // TODO: Select default selectedBalanceSegment and selectedAllocationSegment
   // TODO: Make sure the two above segments are never the same
-
   useEffect(() => {
     if (nonMetricSegments.length > 0) {
       // Populate the formData with the retrieved nonMetricSegments
@@ -98,6 +106,7 @@ export const JournalForm = () => {
         handleClose={closeAllocationModal}
         metricSegments={metricSegments}
         metrics={metrics}
+        toBalanceValue={formData.toBalanceSegmentValue}
       />
       <div className="accountsColumn">
         <GLSegment
@@ -110,14 +119,17 @@ export const JournalForm = () => {
           handleChangeFormData={handleChangeFormData}
           segmentType="toAllocate"
         />
-
+        {subGLCodeSegment ? (
+          <SubGLSegment
+            data={subGLCodeSegment}
+            handleChangeFormData={handleChangeFormData}
+          />
+        ) : null}
         {nonMetricSegments.map((segment, index) => (
           <OtherSegment
             key={index}
             data={segment}
-            handleChangeFormData={handleChangeFormData}
             handleChangeOtherSegments={handleChangeOtherSegments}
-            segmentType="other"
           />
         ))}
 
@@ -126,7 +138,7 @@ export const JournalForm = () => {
         <div>
           <h3>Journal Entry Meta Data</h3>
           <div className="formRow">
-            <label className="formLabel">Header:</label>
+            <label className="formLabel">Description:</label>
             <input
               type="text"
               onChange={(e) =>
@@ -137,7 +149,11 @@ export const JournalForm = () => {
         </div>
       </div>
       <div className="autoAllocationColumn">
-        <button onClick={openAllocationModal} className="mediumButton">
+        <button
+          onClick={openAllocationModal}
+          className="mediumButton"
+          disabled={!readyToAllocate}
+        >
           Time to Allocate!
         </button>
         <div>
