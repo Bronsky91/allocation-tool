@@ -57,26 +57,14 @@ const workbookBuilder = (data, segments) => {
       new Decimal(data.allocationValueOfBalancePerChartField[chartField])
     );
   }
-  // The final sum of the selected Metric
-  const sumOfAllocationValues = arrayOfAllocationValues.reduce(
-    (a, b) => a.plus(b),
-    new Decimal(0)
-  );
+
   // Final Row
   worksheet.addRow({
     // TODO: Find a way to do this dynamically based on ChartFieldOrder
     account: `000-000-${data.selectedAllocationSegment.segmentId}-${data.subGLSegment.segmentId}`,
     description: `${data.journalDescription}`,
-    debit: getBalanceByTypicalBalance(
-      data.typicalBalance,
-      sumOfAllocationValues,
-      "debit"
-    ),
-    credit: getBalanceByTypicalBalance(
-      data.typicalBalance,
-      sumOfAllocationValues,
-      "credit"
-    ),
+    debit: getBalanceByTypicalBalance(data.typicalBalance, data.sum, "debit"),
+    credit: getBalanceByTypicalBalance(data.typicalBalance, data.sum, "credit"),
   });
 
   // save under export.xlsx

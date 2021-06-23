@@ -118,8 +118,6 @@ export const AllocateModal = ({
       chartFieldSegments.push(subsegmentFormData[segment.description]);
     }
 
-    console.log("chartFieldSegments", chartFieldSegments);
-
     // Generates all combinations of chart field array elements:
     // Generator Function found here: https://stackoverflow.com/questions/15298912/javascript-generating-combinations-from-n-arrays-with-m-elements
     function* cartesian(head, ...tail) {
@@ -191,8 +189,11 @@ export const AllocateModal = ({
       allocationValuePerChartField[chartField] = allocationValue;
     }
 
+    // Final Object to be sent to Workbook Creator
     const allocationValueOfBalancePerChartField = {};
+    const allocationValueOfBalancePerChartFieldArray = [];
     for (const chartField in allocationValuePerChartField) {
+      // Creates a number with 2 decimal places
       const allocationValueOfBalance = Number(
         allocationValuePerChartField[chartField]
           .times(new Decimal(toBalanceValue))
@@ -200,8 +201,26 @@ export const AllocateModal = ({
       );
       allocationValueOfBalancePerChartField[chartField] =
         allocationValueOfBalance;
+      // Adds to value array to later sum
+      allocationValueOfBalancePerChartFieldArray.push(allocationValueOfBalance);
     }
 
+    // Gets sum in Decimal format
+    const sumOfAllocationValueOfBalancePerChartField =
+      allocationValueOfBalancePerChartFieldArray
+        .map((value) => new Decimal(value))
+        .reduce((a, b) => a.plus(b), new Decimal(0));
+
+    // Sum in number format
+    allocationValueOfBalancePerChartField.sum = Number(
+      sumOfAllocationValueOfBalancePerChartField.toFixed(2)
+    );
+
+    // TODO: Implement plug feature to make sure sum === the value of the balance
+    // TODO: May need extra meta data in the final object other than the number to clarify if it was plugg
+    // TODO: Could also do this during workbook creation??
+
+    // Hands to form data
     handleChangeFormData(
       "allocationValueOfBalancePerChartField",
       allocationValueOfBalancePerChartField

@@ -10,7 +10,6 @@ import { MetricsCollection } from "../../api/Metrics";
 
 export const JournalForm = () => {
   const segments = useTracker(() => SegmentsCollection.find().fetch());
-  console.log("segments", segments);
   const metrics = useTracker(() => MetricsCollection.find().fetch());
   // TODO: Temp array that should be done from onboarding
   const metricSegmentNames = ["Department", "Location"];
