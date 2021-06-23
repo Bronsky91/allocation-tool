@@ -101,108 +101,97 @@ export const AllocateModal = ({
     setSelectedMetrics(selectedOptions);
   };
 
-  // Organize by column(s) (ex: Location)
-  // Set of locations
-  // If multiple then it will be D column in the example (ex: 010-100)
-  // Summing another column (WEMPV) by the first column (each location)
-  // Summing the result of the summed WEMPV for each location
-
   const completeAllocation = () => {
-    // TODO: Use employeeRosterMetrics to get all rows required for math
-
-    const selectedSegmentData = metricSegments.filter((ms) =>
-      selectedMetricSegments.map((sm) => sm.value).includes(ms._id)
-    );
-    console.log("Selected Metric Segments", selectedSegmentData);
-    console.log("SubSegments Selected", subsegmentFormData);
-    const selectedMetricData = validMetrics.filter((vm) =>
-      selectedMetrics.map((sm) => sm.value).includes(vm.title)
-    );
-    console.log("Selected Metric Data", selectedMetricData);
-    console.log("employeeRosterMetrics", employeeRosterMetrics);
-
-    const metricRowArrays = employeeRosterMetrics.columns
-      .filter((c) =>
-        metricSegments.map((sd) => sd.description).includes(c.title)
+    // Array of the Selected Segment Data, sorted by chart field order
+    const selectedSegmentData = metricSegments
+      .filter((ms) =>
+        selectedMetricSegments.map((sm) => sm.value).includes(ms._id)
       )
-      .map((c) =>
-        c.rows
-          .filter((row) => subsegmentFormData[c.title].includes(row.value))
-          .map((row) => row.rowNumber)
+      .sort((a, b) => a.chartFieldOrder - b.chartFieldOrder);
+
+    // The metric that was selected
+    const selectedMetric = validMetrics.filter((vm) =>
+      selectedMetrics.map((sm) => sm.value).includes(vm.title)
+    )[0];
+
+    const chartFieldSegments = [];
+    // An array of all Chart Field arrays that were selected by segment
+    // EX: [[010, 020], [110, 120], ...]
+    for (const segment of selectedSegmentData) {
+      chartFieldSegments.push(subsegmentFormData[segment.description]);
+    }
+
+    // Generates all combinations of chart field array elements:
+    // Generator Function found here: https://stackoverflow.com/questions/15298912/javascript-generating-combinations-from-n-arrays-with-m-elements
+    function* cartesian(head, ...tail) {
+      let remainder = tail.length ? cartesian(...tail) : [[]];
+      for (let r of remainder) for (let h of head) yield [h, ...r];
+    }
+
+    // An array of all possible chart field combinations of those selected
+    // EX: [[010, 110], [010, 120], ...]
+    const allChartFieldCombos = [];
+    // Fill the AllChartFieldCombos Array
+    for (let c of cartesian(...chartFieldSegments)) {
+      allChartFieldCombos.push(c);
+    }
+
+    const chartFieldSumObject = {};
+    // Loop through each possible Chart Field Combination
+    for (const chartField of allChartFieldCombos) {
+      // All rows pertaining to the current chart field
+      const chartFieldRowArrays = employeeRosterMetrics.columns
+        .filter((c) => Object.keys(subsegmentFormData).includes(c.title))
+        .map((c) =>
+          c.rows
+            .filter((row) => chartField.includes(row.value))
+            .map((row) => row.rowNumber)
+        );
+      // Common row numbers between the chart field
+      const commonRowNumbersForChartField = chartFieldRowArrays.reduce((p, c) =>
+        p.filter((e) => c.includes(e))
       );
-    console.log("Metric Row Arrays", metricRowArrays);
+      // The selected metric rows of the common row numbers found above
+      const selectedMetricRows = employeeRosterMetrics.columns
+        .find((c) => c.title === selectedMetric.title)
+        .rows.filter((row) =>
+          commonRowNumbersForChartField.includes(row.rowNumber)
+        );
 
-    const selectedRowNumbers = metricRowArrays.reduce((p, c) =>
-      p.filter((e) => c.includes(e))
-    );
+      // The sum of the metric for the common row numbers for this chart field
+      const sumOfSelectedMetric = selectedMetricRows
+        .map((row) => row.value)
+        .reduce((a, b) => a + b, 0);
 
-    // GOLD BABY!
-    console.log("Common Row Numbers", selectedRowNumbers);
+      // Places the sum of the chart field into an object with the chart field shown as connected with dashes
+      chartFieldSumObject[chartField.join("-")] = sumOfSelectedMetric;
+    }
 
-    // const subSegmentRowsObject = {};
-    // for (const segment of selectedSegmentData) {
-    //   const selectedSubSegmentMetricRows = employeeRosterMetrics.columns
-    //     .find((c) => c.title === segment.description)
-    //     .rows.filter((row) => selectedRowNumbers.includes(row.rowNumber));
+    const chartFieldSums = [];
+    // Array of just the sums for each chart field
+    for (const chartField in chartFieldSumObject) {
+      chartFieldSums.push(chartFieldSumObject[chartField]);
+    }
 
-    //   const eachSelectedSubsegmentNumber = new Set(
-    //     selectedSubSegmentMetricRows.map((s) => s.value)
-    //   );
-
-    //   for (const subsegmentNumber of eachSelectedSubsegmentNumber) {
-
-    //     subSegmentRowsObject[segment.description] = {
-    //       ...subSegmentRowsObject[segment.description],
-    //       [subsegmentNumber]: selectedSubSegmentMetricRows
-    //         .filter((s) => s.value === subsegmentNumber)
-    //         .map((s) => s.rowNumber),
-    //     };
-    //   }
-    // }
-
-    // console.log("subSegmentRowsObject", subSegmentRowsObject);
-
-    // Loop through each subsegment of the first select segment, then loop through each subsequent subsegments
-    // const allOtherSubsegments = Object.keys(subsegmentFormData).filter(
-    //   (s) => s !== selectedSegmentData[0].description
-    // );
-    // for (const subSegments of subsegmentFormData[
-    //   selectedSegmentData[0].description // Location
-    // ]) {
-    //   console.log(`SubSegment: ${subSegments}`);
-    //   for (const otherSubSegment of allOtherSubsegments) {
-    // console.log(subsegmentFormData[otherSubSegment]);
-    //     for (const subSegmentNumber of subsegmentFormData[otherSubSegment]) {
-    //       console.log(subSegmentNumber);
-    //       const allColumns = employeeRosterMetrics.columns.filter((c) =>
-    //         [selectedSegmentData[0].description, otherSubSegment].includes(
-    //           c.title
-    //         )
-    //       );
-    //       for (const column of allColumns) {
-    //         console.log("column", column);
-    //         console.log(
-    //           column.rows.filter(
-    //             (row) =>
-    //               selectedRowNumbers.includes(row.rowNumber) &&
-    //               row.value === subSegmentNumber
-    //           )
-    //         );
-    //       }
-    //     }
-    //   }
-    // }
-
-    const selectedMetricRows = employeeRosterMetrics.columns
-      .find((c) => c.title === selectedMetricData[0].title)
-      .rows.filter((row) => selectedRowNumbers.includes(row.rowNumber));
-    console.log("selectedMetricRows", selectedMetricRows);
-
-    const sumOfSelectedMetric = selectedMetricRows
-      .map((row) => row.value)
-      .reduce((a, b) => a + b, 0);
+    // The final sum of the selected Metric
+    const sumOfSelectedMetric = chartFieldSums.reduce((a, b) => a + b, 0);
+    console.log("chartFieldSumObject", chartFieldSumObject);
     console.log("sumOfSelectedMetric", sumOfSelectedMetric);
     // handleClose()
+
+    // The result of dividing each chart field sum by the the sum of the selected Metric
+    const allocationValuePerChartField = {};
+    for (const chartField in chartFieldSumObject) {
+      const allocationValue =
+        chartFieldSumObject[chartField] / sumOfSelectedMetric;
+      if (allocationValue === 0) {
+        // Do not include chart fields that have a 0 allocation value
+        continue;
+      }
+      allocationValuePerChartField[chartField] = allocationValue;
+    }
+
+    console.log("allocationValuePerChartField", allocationValuePerChartField);
   };
 
   return (
