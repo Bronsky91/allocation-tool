@@ -4,6 +4,8 @@ import { makeStyles } from "@material-ui/core/styles";
 import MultiSelect from "react-multi-select-component";
 import { SubsegmentDropdown } from "./SubsegmentDropdown";
 import { Decimal } from "decimal.js";
+import { reconciliationAdjustments } from "../../api/utils/ReconciliationAdjustments";
+import { convertDecimalToFixedFloat } from "../../api/utils/ConvertDecimalToFixedFloat";
 
 const getModalStyle = () => {
   const top = 50;
@@ -47,7 +49,12 @@ export const AllocateModal = ({
 
   // TODO: Find a way to do this in onboarding
   const employeeRosterMetrics = metrics[0];
-  const validMetricNames = ["FTE Status", "Labor %", "Weighted EMP Value"];
+  const validMetricNames = [
+    "FTE Status",
+    "Labor %",
+    "Weighted EMP Value",
+    "Annual Salary",
+  ];
   const validMetrics = employeeRosterMetrics.columns.filter((c) =>
     validMetricNames.includes(c.title)
   );
@@ -160,15 +167,14 @@ export const AllocateModal = ({
         .map((row) => new Decimal(row.value))
         .reduce((a, b) => a.plus(b), new Decimal(0));
 
+      // TODO: Create a key in the object that identifies which segment is what using orderedMetricSegments
+      // TODO: EX: Location-Department - this will enable to find the chart order field when making the workbook
       // Places the sum of the chart field into an object with the chart field shown as connected with dashes
       chartFieldSumObject[chartField.join("-")] = sumOfSelectedMetric;
     }
 
-    const chartFieldSums = [];
     // Array of just the sums for each chart field
-    for (const chartField in chartFieldSumObject) {
-      chartFieldSums.push(chartFieldSumObject[chartField]);
-    }
+    const chartFieldSums = Object.values(chartFieldSumObject);
 
     // The final sum of the selected Metric
     const sumOfSelectedMetric = chartFieldSums.reduce(
@@ -194,10 +200,10 @@ export const AllocateModal = ({
     const allocationValueOfBalancePerChartFieldArray = [];
     for (const chartField in allocationValuePerChartField) {
       // Creates a number with 2 decimal places
-      const allocationValueOfBalance = Number(
-        allocationValuePerChartField[chartField]
-          .times(new Decimal(toBalanceValue))
-          .toFixed(2)
+      const allocationValueOfBalance = convertDecimalToFixedFloat(
+        allocationValuePerChartField[chartField].times(
+          new Decimal(toBalanceValue)
+        )
       );
       allocationValueOfBalancePerChartField[chartField] =
         allocationValueOfBalance;
@@ -212,14 +218,13 @@ export const AllocateModal = ({
         .reduce((a, b) => a.plus(b), new Decimal(0));
 
     // Sum in number format
-    allocationValueOfBalancePerChartField.sum = Number(
-      sumOfAllocationValueOfBalancePerChartField.toFixed(2)
+    allocationValueOfBalancePerChartField.sum = convertDecimalToFixedFloat(
+      sumOfAllocationValueOfBalancePerChartField
     );
 
     // TODO: Implement plug feature to make sure sum === the value of the balance
     // TODO: May need extra meta data in the final object other than the number to clarify if it was plugg
     // TODO: Could also do this during workbook creation??
-
     // Hands to form data
     handleChangeFormData(
       "allocationValueOfBalancePerChartField",

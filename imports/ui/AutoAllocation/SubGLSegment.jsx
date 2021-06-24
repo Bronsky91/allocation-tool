@@ -29,7 +29,7 @@ export const SubGLSegment = ({ data, handleChangeFormData }) => {
     if (!showSubGLSegment) {
       handleChangeFormData("subGLSegment", {
         segmentId: "0000",
-        description: "Blank",
+        description: "None",
       });
     } else {
       handleChangeFormData("subGLSegment", {
