@@ -1,6 +1,5 @@
 import { Workbook } from "exceljs";
 import { saveAs } from "file-saver";
-import { Decimal } from "decimal.js";
 import { reconciliationAdjustments } from "./utils/ReconciliationAdjustments";
 import { convertDecimalToFixedFloat } from "./utils/ConvertDecimalToFixedFloat";
 
@@ -22,7 +21,6 @@ const workbookBuilder = (data, segments) => {
   const worksheet = workbook.addWorksheet(data.journalDescription);
 
   const reconciledData = reconciliationAdjustments(data);
-  console.log("reconciledData", reconciledData);
 
   worksheet.columns = [
     {
@@ -75,7 +73,6 @@ const workbookBuilder = (data, segments) => {
         pattern: "solid",
         fgColor: { argb: "FFFFFF00" },
       };
-      console.log(cell);
     }
   }
 
@@ -96,7 +93,7 @@ const workbookBuilder = (data, segments) => {
     ),
   });
 
-  if (reconciledData.reconciled) {
+  if (reconciledData.allocationValueOfBalancePerChartField.sum.reconciled) {
     const cellNumber = reconciledData.typicalBalance === "debit" ? 4 : 3;
     const cell = row.getCell(cellNumber);
     cell.fill = {

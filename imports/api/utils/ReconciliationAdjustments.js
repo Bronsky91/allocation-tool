@@ -11,25 +11,21 @@ export const reconciliationAdjustments = (data) => {
   );
   const difference = decimalBalance.minus(decimalSum);
 
-  console.log("difference found", difference.toFixed(2));
-
   if (difference.equals(0.0)) {
-    reconciledData.reconciled = false;
-    // TODO: Probably don't do this and avoid checking for the object in the CreateWorkbook if reconciled is false
+    // Add reconciled tag
     for (const chartField in reconciledData.allocationValueOfBalancePerChartField) {
       reconciledData.allocationValueOfBalancePerChartField[chartField] = {
         value: reconciledData.allocationValueOfBalancePerChartField[chartField],
         reconciled: false,
       };
     }
+    return reconciledData;
   }
-  return reconciledData;
   // TODO: Find which method the user uses
   return roundingPlug(reconciledData, difference);
 };
 
 const roundingPlug = (data, difference) => {
-  data.reconciled = true;
   // Array of all values, then find the value in the object to tack on meta data
   const arrayOfValues = Object.values(
     data.allocationValueOfBalancePerChartField
