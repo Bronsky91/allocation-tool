@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useTracker } from "meteor/react-meteor-data";
 import { CreateWorkbook } from "../../api/CreateWorkbook";
 import { SegmentsCollection } from "../../api/Segments";
+import { BalanceAccount } from "./BalanceAccount";
 import { GLSegment } from "./GLSegment";
 import { SubGLSegment } from "./SubGLSegment";
 import { OtherSegment } from "./OtherSegment";
@@ -16,6 +17,10 @@ export const JournalForm = () => {
   const GLSegmentNames = ["GL Code", "Sub-GL Code"];
   // TODO: Find a better way to get GL code segments
   const glCodeSegment = segments.find((s) => s.description === "GL Code");
+  const balanceAccountSegments = segments
+    .filter((s) => s.description !== "Sub-GL Code")
+    .sort((a, b) => a.chartFieldOrder - b.chartFieldOrder);
+
   const subGLCodeSegment = segments.find(
     (s) => s.description === "Sub-GL Code"
   );
@@ -31,9 +36,12 @@ export const JournalForm = () => {
   const [allocationModalOpen, setAllocationModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     toBalanceSegmentValue: 0,
-    selectedBalanceSegment: {},
+    selectedBalanceSegments: [],
     selectedAllocationSegment: {},
-    subGLSegment: {},
+    subGLSegment: {
+      balance: { segmentId: "0000", description: "None" },
+      allocations: { segmentId: "0000", description: "None" },
+    },
     otherSegments: [],
     journalDescription: "",
     typicalBalance: "",
@@ -117,10 +125,10 @@ export const JournalForm = () => {
         handleChangeFormData={handleChangeFormData}
       />
       <div className="accountsColumn">
-        <GLSegment
-          data={glCodeSegment}
+        <BalanceAccount
+          data={balanceAccountSegments}
           handleChangeFormData={handleChangeFormData}
-          segmentType="toBalance"
+          subGL={formData.subGLSegment}
         />
         <GLSegment
           data={glCodeSegment}

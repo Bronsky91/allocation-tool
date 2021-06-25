@@ -3,14 +3,15 @@ import Radio from "@material-ui/core/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import FormControl from "@material-ui/core/FormControl";
-import FormLabel from "@material-ui/core/FormLabel";
 import { useEffect } from "react";
 
 export const SubGLSegment = ({ data, handleChangeFormData }) => {
   const [selectedSegment, setSelectedSegment] = useState(data.subSegments[0]);
   const [showSubGLSegment, setShowSubGLSegment] = useState(false);
   const [selectedOption, setSelectedOption] = useState("balance");
+
   const description = data.description;
+  const noSubGL = { description: "None", segmentId: "0000" };
 
   const handleChangeSegment = (e) => {
     const newSelectedSegment = data.subSegments[e.target.value];
@@ -28,13 +29,23 @@ export const SubGLSegment = ({ data, handleChangeFormData }) => {
   useEffect(() => {
     if (!showSubGLSegment) {
       handleChangeFormData("subGLSegment", {
-        segmentId: "0000",
-        description: "None",
+        balance: noSubGL,
+        allocations: noSubGL,
       });
-    } else {
+    } else if (selectedOption === "both") {
       handleChangeFormData("subGLSegment", {
-        ...selectedSegment,
-        selectedOption,
+        balance: selectedSegment,
+        allocations: selectedSegment,
+      });
+    } else if (selectedOption === "balance") {
+      handleChangeFormData("subGLSegment", {
+        balance: selectedSegment,
+        allocations: noSubGL,
+      });
+    } else if (selectedOption === "allocations") {
+      handleChangeFormData("subGLSegment", {
+        balance: noSubGL,
+        allocations: selectedSegment,
       });
     }
   }, [selectedSegment, selectedOption, showSubGLSegment]);

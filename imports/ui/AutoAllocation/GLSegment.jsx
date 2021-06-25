@@ -1,11 +1,9 @@
 import React, { useState } from "react";
 import { useEffect } from "react";
 
-export const GLSegment = ({ data, handleChangeFormData, segmentType }) => {
+export const GLSegment = ({ data, handleChangeFormData }) => {
   const [selectedSegment, setSelectedSegment] = useState(data?.subSegments[0]);
   const [typicalBalance, setTypicalBalance] = useState("debit");
-  const description =
-    segmentType === "toAllocate" ? "GL Code to Allocate" : "GL Code to Balance";
 
   const handleChangeSegment = (e) => {
     const newSelectedSegment = data.subSegments[e.target.value];
@@ -17,18 +15,13 @@ export const GLSegment = ({ data, handleChangeFormData, segmentType }) => {
   };
 
   useEffect(() => {
-    const field =
-      segmentType === "toAllocate"
-        ? "selectedAllocationSegment"
-        : "selectedBalanceSegment";
-    handleChangeFormData(field, selectedSegment);
-    if (segmentType === "toAllocate")
-      handleChangeFormData("typicalBalance", typicalBalance);
+    handleChangeFormData("selectedAllocationSegment", selectedSegment);
+    handleChangeFormData("typicalBalance", typicalBalance);
   }, [selectedSegment, typicalBalance]);
 
   return (
     <div>
-      <h3>{description}</h3>
+      <h3>GL Code to Allocate</h3>
 
       <div>
         <div className="formRow">
@@ -54,30 +47,13 @@ export const GLSegment = ({ data, handleChangeFormData, segmentType }) => {
         </div>
       </div>
 
-      {segmentType === "toBalance" ? (
-        <div className="formRow">
-          <label className="formLabel">Value:</label>
-          {/* //TODO: Make sure no negative number can be entered */}
-          <input
-            type="number"
-            onChange={(e) =>
-              handleChangeFormData(
-                "toBalanceSegmentValue",
-                Number(e.target.value)
-              )
-            }
-          />
-        </div>
-      ) : null}
-      {segmentType === "toAllocate" ? (
-        <div>
-          <label>Typical Balance:</label>
-          <select onChange={handleChangeTypicalBalance} value={typicalBalance}>
-            <option value="debit">Debit</option>
-            <option value="credit">Credit</option>
-          </select>
-        </div>
-      ) : null}
+      <div>
+        <label>Typical Balance:</label>
+        <select onChange={handleChangeTypicalBalance} value={typicalBalance}>
+          <option value="debit">Debit</option>
+          <option value="credit">Credit</option>
+        </select>
+      </div>
     </div>
   );
 };

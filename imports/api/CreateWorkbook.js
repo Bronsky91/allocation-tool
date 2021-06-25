@@ -50,7 +50,7 @@ const workbookBuilder = (data, segments) => {
     // Row Object
     const rowObject = {
       // TODO: Find a way to do this dynamically based on ChartFieldOrder
-      account: `${chartField}-${reconciledData.selectedAllocationSegment.segmentId}-${reconciledData.subGLSegment.segmentId}`,
+      account: `${chartField}-${reconciledData.selectedAllocationSegment.segmentId}-${reconciledData.subGLSegment.allocations.segmentId}`,
       description: `${reconciledData.journalDescription}`,
       debit: getAmountByTypicalBalance(
         reconciledData.typicalBalance,
@@ -79,7 +79,7 @@ const workbookBuilder = (data, segments) => {
   // Final Row
   const row = worksheet.addRow({
     // TODO: Find a way to do this dynamically based on ChartFieldOrder
-    account: `000-000-${reconciledData.selectedAllocationSegment.segmentId}-${reconciledData.subGLSegment.segmentId}`,
+    account: `000-000-${reconciledData.selectedAllocationSegment.segmentId}-${reconciledData.subGLSegment.balance.segmentId}`,
     description: `${reconciledData.journalDescription}`,
     debit: getBalanceByTypicalBalance(
       reconciledData.typicalBalance,
