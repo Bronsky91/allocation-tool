@@ -111,9 +111,6 @@ export const AllocateModal = ({
   };
 
   const completeAllocation = () => {
-    const orderedMetricSegments = metricSegments.sort(
-      (a, b) => a.chartFieldOrder - b.chartFieldOrder
-    );
     // The metric that was selected
     const selectedMetric = validMetrics.filter((vm) =>
       selectedMetrics.map((sm) => sm.value).includes(vm.title)
@@ -121,7 +118,7 @@ export const AllocateModal = ({
     const chartFieldSegments = [];
     // An array of all Chart Field arrays that were selected by segment
     // EX: [[010, 020], [110, 120], ...]
-    for (const segment of orderedMetricSegments) {
+    for (const segment of metricSegments) {
       chartFieldSegments.push(subsegmentFormData[segment.description]);
     }
 
@@ -167,8 +164,6 @@ export const AllocateModal = ({
         .map((row) => new Decimal(row.value))
         .reduce((a, b) => a.plus(b), new Decimal(0));
 
-      // TODO: Create a key in the object that identifies which segment is what using orderedMetricSegments
-      // TODO: EX: Location-Department - this will enable to find the chart order field when making the workbook
       // Places the sum of the chart field into an object with the chart field shown as connected with dashes
       chartFieldSumObject[chartField.join("-")] = sumOfSelectedMetric;
     }
@@ -222,9 +217,6 @@ export const AllocateModal = ({
       sumOfAllocationValueOfBalancePerChartField
     );
 
-    // TODO: Implement plug feature to make sure sum === the value of the balance
-    // TODO: May need extra meta data in the final object other than the number to clarify if it was plugg
-    // TODO: Could also do this during workbook creation??
     // Hands to form data
     handleChangeFormData(
       "allocationValueOfBalancePerChartField",

@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useEffect } from "react";
+import { createBalanceAccountString } from "../../api/utils/CreateAccountStrings";
 
-export const BalanceAccount = ({ data, handleChangeFormData, subGL }) => {
+export const BalanceAccount = ({ data, handleChangeFormData, formData }) => {
   const [selectedSegments, setSelectedSegments] = useState(
     data.map((s) => ({ ...s, selectedSubSegment: s.subSegments[0] }))
   );
@@ -58,11 +59,7 @@ export const BalanceAccount = ({ data, handleChangeFormData, subGL }) => {
         </div>
         <div className="formRow">
           <label className="formLabel">Full Chart Field String:</label>
-          <div>
-            {`${selectedSegments
-              .map((s) => s.selectedSubSegment.segmentId)
-              .join("-")}-${subGL.balance.segmentId}`}
-          </div>
+          <div>{createBalanceAccountString(formData)}</div>
         </div>
       </div>
 

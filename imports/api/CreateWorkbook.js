@@ -2,9 +2,10 @@ import { Workbook } from "exceljs";
 import { saveAs } from "file-saver";
 import { reconciliationAdjustments } from "./utils/ReconciliationAdjustments";
 import { convertDecimalToFixedFloat } from "./utils/ConvertDecimalToFixedFloat";
+import { createAllocationAccountString, createBalanceAccountString } from "./utils/CreateAccountStrings";
 
-export const CreateWorkbook = (data, segments) => {
-  workbookBuilder(data, segments)
+export const CreateWorkbook = (data) => {
+  workbookBuilder(data)
     .then((buffer) => {
       saveAs(
         new Blob([buffer]),
@@ -16,7 +17,7 @@ export const CreateWorkbook = (data, segments) => {
     });
 };
 
-const workbookBuilder = (data, segments) => {
+const workbookBuilder = (data) => {
   const workbook = new Workbook();
   const worksheet = workbook.addWorksheet(data.journalDescription);
 
@@ -49,8 +50,7 @@ const workbookBuilder = (data, segments) => {
       reconciledData.allocationValueOfBalancePerChartField[chartField];
     // Row Object
     const rowObject = {
-      // TODO: Find a way to do this dynamically based on ChartFieldOrder
-      account: `${chartField}-${reconciledData.selectedAllocationSegment.segmentId}-${reconciledData.subGLSegment.allocations.segmentId}`,
+      account: createAllocationAccountString(reconciledData, chartField),
       description: `${reconciledData.journalDescription}`,
       debit: getAmountByTypicalBalance(
         reconciledData.typicalBalance,
@@ -76,10 +76,9 @@ const workbookBuilder = (data, segments) => {
     }
   }
 
-  // Final Row
+  // Final Balancing Row
   const row = worksheet.addRow({
-    // TODO: Find a way to do this dynamically based on ChartFieldOrder
-    account: `000-000-${reconciledData.selectedAllocationSegment.segmentId}-${reconciledData.subGLSegment.balance.segmentId}`,
+    account: createBalanceAccountString(reconciledData),
     description: `${reconciledData.journalDescription}`,
     debit: getBalanceByTypicalBalance(
       reconciledData.typicalBalance,
@@ -108,8 +107,7 @@ const workbookBuilder = (data, segments) => {
       4;
     const notationRow = worksheet.getRow(rowIndex);
     notationRow.values = [
-      `Notation: ${reconciledData.difference.toFixed(2)} was ${
-        Math.sign(reconciledData.difference) > 0 ? "added to" : "removed from"
+      `Notation: ${reconciledData.difference.toFixed(2)} was ${Math.sign(reconciledData.difference) > 0 ? "added to" : "removed from"
       } highlighted account amount to balance`,
     ];
     notationRow.getCell(1).fill = {

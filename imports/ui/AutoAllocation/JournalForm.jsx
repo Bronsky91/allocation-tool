@@ -29,14 +29,17 @@ export const JournalForm = () => {
       !metricSegmentNames.includes(s.description) &&
       !GLSegmentNames.includes(s.description)
   );
-  const metricSegments = segments.filter((s) =>
-    metricSegmentNames.includes(s.description)
-  );
+  const metricSegments = segments
+    .filter((s) => metricSegmentNames.includes(s.description))
+    .sort((a, b) => a.chartFieldOrder - b.chartFieldOrder);
 
   const [allocationModalOpen, setAllocationModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     toBalanceSegmentValue: 0,
-    selectedBalanceSegments: [],
+    selectedBalanceSegments: balanceAccountSegments.map((bas) => ({
+      ...bas,
+      selectedSubSegment: bas.subSegments[0],
+    })),
     selectedAllocationSegment: {},
     subGLSegment: {
       balance: { segmentId: "0000", description: "None" },
@@ -46,6 +49,8 @@ export const JournalForm = () => {
     journalDescription: "",
     typicalBalance: "",
     allocationValueOfBalancePerChartField: {},
+    segments,
+    metricSegments, // Used to dynamically create the chart order in workbook
   });
 
   const readyToAllocate =
@@ -56,8 +61,6 @@ export const JournalForm = () => {
     readyToAllocate &&
     Object.keys(formData.allocationValueOfBalancePerChartField).length > 0;
 
-  // TODO: Select default selectedBalanceSegment and selectedAllocationSegment
-  // TODO: Make sure the two above segments are never the same
   useEffect(() => {
     if (nonMetricSegments.length > 0) {
       // Populate the formData with the retrieved nonMetricSegments
@@ -66,7 +69,6 @@ export const JournalForm = () => {
           _id: segment._id,
           description: segment.description,
           selectedSubSegment: segment.subSegments[0],
-          isApplied: false,
         }));
 
         handleChangeFormData("otherSegments", otherSegments);
@@ -100,10 +102,8 @@ export const JournalForm = () => {
   const openAllocationModal = () => {
     setAllocationModalOpen(true);
     // Opens Allocation Modal
-    // Use material UI
   };
 
-  // TODO: After modal is closed make sure the state is saved, Subsegments are gonna be an issue here
   const closeAllocationModal = () => {
     setAllocationModalOpen(false);
   };
@@ -111,7 +111,7 @@ export const JournalForm = () => {
   const createJournalEntry = () => {
     console.log(formData);
     // TODO: Fix workbook formatting
-    CreateWorkbook(formData, segments);
+    CreateWorkbook(formData);
   };
 
   return (
@@ -128,7 +128,7 @@ export const JournalForm = () => {
         <BalanceAccount
           data={balanceAccountSegments}
           handleChangeFormData={handleChangeFormData}
-          subGL={formData.subGLSegment}
+          formData={formData}
         />
         <GLSegment
           data={glCodeSegment}
