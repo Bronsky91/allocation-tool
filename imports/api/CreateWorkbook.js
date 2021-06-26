@@ -2,7 +2,10 @@ import { Workbook } from "exceljs";
 import { saveAs } from "file-saver";
 import { reconciliationAdjustments } from "./utils/ReconciliationAdjustments";
 import { convertDecimalToFixedFloat } from "./utils/ConvertDecimalToFixedFloat";
-import { createAllocationAccountString, createBalanceAccountString } from "./utils/CreateAccountStrings";
+import {
+  createAllocationAccountString,
+  createBalanceAccountString,
+} from "./utils/CreateAccountStrings";
 
 export const CreateWorkbook = (data) => {
   workbookBuilder(data)
@@ -107,7 +110,8 @@ const workbookBuilder = (data) => {
       4;
     const notationRow = worksheet.getRow(rowIndex);
     notationRow.values = [
-      `Notation: ${reconciledData.difference.toFixed(2)} was ${Math.sign(reconciledData.difference) > 0 ? "added to" : "removed from"
+      `Notation: ${Math.abs(reconciledData.difference).toFixed(2)} was ${
+        Math.sign(reconciledData.difference) > 0 ? "added to" : "removed from"
       } highlighted account amount to balance`,
     ];
     notationRow.getCell(1).fill = {

@@ -54,10 +54,14 @@ export const AllocateModal = ({
     "Labor %",
     "Weighted EMP Value",
     "Annual Salary",
+    "Labor_Percentage",
+    "Annual_Rate",
+    "Weighted_Annual_Rate",
   ];
   const validMetrics = employeeRosterMetrics.columns.filter((c) =>
     validMetricNames.includes(c.title)
   );
+  console.log("validMetrics", validMetrics);
   const initialMetricOptions = validMetrics.map((vm) => ({
     label: vm.title,
     value: vm.title,
@@ -73,6 +77,7 @@ export const AllocateModal = ({
   const [metricOptions, setMetricOptions] = useState(initialMetricOptions);
   // The selected metric from the metric dropdown
   const [selectedMetrics, setSelectedMetrics] = useState([]);
+  console.log("metricOptions", metricOptions);
 
   const showMetricDropdown = () => {
     if (Object.keys(subsegmentFormData).length === 0) return false;
@@ -145,7 +150,11 @@ export const AllocateModal = ({
         .filter((c) => Object.keys(subsegmentFormData).includes(c.title))
         .map((c) =>
           c.rows
-            .filter((row) => chartField.includes(row.value))
+            .filter((row) =>
+              chartField
+                .map((cf) => cf.toString())
+                .includes(row.value.toString())
+            )
             .map((row) => row.rowNumber)
         );
       // Common row numbers between the chart field
@@ -170,7 +179,6 @@ export const AllocateModal = ({
 
     // Array of just the sums for each chart field
     const chartFieldSums = Object.values(chartFieldSumObject);
-
     // The final sum of the selected Metric
     const sumOfSelectedMetric = chartFieldSums.reduce(
       (a, b) => a.plus(b),

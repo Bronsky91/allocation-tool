@@ -11,7 +11,7 @@ export const SubGLSegment = ({ data, handleChangeFormData }) => {
   const [selectedOption, setSelectedOption] = useState("balance");
 
   const description = data.description;
-  const noSubGL = { description: "None", segmentId: "0000" };
+  const noSubGL = data.subSegments.find((s) => Number(s.segmentId) === 0);
 
   const handleChangeSegment = (e) => {
     const newSelectedSegment = data.subSegments[e.target.value];

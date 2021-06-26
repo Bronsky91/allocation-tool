@@ -8,22 +8,21 @@ import { SubGLSegment } from "./SubGLSegment";
 import { OtherSegment } from "./OtherSegment";
 import { AllocateModal } from "./AllocateModal";
 import { MetricsCollection } from "../../api/Metrics";
+import { GL_CODE, Sub_GL_CODE } from "../../../constants";
 
 export const JournalForm = () => {
   const segments = useTracker(() => SegmentsCollection.find().fetch());
   const metrics = useTracker(() => MetricsCollection.find().fetch());
   // TODO: Temp array that should be done from onboarding
   const metricSegmentNames = ["Department", "Location"];
-  const GLSegmentNames = ["GL Code", "Sub-GL Code"];
+  const GLSegmentNames = [GL_CODE, Sub_GL_CODE];
   // TODO: Find a better way to get GL code segments
-  const glCodeSegment = segments.find((s) => s.description === "GL Code");
+  const glCodeSegment = segments.find((s) => s.description === GL_CODE);
   const balanceAccountSegments = segments
-    .filter((s) => s.description !== "Sub-GL Code")
+    .filter((s) => s.description !== Sub_GL_CODE)
     .sort((a, b) => a.chartFieldOrder - b.chartFieldOrder);
 
-  const subGLCodeSegment = segments.find(
-    (s) => s.description === "Sub-GL Code"
-  );
+  const subGLCodeSegment = segments.find((s) => s.description === Sub_GL_CODE);
   const nonMetricSegments = segments.filter(
     (s) =>
       !metricSegmentNames.includes(s.description) &&

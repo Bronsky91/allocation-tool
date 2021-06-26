@@ -1,11 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ReadWorkbook } from "../../api/ReadWorkbook";
 import { useTracker } from "meteor/react-meteor-data";
-import {
-  COLUMNS,
-  CreateSegments,
-  SegmentsCollection,
-} from "../../api/Segments";
+import { CreateSegments, SegmentsCollection } from "../../api/Segments";
 import { CreateMetrics, MetricsCollection } from "../../api/Metrics";
 
 export const ImportData = () => {
