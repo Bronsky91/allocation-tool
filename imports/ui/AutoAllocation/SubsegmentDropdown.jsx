@@ -4,7 +4,7 @@ import MultiSelect from "react-multi-select-component";
 
 export const SubsegmentDropdown = ({
   segment,
-  setSubsegmentFormData,
+  setSubsegmentAllocationData,
   isMultiSelect,
 }) => {
   // Creates the options object for the dropdown
@@ -40,7 +40,7 @@ export const SubsegmentDropdown = ({
   };
 
   useEffect(() => {
-    setSubsegmentFormData((data) => ({
+    setSubsegmentAllocationData((data) => ({
       ...data,
       [segment.description]: selected.map((s) => s.value),
     }));

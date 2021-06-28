@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
 import { CreateWorkbook } from "../../api/CreateWorkbook";
 import { SegmentsCollection } from "../../api/Segments";
@@ -9,10 +10,12 @@ import { OtherSegment } from "./OtherSegment";
 import { AllocateModal } from "./AllocateModal";
 import { MetricsCollection } from "../../api/Metrics";
 import { GL_CODE, Sub_GL_CODE } from "../../../constants";
+import { AllocationsCollection } from "../../api/Allocations";
 
 export const JournalForm = () => {
   const segments = useTracker(() => SegmentsCollection.find().fetch());
   const metrics = useTracker(() => MetricsCollection.find().fetch());
+  const allocations = useTracker(() => AllocationsCollection.find().fetch());
   // TODO: Temp array that should be done from onboarding
   const metricSegmentNames = ["Department", "Location"];
   const GLSegmentNames = [GL_CODE, Sub_GL_CODE];
@@ -32,7 +35,23 @@ export const JournalForm = () => {
     .filter((s) => metricSegmentNames.includes(s.description))
     .sort((a, b) => a.chartFieldOrder - b.chartFieldOrder);
 
+  // TODO: Find a way to do this in onboarding
+  const metricData = metrics[0];
+  const validMetricNames = [
+    "FTE Status",
+    "Labor %",
+    "Weighted EMP Value",
+    "Annual Salary",
+    "Labor_Percentage",
+    "Annual_Rate",
+    "Weighted_Annual_Rate",
+  ];
+  const availableMetrics = metricData.columns.filter((c) =>
+    validMetricNames.includes(c.title)
+  );
+
   const [allocationModalOpen, setAllocationModalOpen] = useState(false);
+  const [selectedAllocation, setSelectedAllocation] = useState(allocations[0]);
   const [formData, setFormData] = useState({
     toBalanceSegmentValue: 0,
     selectedBalanceSegments: balanceAccountSegments.map((bas) => ({
@@ -47,17 +66,14 @@ export const JournalForm = () => {
     otherSegments: [],
     journalDescription: "",
     typicalBalance: "",
-    allocationValueOfBalancePerChartField: {},
-    segments,
+    allocationValueOfBalancePerChartField: {}, // Allocation calculations
+    segments, // All segments, used here for creating the workbook
     metricSegments, // Used to dynamically create the chart order in workbook
   });
 
   const readyToAllocate =
     formData.toBalanceSegmentValue > 0 &&
-    formData.journalDescription.length > 0;
-
-  const allocationComplete =
-    readyToAllocate &&
+    formData.journalDescription.length > 0 &&
     Object.keys(formData.allocationValueOfBalancePerChartField).length > 0;
 
   useEffect(() => {
@@ -74,6 +90,31 @@ export const JournalForm = () => {
       }
     }
   }, [nonMetricSegments]);
+
+  useEffect(() => {
+    if (selectedAllocation && formData.toBalanceSegmentValue > 0) {
+      console.log("Allocate time", selectedAllocation);
+      Meteor.call(
+        "calculateAllocation",
+        {
+          subSegments: selectedAllocation.subSegments,
+          metric: selectedAllocation.metric,
+          toBalanceValue: formData.toBalanceSegmentValue,
+        },
+        (err, allocationData) => {
+          if (err) {
+            console.log("err", err);
+          } else {
+            console.log("allocationData", allocationData);
+            handleChangeFormData(
+              "allocationValueOfBalancePerChartField",
+              allocationData
+            );
+          }
+        }
+      );
+    }
+  }, [formData.toBalanceSegmentValue, selectedAllocation]);
 
   const handleChangeFormData = (field, value) => {
     console.log(formData);
@@ -98,6 +139,11 @@ export const JournalForm = () => {
     }));
   };
 
+  const handleAllocationChange = (e) => {
+    const newAllocationSelected = allocations[e.target.value];
+    setSelectedAllocation(newAllocationSelected);
+  };
+
   const openAllocationModal = () => {
     setAllocationModalOpen(true);
     // Opens Allocation Modal
@@ -109,7 +155,6 @@ export const JournalForm = () => {
 
   const createJournalEntry = () => {
     console.log(formData);
-    // TODO: Fix workbook formatting
     CreateWorkbook(formData);
   };
 
@@ -119,9 +164,7 @@ export const JournalForm = () => {
         open={allocationModalOpen}
         handleClose={closeAllocationModal}
         metricSegments={metricSegments}
-        metrics={metrics}
-        toBalanceValue={formData.toBalanceSegmentValue}
-        handleChangeFormData={handleChangeFormData}
+        availableMetrics={availableMetrics}
       />
       <div className="accountsColumn">
         <BalanceAccount
@@ -164,15 +207,28 @@ export const JournalForm = () => {
         </div>
       </div>
       <div className="autoAllocationColumn">
-        <button
-          onClick={openAllocationModal}
-          className="mediumButton"
-          disabled={!readyToAllocate}
-        >
-          Time to Allocate!
+        <button onClick={openAllocationModal} className="mediumButton">
+          Create new Allocation Technique
         </button>
+        <div className="row">
+          <label>Select Allocation Technique:</label>
+          <select
+            value={allocations.findIndex(
+              (allocation) => allocation._id === selectedAllocation?._id
+            )}
+            onChange={handleAllocationChange}
+          >
+            {allocations.map((allocation, index) => {
+              return (
+                <option key={index} value={index}>
+                  {allocation.name}
+                </option>
+              );
+            })}
+          </select>
+        </div>
         <div>
-          {allocationComplete ? (
+          {readyToAllocate ? (
             <button onClick={createJournalEntry} className="mediumButton">
               Download!
             </button>

@@ -1,20 +1,15 @@
 import { Mongo } from "meteor/mongo";
 import { Meteor } from "meteor/meteor";
-import { CHART_OF_ACCOUNT_COLUMNS } from "../../constants";
 
 export const AllocationsCollection = new Mongo.Collection("allocations");
 
-export const CreateAllocations = (data) => {
+export const CreateAllocation = ({ name, subSegments, metric }) => {
   // Transform data into the 3 parts of an allocation
-  Meteor.call(
-    "insertAllocation",
-    { segments, subSegments, metric },
-    (err, res) => {
-      if (err) {
-        console.log("err", err);
-      } else {
-        console.log("res", res);
-      }
+  Meteor.call("insertAllocation", { name, subSegments, metric }, (err, res) => {
+    if (err) {
+      console.log("err", err);
+    } else {
+      console.log("res", res);
     }
-  );
+  });
 };

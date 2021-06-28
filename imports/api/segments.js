@@ -1,5 +1,6 @@
 import { Mongo } from "meteor/mongo";
 import { Meteor } from "meteor/meteor";
+import { CHART_OF_ACCOUNT_COLUMNS } from "../../constants";
 
 export const SegmentsCollection = new Mongo.Collection("segments");
 
@@ -12,7 +13,7 @@ export const CreateSegments = (data) => {
       .map((row) => {
         const subSegment = {};
         row.map((r, i) => {
-          subSegment[COLUMNS[i]] = r.value;
+          subSegment[CHART_OF_ACCOUNT_COLUMNS[i]] = r.value;
         });
         return subSegment;
       });
@@ -29,10 +30,4 @@ export const CreateSegments = (data) => {
       }
     );
   }
-};
-
-export const COLUMNS = {
-  0: "segmentId",
-  1: "description",
-  2: "category",
 };

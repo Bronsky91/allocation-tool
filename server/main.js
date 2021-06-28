@@ -1,6 +1,7 @@
 import { Meteor } from "meteor/meteor";
 import { AllocationsCollection } from "../imports/api/Allocations";
 import { MetricsCollection } from "../imports/api/Metrics";
+import { calcAllocation } from "./CalcAllocation";
 import { SegmentsCollection } from "/imports/api/Segments";
 
 Meteor.methods({
@@ -23,12 +24,20 @@ Meteor.methods({
       createdAt: new Date(),
     });
   },
-  insertAllocation: ({ segments, subSegments, metric }) => {
+  insertAllocation: ({ name, subSegments, metric }) => {
+    // subSegments = [{segmentName: "Department", subSegmentIds: ['010', '020', ...]}]
     AllocationsCollection.insert({
-      segments,
+      name,
       subSegments,
       metric,
       createdAt: new Date(),
+    });
+  },
+  calculateAllocation: ({ subSegments, metric, toBalanceValue }) => {
+    return calcAllocation({
+      subSegments,
+      metric,
+      toBalanceValue,
     });
   },
 });
