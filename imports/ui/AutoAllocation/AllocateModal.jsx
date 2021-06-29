@@ -4,8 +4,6 @@ import Modal from "@material-ui/core/Modal";
 import { makeStyles } from "@material-ui/core/styles";
 import MultiSelect from "react-multi-select-component";
 import { SubsegmentDropdown } from "./SubsegmentDropdown";
-import { useEffect } from "react";
-import { CreateAllocation } from "../../api/Allocations";
 
 const getModalStyle = () => {
   const top = 50;
@@ -35,6 +33,7 @@ export const AllocateModal = ({
   handleClose,
   metricSegments,
   availableMetrics,
+  setNewestAllocationId,
 }) => {
   const classes = useStyles();
   // getModalStyle is not a pure function, we roll the style only on the first render
@@ -111,7 +110,17 @@ export const AllocateModal = ({
         subSegmentIds: subsegmentAllocationData[segmentName],
       });
     }
-    CreateAllocation({ name, subSegments, metric });
+    Meteor.call(
+      "insertAllocation",
+      { name, subSegments, metric },
+      (err, newAllocationId) => {
+        if (err) {
+          console.log("err", err);
+        } else {
+          setNewestAllocationId(newAllocationId);
+        }
+      }
+    );
     handleClose();
   };
 

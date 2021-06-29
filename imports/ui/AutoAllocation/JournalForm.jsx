@@ -52,6 +52,7 @@ export const JournalForm = () => {
 
   const [allocationModalOpen, setAllocationModalOpen] = useState(false);
   const [selectedAllocation, setSelectedAllocation] = useState(allocations[0]);
+  const [newestAllocationId, setNewestAllocationId] = useState();
   const [formData, setFormData] = useState({
     toBalanceSegmentValue: 0,
     selectedBalanceSegments: balanceAccountSegments.map((bas) => ({
@@ -92,8 +93,21 @@ export const JournalForm = () => {
   }, [nonMetricSegments]);
 
   useEffect(() => {
+    if (newestAllocationId) {
+      console.log("set NewestAllocationId", newestAllocationId);
+      console.log("allocations", allocations);
+      setSelectedAllocation(
+        allocations.find((a) => a._id === newestAllocationId)
+      );
+    }
+  }, [newestAllocationId]);
+
+  useEffect(() => {
     if (selectedAllocation && formData.toBalanceSegmentValue > 0) {
-      console.log("Allocate time", selectedAllocation);
+      console.log(
+        "selectedAllocation.subSegments",
+        selectedAllocation.subSegments
+      );
       Meteor.call(
         "calculateAllocation",
         {
@@ -105,7 +119,6 @@ export const JournalForm = () => {
           if (err) {
             console.log("err", err);
           } else {
-            console.log("allocationData", allocationData);
             handleChangeFormData(
               "allocationValueOfBalancePerChartField",
               allocationData
@@ -165,6 +178,7 @@ export const JournalForm = () => {
         handleClose={closeAllocationModal}
         metricSegments={metricSegments}
         availableMetrics={availableMetrics}
+        setNewestAllocationId={setNewestAllocationId}
       />
       <div className="accountsColumn">
         <BalanceAccount

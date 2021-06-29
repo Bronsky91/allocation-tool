@@ -26,12 +26,13 @@ Meteor.methods({
   },
   insertAllocation: ({ name, subSegments, metric }) => {
     // subSegments = [{segmentName: "Department", subSegmentIds: ['010', '020', ...]}]
-    AllocationsCollection.insert({
+    const newAllocationId = AllocationsCollection.insert({
       name,
       subSegments,
       metric,
       createdAt: new Date(),
     });
+    return newAllocationId;
   },
   calculateAllocation: ({ subSegments, metric, toBalanceValue }) => {
     return calcAllocation({

@@ -3,11 +3,8 @@ import { MetricsCollection } from "../imports/api/Metrics";
 import { convertDecimalToFixedFloat } from "../imports/api/utils/ConvertDecimalToFixedFloat";
 
 export const calcAllocation = ({ subSegments, metric, toBalanceValue }) => {
-  // subSegments = [{segmentName: "Department", subSegmentIds: ['010', '020', ...]}]
-  // metric = ""
-
-  // subsegmentAllocationData == The subsegments the user chose in the form ie: {SegmentName: [...subsegmentIds]}
-  // selectedMetric == The metric that was chosen in the form
+  // subSegments = The subsegments the user chose in the form ie: {SegmentName: [...subsegmentIds]}
+  // metric = The metric that was chosen in the form
   // toBalanceValue == The balance value the user enters to run the allocation against
 
   // TODO: Get metrics from database by user
@@ -17,8 +14,6 @@ export const calcAllocation = ({ subSegments, metric, toBalanceValue }) => {
   // An array of all Chart Field arrays that were selected by segment
   // EX: [[010, 020], [110, 120], ...]
   const chartFieldSegments = subSegments.map((s) => s.subSegmentIds);
-  console.log("chartFieldSegments", chartFieldSegments);
-
   // Generates all combinations of chart field array elements:
   // Generator Function found here: https://stackoverflow.com/questions/15298912/javascript-generating-combinations-from-n-arrays-with-m-elements
   function* cartesian(head, ...tail) {
