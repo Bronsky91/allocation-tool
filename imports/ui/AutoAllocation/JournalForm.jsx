@@ -1,17 +1,24 @@
 import React, { useState, useEffect } from "react";
+// Metor imports
 import { Meteor } from "meteor/meteor";
-// import { DeleteIcon, EditIcon, IconButton } from "@material-ui/icons";
 import { useTracker } from "meteor/react-meteor-data";
-import { CreateWorkbook } from "../../api/CreateWorkbook";
-import { SegmentsCollection } from "../../api/Segments";
+// Material UI
+import { IconButton } from "@material-ui/core";
+import EditIcon from "@material-ui/icons/Edit";
+import DeleteIcon from "@material-ui/icons/Delete";
+// Components
 import { BalanceAccount } from "./BalanceAccount";
 import { GLSegment } from "./GLSegment";
 import { SubGLSegment } from "./SubGLSegment";
 import { OtherSegment } from "./OtherSegment";
 import { AllocateModal } from "./AllocateModal";
+// API
 import { MetricsCollection } from "../../api/Metrics";
+import { CreateWorkbook } from "../../api/CreateWorkbook";
+import { SegmentsCollection } from "../../api/Segments";
+import { AllocationsCollection, removeAllocation } from "../../api/Allocations";
+
 import { GL_CODE, Sub_GL_CODE } from "../../../constants";
-import { AllocationsCollection } from "../../api/Allocations";
 
 export const JournalForm = () => {
   const segments = useTracker(() => SegmentsCollection.find().fetch());
@@ -153,6 +160,20 @@ export const JournalForm = () => {
     }));
   };
 
+  const handleEditAllocation = (e) => {};
+
+  const handleDeleteAllocation = (e) => {
+    // Gets current index of selected allocation in the allocations array
+    const currentIndex = allocations.findIndex(
+      (a) => a._id === selectedAllocation._id
+    );
+    // Removes the selected Allocation from the database
+    removeAllocation(selectedAllocation._id);
+    // Moves the next selectedAllocation down one index, unless it's already 0 then keep it 0
+    const nextIndex = currentIndex > 0 ? currentIndex - 1 : 0;
+    setSelectedAllocation(allocations[nextIndex]);
+  };
+
   const handleAllocationChange = (e) => {
     const newAllocationSelected = allocations[e.target.value];
     setSelectedAllocation(newAllocationSelected);
@@ -226,7 +247,7 @@ export const JournalForm = () => {
           Create new Allocation Technique
         </button>
         <div className="row">
-          <label>Select Allocation Technique:</label>
+          <label className="center">Select Allocation Technique:</label>
           <select
             value={allocations.findIndex(
               (allocation) => allocation._id === selectedAllocation?._id
@@ -241,8 +262,12 @@ export const JournalForm = () => {
               );
             })}
           </select>
-          {/* <EditIcon />
-          <DeleteIcon /> */}
+          <IconButton color="inherit" onClick={handleEditAllocation}>
+            <EditIcon />
+          </IconButton>
+          <IconButton color="inherit" onClick={handleDeleteAllocation}>
+            <DeleteIcon />
+          </IconButton>
         </div>
         <div>
           {readyToAllocate ? (

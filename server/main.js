@@ -34,6 +34,9 @@ Meteor.methods({
     });
     return newAllocationId;
   },
+  removeAllocation: ({ id }) => {
+    AllocationsCollection.remove(id);
+  },
   calculateAllocation: ({ subSegments, metric, toBalanceValue }) => {
     return calcAllocation({
       subSegments,
