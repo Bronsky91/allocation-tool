@@ -4,6 +4,7 @@ import MultiSelect from "react-multi-select-component";
 
 export const SubsegmentDropdown = ({
   segment,
+  subsegmentAllocationData,
   setSubsegmentAllocationData,
   isMultiSelect,
 }) => {
@@ -13,8 +14,19 @@ export const SubsegmentDropdown = ({
     value: s.segmentId,
     disabled: false,
   }));
+  const initialSelected = subsegmentAllocationData
+    ? segment?.subSegments
+        .filter((s) =>
+          subsegmentAllocationData[segment?.description].includes(s.segmentId)
+        )
+        .map((s) => ({
+          label: s.description,
+          value: s.segmentId,
+          disabled: false,
+        }))
+    : [];
   const [options, setOptions] = useState(initialOptions);
-  const [selected, setSelected] = useState([]);
+  const [selected, setSelected] = useState(initialSelected);
 
   const handleSelect = (selectedOptions) => {
     if (!isMultiSelect) {

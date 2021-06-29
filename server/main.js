@@ -34,6 +34,18 @@ Meteor.methods({
     });
     return newAllocationId;
   },
+  updateAllocation: ({ id, name, subSegments, metric }) => {
+    AllocationsCollection.update(id, { $set: { name, subSegments, metric } });
+    // console.log("subSegments", subSegments);
+    // for (const subSegment of subSegments) {
+    //   AllocationsCollection.update(id, {
+    //     $set: {
+    //       "subSegments.$.segmentName": subSegment.segmentName,
+    //       "subSegments.$.segmentIds": subSegment.segmentIds,
+    //     },
+    //   });
+    // }
+  },
   removeAllocation: ({ id }) => {
     AllocationsCollection.remove(id);
   },

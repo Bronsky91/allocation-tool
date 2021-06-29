@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Meteor } from "meteor/meteor";
 import Modal from "@material-ui/core/Modal";
 import { makeStyles } from "@material-ui/core/styles";
@@ -33,7 +33,8 @@ export const AllocateModal = ({
   handleClose,
   metricSegments,
   availableMetrics,
-  setNewestAllocationId,
+  setNewestAllocationId, // For creating
+  currentAllocation, // For editing
 }) => {
   const classes = useStyles();
   // getModalStyle is not a pure function, we roll the style only on the first render
@@ -47,20 +48,70 @@ export const AllocateModal = ({
   const initialMetricOptions = availableMetrics.map((vm) => ({
     label: vm.title,
     value: vm.title,
+    disabled: currentAllocation ? currentAllocation.metric !== vm.title : false,
   }));
 
+  console.log("currentAllocation", currentAllocation);
+  // Populates name for editing
+  const initialAllocationName = currentAllocation ? currentAllocation.name : "";
+  // Populates segments for editing
+  const initialSelectedMetricSegments = currentAllocation
+    ? metricSegmentOptions.filter((mso) =>
+        currentAllocation.subSegments
+          .map((s) => s.segmentName)
+          .includes(mso.label)
+      )
+    : [];
+  // Populates subsegments for editing
+  const intialSubsegmentAllocationData = currentAllocation
+    ? currentAllocation.subSegments.reduce(
+        (allocationData, currentSubsegment) => {
+          return {
+            ...allocationData,
+            [currentSubsegment.segmentName]: currentSubsegment.subSegmentIds,
+          };
+        },
+        {}
+      )
+    : {};
+  // Populates metric for editing
+  const initialSelectedMetric = currentAllocation
+    ? [
+        {
+          label: currentAllocation?.metric,
+          value: currentAllocation?.metric,
+          disabled: false,
+        },
+      ]
+    : [];
+
   // Name of Allocation
-  const [allocationName, setAllocationName] = useState("");
+  const [allocationName, setAllocationName] = useState(initialAllocationName);
   // Lists the selected metric segments by label and _id
-  const [selectedMetricSegments, setSelectedMetricSegments] = useState([]);
+  const [selectedMetricSegments, setSelectedMetricSegments] = useState(
+    initialSelectedMetricSegments
+  );
   // State of all subsegment dropdowns that are based on the selected Metric Segments above
-  const [subsegmentAllocationData, setSubsegmentAllocationData] = useState({
+  const [subsegmentAllocationData, setSubsegmentAllocationData] = useState(
     // [segment._id]: [array of selected subsegmentIds]
-  });
+    intialSubsegmentAllocationData
+  );
   // The options for the metric dropdown
   const [metricOptions, setMetricOptions] = useState(initialMetricOptions);
   // The selected metric from the metric dropdown
-  const [selectedMetrics, setSelectedMetrics] = useState([]);
+  const [selectedMetrics, setSelectedMetrics] = useState(initialSelectedMetric);
+
+  useEffect(() => {
+    // If the modal is closed and is the edit modal
+    if (!open) {
+      // When edit modal is closed or saved allocation changes it resets it's state to the initial current allocation state
+      setAllocationName(initialAllocationName);
+      setSelectedMetricSegments(initialSelectedMetricSegments);
+      setSubsegmentAllocationData(intialSubsegmentAllocationData);
+      setSelectedMetrics(initialSelectedMetric);
+    }
+    // Only reset when the modal closes or the currentAllocation updates
+  }, [open, currentAllocation]);
 
   const showMetricDropdown = () => {
     if (Object.keys(subsegmentAllocationData).length === 0) return false;
@@ -110,17 +161,40 @@ export const AllocateModal = ({
         subSegmentIds: subsegmentAllocationData[segmentName],
       });
     }
-    Meteor.call(
-      "insertAllocation",
-      { name, subSegments, metric },
-      (err, newAllocationId) => {
-        if (err) {
-          console.log("err", err);
-        } else {
-          setNewestAllocationId(newAllocationId);
+    if (currentAllocation) {
+      // Editing
+      console.log("editing", { name, subSegments, metric });
+      const id = currentAllocation._id;
+      Meteor.call(
+        "updateAllocation",
+        { id, name, subSegments, metric },
+        (err, res) => {
+          if (err) {
+            console.log("err", err);
+          } else {
+            // Once the edit is complete re-select the edited allocation technique to update values for when the modal is next opened
+            setNewestAllocationId(id);
+            // TODO: This does NOT trigger the useEffect to select a "new" updated currentAllocation
+            // TODO: Find a way to update the currentAllocation to the same but updated object to update initial values here
+            console.log("should have setNewestAllocaitonId", id);
+          }
         }
-      }
-    );
+      );
+    } else {
+      // Creating
+      Meteor.call(
+        "insertAllocation",
+        { name, subSegments, metric },
+        (err, newAllocationId) => {
+          if (err) {
+            console.log("err", err);
+          } else {
+            setNewestAllocationId(newAllocationId);
+          }
+        }
+      );
+    }
+
     handleClose();
   };
 
@@ -139,6 +213,7 @@ export const AllocateModal = ({
           <h3>Technique Name: </h3>
           <input
             type="text"
+            value={allocationName}
             onChange={(e) => setAllocationName(e.target.value)}
           />
         </div>
@@ -156,7 +231,19 @@ export const AllocateModal = ({
           <div className="dropDownColumn" style={{ width: 200 }}>
             {selectedMetricSegments.length > 0
               ? metricSegments.map((segment, index) => {
-                  return (
+                  return currentAllocation ? (
+                    // Subsegment dropdowns used for editing
+                    <SubsegmentDropdown
+                      key={index}
+                      segment={segment}
+                      isMultiSelect={selectedMetricSegments
+                        .map((sm) => sm.value)
+                        .includes(segment._id)}
+                      subsegmentAllocationData={subsegmentAllocationData}
+                      setSubsegmentAllocationData={setSubsegmentAllocationData} // Used to prepopulate the allocation data for editing
+                    />
+                  ) : (
+                    // Subsegments dropdowns used for creating
                     <SubsegmentDropdown
                       key={index}
                       segment={segment}

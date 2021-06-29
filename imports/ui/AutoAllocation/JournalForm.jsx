@@ -59,6 +59,7 @@ export const JournalForm = () => {
   );
 
   const [allocationModalOpen, setAllocationModalOpen] = useState(false);
+  const [editAllocationModalOpen, setEditAllocationModalOpen] = useState(false);
   const [selectedAllocation, setSelectedAllocation] = useState(allocations[0]);
   const [newestAllocationId, setNewestAllocationId] = useState();
   const [formData, setFormData] = useState({
@@ -101,6 +102,7 @@ export const JournalForm = () => {
   }, [nonMetricSegments]);
 
   useEffect(() => {
+    console.log("In newesetallocationId  Usefeffect", newestAllocationId);
     if (newestAllocationId) {
       console.log("set NewestAllocationId", newestAllocationId);
       console.log("allocations", allocations);
@@ -160,8 +162,6 @@ export const JournalForm = () => {
     }));
   };
 
-  const handleEditAllocation = (e) => {};
-
   const handleDeleteAllocation = (e) => {
     // Gets current index of selected allocation in the allocations array
     const currentIndex = allocations.findIndex(
@@ -180,12 +180,23 @@ export const JournalForm = () => {
   };
 
   const openAllocationModal = () => {
-    setAllocationModalOpen(true);
     // Opens Allocation Modal
+    setAllocationModalOpen(true);
   };
 
   const closeAllocationModal = () => {
+    // Close Allocation Modal
     setAllocationModalOpen(false);
+  };
+
+  const openEditAllocationModal = () => {
+    // Opens Edit Allocation Modal
+    setEditAllocationModalOpen(true);
+  };
+
+  const closeEditAllocationModal = () => {
+    // Close Edit Allocation Modal
+    setEditAllocationModalOpen(false);
   };
 
   const createJournalEntry = () => {
@@ -196,11 +207,19 @@ export const JournalForm = () => {
   return (
     <div className="form">
       <AllocateModal
-        open={allocationModalOpen}
-        handleClose={closeAllocationModal}
-        metricSegments={metricSegments}
-        availableMetrics={availableMetrics}
-        setNewestAllocationId={setNewestAllocationId}
+        open={allocationModalOpen} // Required
+        handleClose={closeAllocationModal} // Required
+        metricSegments={metricSegments} // Required, used for listing segments and subsegments
+        availableMetrics={availableMetrics} // Required, used for listing which metric options to use
+        setNewestAllocationId={setNewestAllocationId} // Set the newest allocation created as selected in the dropdown
+      />
+      <AllocateModal
+        open={editAllocationModalOpen} // Required
+        handleClose={closeEditAllocationModal} // Required
+        metricSegments={metricSegments} // Required, used for listing segments and subsegments
+        availableMetrics={availableMetrics} // Required, used for listing which metric options to use
+        setNewestAllocationId={setNewestAllocationId} // Set the edited allocation as selected in the dropdown
+        currentAllocation={selectedAllocation} // Used to edit the currently selected allocation
       />
       <div className="accountsColumn">
         <BalanceAccount
@@ -262,10 +281,18 @@ export const JournalForm = () => {
               );
             })}
           </select>
-          <IconButton color="inherit" onClick={handleEditAllocation}>
+          <IconButton
+            color="inherit"
+            onClick={openEditAllocationModal}
+            disabled={!selectedAllocation}
+          >
             <EditIcon />
           </IconButton>
-          <IconButton color="inherit" onClick={handleDeleteAllocation}>
+          <IconButton
+            color="inherit"
+            onClick={handleDeleteAllocation}
+            disabled={!selectedAllocation}
+          >
             <DeleteIcon />
           </IconButton>
         </div>
