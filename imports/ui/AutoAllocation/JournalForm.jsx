@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Meteor } from "meteor/meteor";
+// import { DeleteIcon, EditIcon, IconButton } from "@material-ui/icons";
 import { useTracker } from "meteor/react-meteor-data";
 import { CreateWorkbook } from "../../api/CreateWorkbook";
 import { SegmentsCollection } from "../../api/Segments";
@@ -240,6 +241,8 @@ export const JournalForm = () => {
               );
             })}
           </select>
+          {/* <EditIcon />
+          <DeleteIcon /> */}
         </div>
         <div>
           {readyToAllocate ? (
