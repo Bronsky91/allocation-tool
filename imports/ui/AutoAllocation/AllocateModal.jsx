@@ -35,6 +35,7 @@ export const AllocateModal = ({
   availableMetrics,
   setNewestAllocationId, // For creating
   currentAllocation, // For editing
+  setEditedCurrentAllocation, // For editing
 }) => {
   const classes = useStyles();
   // getModalStyle is not a pure function, we roll the style only on the first render
@@ -51,7 +52,6 @@ export const AllocateModal = ({
     disabled: currentAllocation ? currentAllocation.metric !== vm.title : false,
   }));
 
-  console.log("currentAllocation", currentAllocation);
   // Populates name for editing
   const initialAllocationName = currentAllocation ? currentAllocation.name : "";
   // Populates segments for editing
@@ -78,8 +78,8 @@ export const AllocateModal = ({
   const initialSelectedMetric = currentAllocation
     ? [
         {
-          label: currentAllocation?.metric,
-          value: currentAllocation?.metric,
+          label: currentAllocation.metric,
+          value: currentAllocation.metric,
           disabled: false,
         },
       ]
@@ -108,6 +108,7 @@ export const AllocateModal = ({
       setAllocationName(initialAllocationName);
       setSelectedMetricSegments(initialSelectedMetricSegments);
       setSubsegmentAllocationData(intialSubsegmentAllocationData);
+      setMetricOptions(initialMetricOptions);
       setSelectedMetrics(initialSelectedMetric);
     }
     // Only reset when the modal closes or the currentAllocation updates
@@ -173,10 +174,9 @@ export const AllocateModal = ({
             console.log("err", err);
           } else {
             // Once the edit is complete re-select the edited allocation technique to update values for when the modal is next opened
-            setNewestAllocationId(id);
-            // TODO: This does NOT trigger the useEffect to select a "new" updated currentAllocation
-            // TODO: Find a way to update the currentAllocation to the same but updated object to update initial values here
-            console.log("should have setNewestAllocaitonId", id);
+            // A Date timestamp is being used here to be provie a new value for the useEffect so it will be triggered each time
+            // This needs to be in a useEffect because the allocations array is only updated on re-renders, which this causes
+            setEditedCurrentAllocation(new Date());
           }
         }
       );
@@ -189,6 +189,7 @@ export const AllocateModal = ({
           if (err) {
             console.log("err", err);
           } else {
+            // Once the allocation is saved, make it the selected the allocation in the dropdown
             setNewestAllocationId(newAllocationId);
           }
         }

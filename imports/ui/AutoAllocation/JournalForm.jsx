@@ -62,6 +62,7 @@ export const JournalForm = () => {
   const [editAllocationModalOpen, setEditAllocationModalOpen] = useState(false);
   const [selectedAllocation, setSelectedAllocation] = useState(allocations[0]);
   const [newestAllocationId, setNewestAllocationId] = useState();
+  const [editedCurrentAllocation, setEditedCurrentAllocation] = useState();
   const [formData, setFormData] = useState({
     toBalanceSegmentValue: 0,
     selectedBalanceSegments: balanceAccountSegments.map((bas) => ({
@@ -102,10 +103,8 @@ export const JournalForm = () => {
   }, [nonMetricSegments]);
 
   useEffect(() => {
-    console.log("In newesetallocationId  Usefeffect", newestAllocationId);
+    // After a new allocation is created, make it the currently selected allocation in the dropdown
     if (newestAllocationId) {
-      console.log("set NewestAllocationId", newestAllocationId);
-      console.log("allocations", allocations);
       setSelectedAllocation(
         allocations.find((a) => a._id === newestAllocationId)
       );
@@ -113,11 +112,15 @@ export const JournalForm = () => {
   }, [newestAllocationId]);
 
   useEffect(() => {
+    // After editing an allocation this is called to refresh the current allocation with the new data from the allocations array
+    // This logic needs to be in a useEffect due to the allocations array not updating from the database until a re-render
+    setSelectedAllocation(
+      allocations.find((a) => a._id === selectedAllocation._id)
+    );
+  }, [editedCurrentAllocation]);
+
+  useEffect(() => {
     if (selectedAllocation && formData.toBalanceSegmentValue > 0) {
-      console.log(
-        "selectedAllocation.subSegments",
-        selectedAllocation.subSegments
-      );
       Meteor.call(
         "calculateAllocation",
         {
@@ -218,8 +221,8 @@ export const JournalForm = () => {
         handleClose={closeEditAllocationModal} // Required
         metricSegments={metricSegments} // Required, used for listing segments and subsegments
         availableMetrics={availableMetrics} // Required, used for listing which metric options to use
-        setNewestAllocationId={setNewestAllocationId} // Set the edited allocation as selected in the dropdown
         currentAllocation={selectedAllocation} // Used to edit the currently selected allocation
+        setEditedCurrentAllocation={setEditedCurrentAllocation} // Set the edited allocation as selected in the dropdown to refresh with new data
       />
       <div className="accountsColumn">
         <BalanceAccount
