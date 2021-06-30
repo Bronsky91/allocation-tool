@@ -6,8 +6,6 @@ import { ImportData } from "./Onboarding/ImportData.jsx";
 export const App = () => {
   const [selectedPage, setSelectedPage] = useState("import");
 
-  const handlePageSelection = () => {};
-
   const pages = {
     import: <ImportData />,
     manual: <JournalFormManual />,
@@ -24,12 +22,15 @@ export const App = () => {
         >
           Import/Onboard
         </button>
+        {/*  
+        **DEPRECATED**
         <button
           className="mediumButton"
           onClick={() => setSelectedPage("manual")}
         >
           Manual Journal Entry
-        </button>
+        </button> 
+        */}
         <button
           className="mediumButton"
           onClick={() => setSelectedPage("auto")}

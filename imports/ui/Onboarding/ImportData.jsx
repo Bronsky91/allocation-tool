@@ -26,6 +26,7 @@ export const ImportData = () => {
   if (metrics.length > 0) {
     console.log("metrics", metrics);
   }
+
   return (
     <div className="importDataContainer">
       <div>
@@ -46,6 +47,7 @@ export const ImportData = () => {
               return (
                 <div key={index}>
                   <h3>{segment.description}</h3>
+                  {/* // TODO: Since order of the object is no longer guarenteed, fix the column and row order to match everytime */}
                   <table>
                     <thead>
                       <tr>
@@ -62,6 +64,7 @@ export const ImportData = () => {
                           <td>{subSegment.segmentId}</td>
                           <td>{subSegment.description}</td>
                           <td>{subSegment.category}</td>
+                          <td>{subSegment.typicalBalance}</td>
                         </tr>
                       ))}
                     </tbody>
