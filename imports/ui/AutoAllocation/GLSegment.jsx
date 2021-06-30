@@ -7,6 +7,10 @@ export const GLSegment = ({ data, handleChangeFormData }) => {
 
   const handleChangeSegment = (e) => {
     const newSelectedSegment = data.subSegments[e.target.value];
+    if (newSelectedSegment.typicalBalance) {
+      // If there's a typical balance assigned to the new subsegment, auto choose it as default
+      setTypicalBalance(newSelectedSegment.typicalBalance.toLowerCase());
+    }
     setSelectedSegment(newSelectedSegment);
   };
 
