@@ -3,17 +3,39 @@ import { ReadWorkbook } from "../../api/ReadWorkbook";
 import { useTracker } from "meteor/react-meteor-data";
 import { CreateSegments, SegmentsCollection } from "../../api/Segments";
 import { CreateMetrics, MetricsCollection } from "../../api/Metrics";
+import { isChartOfAccountWorkBookDataValid } from "../../api/utils/CheckWorkbookData";
 
 export const ImportData = () => {
   const segments = useTracker(() => SegmentsCollection.find().fetch());
   const metrics = useTracker(() => MetricsCollection.find().fetch());
   const [hideSegments, setHideSegments] = useState(false);
-  const [hideMetrics, setHideMetrics] = useState(false);
+  const [chartOfAccountsFileInputKey, setChartOfAccountsFileInputKey] =
+    useState(new Date());
+  const [hideMetricUpload, setHideMetricUpload] = useState(false);
 
   const handleChartOfAccountsFile = async (e) => {
+    // Excel/CSV File
     const file = e.target.files[0];
+    // Formatted Data
     const data = await ReadWorkbook(file);
-    CreateSegments(data);
+    // If their are currently segments and the data is good
+    if (segments.length > 0 && isChartOfAccountWorkBookDataValid(data)) {
+      // then remove the previous segment collection
+      Meteor.call("removeAllSegments", {}, (err, res) => {
+        if (err) {
+          console.log("Error Deleting Segments", err);
+        } else {
+          console.log("Deleted All Segments", res);
+          // Create the Segments from the Formatted Data
+          CreateSegments(data);
+        }
+      });
+    } else {
+      // Create the Segments from the Formatted Data
+      CreateSegments(data);
+    }
+    // Clears the Input field, in case the user wanted to upload a new file right away
+    setChartOfAccountsFileInputKey(new Date());
   };
 
   const handleMetricFile = async (e) => {
@@ -31,7 +53,11 @@ export const ImportData = () => {
     <div className="importDataContainer">
       <div>
         <h2>Import Chart of Accounts: </h2>
-        <input type="file" onChange={handleChartOfAccountsFile}></input>
+        <input
+          type="file"
+          onChange={handleChartOfAccountsFile}
+          key={chartOfAccountsFileInputKey}
+        ></input>
         {segments.length > 0 ? (
           <button
             onClick={() => setHideSegments((hideSegments) => !hideSegments)}
@@ -42,41 +68,26 @@ export const ImportData = () => {
         {hideSegments && segments.length > 0 ? (
           <div>
             <h2>Segments:</h2>
-            {/* One table per sheet */}
             {segments.map((segment, index) => {
               return (
                 <div key={index}>
                   <h3>{segment.description}</h3>
-                  {/* // TODO: Since order of the object is no longer guarenteed, fix the column and row order to match everytime */}
-                  <table>
-                    <thead>
-                      <tr>
-                        {Object.keys(segment.subSegments[0]).map(
-                          (column, index) => (
-                            <th key={index}>{column}</th>
-                          )
-                        )}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {segment.subSegments.map((subSegment, index) => (
-                        <tr key={index}>
-                          <td>{subSegment.segmentId}</td>
-                          <td>{subSegment.description}</td>
-                          <td>{subSegment.category}</td>
-                          <td>{subSegment.typicalBalance}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  <ul>
+                    {segment.subSegments.map((subSegment, i) => (
+                      <li key={i}>{subSegment.description}</li>
+                    ))}
+                  </ul>
                 </div>
               );
             })}
           </div>
         ) : null}
-
-        <h2>Import Metric: </h2>
-        <input type="file" onChange={handleMetricFile}></input>
+        {segments.length > 0 ? (
+          <div>
+            <h2>Import Metric: </h2>
+            <input type="file" onChange={handleMetricFile}></input>
+          </div>
+        ) : null}
       </div>
       <div>
         <h2>Onboarding</h2>

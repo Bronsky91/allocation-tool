@@ -7,3 +7,5 @@ export const CHART_OF_ACCOUNT_COLUMNS = {
   Category: "category",
   "Typical Balance": "typicalBalance",
 };
+
+export const VALID_COLUMN_NAMES = Object.keys(CHART_OF_ACCOUNT_COLUMNS)

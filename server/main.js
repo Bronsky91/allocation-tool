@@ -13,6 +13,9 @@ Meteor.methods({
       createdAt: new Date(),
     });
   },
+  removeAllSegments: ({ }) => {
+    SegmentsCollection.remove({})
+  },
   insertMetric: ({ description, columns }) => {
     // column = {
     //   title: "",
@@ -51,4 +54,4 @@ Meteor.methods({
   },
 });
 
-Meteor.startup(() => {});
+Meteor.startup(() => { });
