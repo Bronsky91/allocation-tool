@@ -3,7 +3,7 @@ import { useTracker } from "meteor/react-meteor-data";
 import { v4 as uuidv4 } from "uuid";
 import { AllocationRow } from "./AllocationRow";
 import { CreateWorkbook } from "../../api/CreateWorkbook";
-import { SegmentsCollection } from "../../api/Segments";
+import { SegmentsCollection } from "../../api/Segments-Change";
 import { SegmentManual } from "./SegmentManual";
 import PacmanLoader from "react-spinners/PacmanLoader";
 

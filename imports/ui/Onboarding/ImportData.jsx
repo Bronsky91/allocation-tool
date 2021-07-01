@@ -5,7 +5,7 @@ import { useTracker } from "meteor/react-meteor-data";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import Dialog from "@material-ui/core/Dialog";
 
-import { CreateSegments, SegmentsCollection } from "../../api/Segments";
+import { CreateSegments, SegmentsCollection } from "../../api/Segments-Change";
 import { CreateMetrics, MetricsCollection } from "../../api/Metrics";
 import { isChartOfAccountWorkBookDataValid } from "../../api/utils/CheckWorkbookData";
 
