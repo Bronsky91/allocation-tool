@@ -2,19 +2,25 @@ import React, { useEffect, useState } from "react";
 import { ReadWorkbook } from "../../api/ReadWorkbook";
 import { useTracker } from "meteor/react-meteor-data";
 
-import DialogTitle from "@material-ui/core/DialogTitle";
-import Dialog from "@material-ui/core/Dialog";
-
 import { CreateSegments, SegmentsCollection } from "../../api/Segments";
-import { CreateMetrics, MetricsCollection } from "../../api/Metrics";
+import { CreateMetric, MetricsCollection } from "../../api/Metrics";
 import { isChartOfAccountWorkBookDataValid } from "../../api/utils/CheckWorkbookData";
+import { GL_CODE, Sub_GL_CODE } from "../../../constants";
 
 export const ImportData = () => {
   const segments = useTracker(() => SegmentsCollection.find().fetch());
   const metrics = useTracker(() => MetricsCollection.find().fetch());
+  // metricData is uploaded metrics sheets and worked data before saving
+  const [metricData, setMetricData] = useState([]);
   const [hideSegments, setHideSegments] = useState(false);
   const [chartOfAccountsFileInputKey, setChartOfAccountsFileInputKey] =
     useState(new Date());
+  const [metricFileInputKey, setMetricFileInputKey] = useState(new Date());
+
+  // Segments possible for allocation
+  const possibleAllocationSegmentNames = segments
+    .filter((segment) => ![GL_CODE, Sub_GL_CODE].includes(segment.description))
+    .map((segment) => segment.description);
 
   const handleChartOfAccountsFile = async (e) => {
     // Excel/CSV File
@@ -51,8 +57,72 @@ export const ImportData = () => {
   const handleMetricFile = async (e) => {
     const file = e.target.files[0];
     const data = await ReadWorkbook(file);
-    console.log("import Data", data);
-    CreateMetrics(data);
+    if (data && "sheets" in data && data.sheets.length > 0) {
+      const rawMetricData = data.sheets[0];
+      setMetricData((metricData) => {
+        // If the metric data uploaded is already being worked with do nothing
+        if (metricData.map((m) => m.name).includes(rawMetricData.name)) {
+          // TODO: Maybe move logic check somewhere else
+          // TODO: Use actual UI dialog instead of browser alert
+          alert(
+            `Finish working with the ${rawMetricData.name} dataset before uploading again`
+          );
+          return metricData;
+        }
+        // Add the upload metric data to the working metricData state object
+        return [
+          ...metricData,
+          {
+            ...rawMetricData,
+            validMethods: [],
+            metricSegments: rawMetricData.columns.filter((column) =>
+              possibleAllocationSegmentNames.includes(column)
+            ),
+          },
+        ];
+      });
+    }
+    // Clear metric upload file input
+    setMetricFileInputKey(new Date());
+  };
+
+  const handleMetricChecked = (e, metricName, metricColumn) => {
+    const checked = e.target.checked;
+
+    setMetricData((metricData) =>
+      metricData.map((metric) => {
+        if (metric.name === metricName) {
+          if (checked) {
+            // Add the metric name to the validMethods array if the name was checked
+            return {
+              ...metric,
+              validMethods: [...metric.validMethods, metricColumn],
+            };
+          }
+          // Remove the metric name from the validMethods array if the name was unchecked
+          return {
+            ...metric,
+            validMethods: metric.validMethods.filter(
+              (vm) => vm !== metricColumn
+            ),
+          };
+        }
+        return metric;
+      })
+    );
+  };
+
+  const handleSaveMetric = (metricName) => {
+    // Find the completed metric from the working data
+    const completedMetricData = metricData.find(
+      (metric) => metric.name === metricName
+    );
+    // Saves the metric to the database
+    CreateMetric(completedMetricData);
+    // Removes the saved metric from the react hook state
+    setMetricData((metricData) =>
+      metricData.filter((metric) => metric.name !== metricName)
+    );
   };
 
   if (metrics.length > 0) {
@@ -95,15 +165,26 @@ export const ImportData = () => {
         {segments.length > 0 ? (
           <div>
             <h2>Import Metric: </h2>
-            <input type="file" onChange={handleMetricFile}></input>
+            <input
+              type="file"
+              onChange={handleMetricFile}
+              key={metricFileInputKey}
+            ></input>
           </div>
         ) : null}
-        {metrics.map((metric) => (
-          <div>
+        {metrics.map((metric, index) => (
+          <div key={index}>
             <h3>{metric.description}</h3>
+            <div>Allocation Segments</div>
             <ul>
-              {metric.columns.map((column) => (
-                <li>{column.title}</li>
+              {metric.metricSegments.map((segment, i) => (
+                <li key={i}>{segment}</li>
+              ))}
+            </ul>
+            <div>Allocation Methods</div>
+            <ul>
+              {metric.validMethods.map((method, i) => (
+                <li key={i}>{method}</li>
               ))}
             </ul>
           </div>
@@ -111,16 +192,52 @@ export const ImportData = () => {
       </div>
       <div>
         <h2>Onboarding</h2>
-        <div>Add onboarding stuff here</div>
-        <ul>
-          <li>Selecting GL Code Segments from chart of accounts?</li>
-          <li>Selecting what columns are segments in metric spreadsheet</li>
-          <ul>
-            <li>
-              Confirm link between segments in chart of accounts and metric
-            </li>
-          </ul>
-        </ul>
+        {metricData.map((data, index) => (
+          <div key={index}>
+            <h3 style={{ textDecoration: "underline" }}>{data.name}</h3>
+            <h3 style={{ fontWeight: "normal" }}>
+              Segments that can be used in allocations
+            </h3>
+            <ul>
+              {data.columns.map((column, i) => {
+                if (possibleAllocationSegmentNames.includes(column)) {
+                  return (
+                    <li key={i} style={{ fontWeight: "bold" }} key={i}>
+                      {column}
+                    </li>
+                  );
+                }
+              })}
+            </ul>
+            <h3 style={{ fontWeight: "normal" }}>
+              Select methods that will be used for allocations
+            </h3>
+
+            {data.columns.map((column, i) => {
+              // Exclude any columns that match possible allocation segment names
+              if (!possibleAllocationSegmentNames.includes(column)) {
+                return (
+                  <div key={i}>
+                    <input
+                      type="checkbox"
+                      onChange={(e) =>
+                        handleMetricChecked(e, data.name, column)
+                      }
+                      value={column}
+                    />
+                    <label style={{ fontWeight: "bold" }}>{column}</label>
+                  </div>
+                );
+              }
+            })}
+            <button
+              onClick={() => handleSaveMetric(data.name)}
+              style={{ padding: 5, marginTop: "1em" }}
+            >
+              Save Metric
+            </button>
+          </div>
+        ))}
       </div>
     </div>
   );

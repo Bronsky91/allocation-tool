@@ -16,7 +16,7 @@ Meteor.methods({
   removeAllSegments: ({}) => {
     SegmentsCollection.remove({});
   },
-  insertMetric: ({ description, columns }) => {
+  insertMetric: ({ description, columns, validMethods, metricSegments }) => {
     // column = {
     //   title: "",
     //   rows: [{ value: "", rowNumber: 0 }],
@@ -24,6 +24,8 @@ Meteor.methods({
     MetricsCollection.insert({
       description,
       columns,
+      validMethods,
+      metricSegments,
       createdAt: new Date(),
     });
   },
