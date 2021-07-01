@@ -2,7 +2,7 @@ import { Meteor } from "meteor/meteor";
 import { AllocationsCollection } from "../imports/api/Allocations";
 import { MetricsCollection } from "../imports/api/Metrics";
 import { calcAllocation } from "./CalcAllocation";
-import { SegmentsCollection } from "/imports/api/Segments-Change";
+import { SegmentsCollection } from "/imports/api/Segments";
 
 Meteor.methods({
   insertSegment: ({ description, subSegments, chartFieldOrder }) => {

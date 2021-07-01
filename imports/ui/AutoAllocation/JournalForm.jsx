@@ -15,7 +15,7 @@ import { AllocateModal } from "./AllocateModal";
 // API
 import { MetricsCollection } from "../../api/Metrics";
 import { CreateWorkbook } from "../../api/CreateWorkbook";
-import { SegmentsCollection } from "../../api/Segments-Change";
+import { SegmentsCollection } from "../../api/Segments";
 import { AllocationsCollection, removeAllocation } from "../../api/Allocations";
 
 import { GL_CODE, Sub_GL_CODE } from "../../../constants";
