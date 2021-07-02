@@ -51,9 +51,10 @@ Meteor.methods({
       throw new Meteor.Error('Not authorized.');
     }
     const newAllocationId = AllocationsCollection.insert({
+      // TODO: Need to add metric (or parent metric)
       name,
       subSegments,
-      metric, // TODO: Maybe rename this to method...
+      metric, // TODO: Need to rename this to method (or something other than metric)
       userId: this.userId,
       createdAt: new Date(),
     });

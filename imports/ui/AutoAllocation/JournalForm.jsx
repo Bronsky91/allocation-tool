@@ -33,33 +33,26 @@ export const JournalForm = () => {
     AllocationsCollection.find({ userId: user._id }).fetch()
   );
 
-  // TODO: Create a selection in the modal to select which metric in the array the user wants to use
-  const metricData = metrics[0];
-  const availableMetrics = metricData.columns.filter((c) =>
-    metricData.validMethods.includes(c.title)
-  );
+  console.log("allocations", allocations);
 
   const GLSegmentNames = [GL_CODE, Sub_GL_CODE];
   const glCodeSegment = segments.find((s) => s.description === GL_CODE);
   const balanceAccountSegments = segments
     .filter((s) => s.description !== Sub_GL_CODE)
     .sort((a, b) => a.chartFieldOrder - b.chartFieldOrder);
-
   const subGLCodeSegment = segments.find((s) => s.description === Sub_GL_CODE);
-  const nonMetricSegments = segments.filter(
-    (s) =>
-      !metricData.metricSegments.includes(s.description) &&
-      !GLSegmentNames.includes(s.description)
-  );
-  const metricSegments = segments
-    .filter((s) => metricData.metricSegments.includes(s.description))
-    .sort((a, b) => a.chartFieldOrder - b.chartFieldOrder);
 
   const [allocationModalOpen, setAllocationModalOpen] = useState(false);
   const [editAllocationModalOpen, setEditAllocationModalOpen] = useState(false);
+  const [selectedMetric, setSelectedMetric] = useState(metrics[0]);
   const [selectedAllocation, setSelectedAllocation] = useState(allocations[0]);
   const [newestAllocationId, setNewestAllocationId] = useState();
   const [editedCurrentAllocation, setEditedCurrentAllocation] = useState();
+
+  const metricSegments = segments
+    .filter((s) => selectedMetric.metricSegments.includes(s.description))
+    .sort((a, b) => a.chartFieldOrder - b.chartFieldOrder);
+
   const [formData, setFormData] = useState({
     toBalanceSegmentValue: 0,
     selectedBalanceSegments: balanceAccountSegments.map((bas) => ({
@@ -78,6 +71,15 @@ export const JournalForm = () => {
     segments, // All segments, used here for creating the workbook
     metricSegments, // Used to dynamically create the chart order in workbook
   });
+
+  const nonMetricSegments = segments.filter(
+    (s) =>
+      !selectedMetric.metricSegments.includes(s.description) &&
+      !GLSegmentNames.includes(s.description)
+  );
+  const availableMetrics = selectedMetric.columns.filter((c) =>
+    selectedMetric.validMethods.includes(c.title)
+  );
 
   const readyToAllocate =
     formData.toBalanceSegmentValue > 0 &&
@@ -125,7 +127,7 @@ export const JournalForm = () => {
           metric: selectedAllocation.metric,
           toBalanceValue: formData.toBalanceSegmentValue,
           userId: user._id,
-          parentMetricId: metricData._id,
+          parentMetricId: selectedMetric._id,
         },
         (err, allocationData) => {
           if (err) {
@@ -174,6 +176,12 @@ export const JournalForm = () => {
     // Moves the next selectedAllocation down one index, unless it's already 0 then keep it 0
     const nextIndex = currentIndex > 0 ? currentIndex - 1 : 0;
     setSelectedAllocation(allocations[nextIndex]);
+  };
+
+  const handleMetricChange = (e) => {
+    const newMetricSelected = metrics[e.target.value];
+    console.log("newMetricSelected", newMetricSelected);
+    setSelectedMetric(newMetricSelected);
   };
 
   const handleAllocationChange = (e) => {
@@ -264,6 +272,21 @@ export const JournalForm = () => {
         </div>
       </div>
       <div className="autoAllocationColumn">
+        <div>
+          <label>Select Metric to Allocate with:</label>
+          <select
+            value={metrics.findIndex(
+              (metric) => metric._id === selectedMetric?._id
+            )}
+            onChange={handleMetricChange}
+          >
+            {metrics.map((metric, index) => (
+              <option key={index} value={index}>
+                {metric.description}
+              </option>
+            ))}
+          </select>
+        </div>
         <button onClick={openAllocationModal} className="mediumButton">
           Create new Allocation Technique
         </button>
