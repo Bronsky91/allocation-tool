@@ -1,8 +1,11 @@
 import { Meteor } from "meteor/meteor";
+import { Accounts } from "meteor/accounts-base";
+// API
 import { AllocationsCollection } from "../imports/api/Allocations";
 import { MetricsCollection } from "../imports/api/Metrics";
-import { calcAllocation } from "./CalcAllocation";
 import { SegmentsCollection } from "/imports/api/Segments";
+// Utils
+import { calcAllocation } from "./CalcAllocation";
 
 Meteor.methods({
   insertSegment: ({ description, subSegments, chartFieldOrder }) => {
@@ -56,4 +59,14 @@ Meteor.methods({
   },
 });
 
-Meteor.startup(() => {});
+const SEED_USERNAME = "bronsky";
+const SEED_PASSWORD = "password";
+
+Meteor.startup(() => {
+  if (!Accounts.findUserByUsername(SEED_USERNAME)) {
+    Accounts.createUser({
+      username: SEED_USERNAME,
+      password: SEED_PASSWORD,
+    });
+  }
+});
