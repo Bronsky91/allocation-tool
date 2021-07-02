@@ -2,14 +2,13 @@ import { Decimal } from "decimal.js";
 import { MetricsCollection } from "../imports/api/Metrics";
 import { convertDecimalToFixedFloat } from "../imports/api/utils/ConvertDecimalToFixedFloat";
 
-export const calcAllocation = ({ subSegments, metric, toBalanceValue }) => {
+export const calcAllocation = ({ subSegments, metric, toBalanceValue, userId, parentMetricId }) => {
   // subSegments = The subsegments the user chose in the form ie: {SegmentName: [...subsegmentIds]}
   // metric = The metric that was chosen in the form
   // toBalanceValue == The balance value the user enters to run the allocation against
 
-  // TODO: Get metrics from database by user
-  const allMetrics = MetricsCollection.find().fetch();
-  const metricData = allMetrics[0];
+  const allMetrics = MetricsCollection.find({ userId }).fetch();
+  const metricData = allMetrics.find(parentMetric => parentMetric._id === parentMetricId);
 
   // An array of all Chart Field arrays that were selected by segment
   // EX: [[010, 020], [110, 120], ...]

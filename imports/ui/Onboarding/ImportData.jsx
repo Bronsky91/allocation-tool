@@ -8,8 +8,14 @@ import { isChartOfAccountWorkBookDataValid } from "../../api/utils/CheckWorkbook
 import { GL_CODE, Sub_GL_CODE } from "../../../constants";
 
 export const ImportData = () => {
-  const segments = useTracker(() => SegmentsCollection.find().fetch());
-  const metrics = useTracker(() => MetricsCollection.find().fetch());
+  // Current user logged in
+  const user = useTracker(() => Meteor.user());
+  const segments = useTracker(() =>
+    SegmentsCollection.find({ userId: user._id }).fetch()
+  );
+  const metrics = useTracker(() =>
+    MetricsCollection.find({ userId: user._id }).fetch()
+  );
   // metricData is uploaded metrics sheets and worked data before saving
   const [metricData, setMetricData] = useState([]);
   const [hideSegments, setHideSegments] = useState(false);
@@ -59,15 +65,22 @@ export const ImportData = () => {
     const data = await ReadWorkbook(file);
     if (data && "sheets" in data && data.sheets.length > 0) {
       const rawMetricData = data.sheets[0];
+      // TODO: This could probably be refactored a bit to be cleaner
       setMetricData((metricData) => {
-        // If the metric data uploaded is already being worked with do nothing
+        // If the metric data uploaded is already being worked with replace it with new file
         if (metricData.map((m) => m.name).includes(rawMetricData.name)) {
-          // TODO: Maybe move logic check somewhere else
-          // TODO: Use actual UI dialog instead of browser alert
-          alert(
-            `Finish working with the ${rawMetricData.name} dataset before uploading again`
-          );
-          return metricData;
+          return metricData.map((data) => {
+            if (data.name === rawMetricData.name) {
+              return {
+                ...rawMetricData,
+                validMethods: [],
+                metricSegments: rawMetricData.columns.filter((column) =>
+                  possibleAllocationSegmentNames.includes(column)
+                ),
+              };
+            }
+            return data;
+          });
         }
         // Add the upload metric data to the working metricData state object
         return [

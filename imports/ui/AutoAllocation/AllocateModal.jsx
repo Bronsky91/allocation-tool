@@ -24,10 +24,10 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.background.paper,
     boxShadow: theme.shadows[5],
     padding: theme.spacing(2, 4, 3),
+    overflow: "scroll",
   },
 }));
 
-// TODO: Use this to have scrollable modal https://material-ui.com/components/dialogs/#scrolling-long-content
 export const AllocateModal = ({
   open,
   handleClose,

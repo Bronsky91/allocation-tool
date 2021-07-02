@@ -7,54 +7,79 @@ import { SegmentsCollection } from "/imports/api/Segments";
 // Utils
 import { calcAllocation } from "./CalcAllocation";
 
+// Arrow functions aren't going to work with these Methods while using this.userId
 Meteor.methods({
-  insertSegment: ({ description, subSegments, chartFieldOrder }) => {
+  insertSegment: function ({ description, subSegments, chartFieldOrder }) {
+    if (!this.userId) {
+      throw new Meteor.Error('Not authorized.');
+    }
+
     SegmentsCollection.insert({
       description,
       subSegments,
       chartFieldOrder,
+      userId: this.userId,
       createdAt: new Date(),
     });
   },
-  removeAllSegments: ({}) => {
+  removeAllSegments: function ({ }) {
+    if (!this.userId) {
+      throw new Meteor.Error('Not authorized.');
+    }
     SegmentsCollection.remove({});
   },
-  insertMetric: ({ description, columns, validMethods, metricSegments }) => {
+  insertMetric: function ({ description, columns, validMethods, metricSegments }) {
     // column = {
     //   title: "",
     //   rows: [{ value: "", rowNumber: 0 }],
     // };
+    if (!this.userId) {
+      throw new Meteor.Error('Not authorized.');
+    }
     MetricsCollection.insert({
       description,
       columns,
       validMethods,
       metricSegments,
+      userId: this.userId,
       createdAt: new Date(),
     });
   },
-  insertAllocation: ({ name, subSegments, metric }) => {
+  insertAllocation: function ({ name, subSegments, metric }) {
     // subSegments = [{segmentName: "Department", subSegmentIds: ['010', '020', ...]}]
+    if (!this.userId) {
+      throw new Meteor.Error('Not authorized.');
+    }
     const newAllocationId = AllocationsCollection.insert({
       name,
       subSegments,
-      metric,
+      metric, // TODO: Maybe rename this to method...
+      userId: this.userId,
       createdAt: new Date(),
     });
     return newAllocationId;
   },
-  updateAllocation: ({ id, name, subSegments, metric }) => {
+  updateAllocation: function ({ id, name, subSegments, metric }) {
+    if (!this.userId) {
+      throw new Meteor.Error('Not authorized.');
+    }
     AllocationsCollection.update(id, {
       $set: { name, subSegments, metric },
     });
   },
-  removeAllocation: ({ id }) => {
+  removeAllocation: function ({ id }) {
+    if (!this.userId) {
+      throw new Meteor.Error('Not authorized.');
+    }
     AllocationsCollection.remove(id);
   },
-  calculateAllocation: ({ subSegments, metric, toBalanceValue }) => {
+  calculateAllocation: function ({ subSegments, metric, toBalanceValue, userId, parentMetricId }) {
     return calcAllocation({
       subSegments,
       metric,
       toBalanceValue,
+      userId,
+      parentMetricId
     });
   },
 });
@@ -62,11 +87,18 @@ Meteor.methods({
 const SEED_USERNAME = "bronsky";
 const SEED_PASSWORD = "password";
 
+const SECOND_SEED_USERNAME = "nate"
+const SECOND_SEE_PASSWORD = "password"
+
 Meteor.startup(() => {
   if (!Accounts.findUserByUsername(SEED_USERNAME)) {
     Accounts.createUser({
       username: SEED_USERNAME,
       password: SEED_PASSWORD,
+    });
+    Accounts.createUser({
+      username: SECOND_SEED_USERNAME,
+      password: SECOND_SEE_PASSWORD,
     });
   }
 });

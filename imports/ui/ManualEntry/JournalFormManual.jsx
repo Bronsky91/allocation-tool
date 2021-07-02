@@ -8,6 +8,7 @@ import { SegmentManual } from "./SegmentManual";
 import PacmanLoader from "react-spinners/PacmanLoader";
 
 export const JournalFormManual = () => {
+  // ***DEPRECATED***
   const segments = useTracker(() => SegmentsCollection.find().fetch());
   const allocationSegments = segments;
 
@@ -157,7 +158,6 @@ export const JournalFormManual = () => {
 
   const createJournalEntry = () => {
     console.log(formData);
-    // TODO: Fix workbook formatting
     // CreateWorkbook(formData);
   };
 

@@ -21,13 +21,25 @@ import { AllocationsCollection, removeAllocation } from "../../api/Allocations";
 import { GL_CODE, Sub_GL_CODE } from "../../../constants";
 
 export const JournalForm = () => {
-  const segments = useTracker(() => SegmentsCollection.find().fetch());
-  const metrics = useTracker(() => MetricsCollection.find().fetch());
-  const allocations = useTracker(() => AllocationsCollection.find().fetch());
-  // TODO: Temp array that should be done from onboarding
-  const metricSegmentNames = ["Department", "Location"];
+  // Current user logged in
+  const user = useTracker(() => Meteor.user());
+  const segments = useTracker(() =>
+    SegmentsCollection.find({ userId: user._id }).fetch()
+  );
+  const metrics = useTracker(() =>
+    MetricsCollection.find({ userId: user._id }).fetch()
+  );
+  const allocations = useTracker(() =>
+    AllocationsCollection.find({ userId: user._id }).fetch()
+  );
+
+  // TODO: Create a selection in the modal to select which metric in the array the user wants to use
+  const metricData = metrics[0];
+  const availableMetrics = metricData.columns.filter((c) =>
+    metricData.validMethods.includes(c.title)
+  );
+
   const GLSegmentNames = [GL_CODE, Sub_GL_CODE];
-  // TODO: Find a better way to get GL code segments
   const glCodeSegment = segments.find((s) => s.description === GL_CODE);
   const balanceAccountSegments = segments
     .filter((s) => s.description !== Sub_GL_CODE)
@@ -36,27 +48,12 @@ export const JournalForm = () => {
   const subGLCodeSegment = segments.find((s) => s.description === Sub_GL_CODE);
   const nonMetricSegments = segments.filter(
     (s) =>
-      !metricSegmentNames.includes(s.description) &&
+      !metricData.metricSegments.includes(s.description) &&
       !GLSegmentNames.includes(s.description)
   );
   const metricSegments = segments
-    .filter((s) => metricSegmentNames.includes(s.description))
+    .filter((s) => metricData.metricSegments.includes(s.description))
     .sort((a, b) => a.chartFieldOrder - b.chartFieldOrder);
-
-  // TODO: Find a way to do this in onboarding
-  const metricData = metrics[0];
-  const validMetricNames = [
-    "FTE Status",
-    "Labor %",
-    "Weighted EMP Value",
-    "Annual Salary",
-    "Labor_Percentage",
-    "Annual_Rate",
-    "Weighted_Annual_Rate",
-  ];
-  const availableMetrics = metricData.columns.filter((c) =>
-    validMetricNames.includes(c.title)
-  );
 
   const [allocationModalOpen, setAllocationModalOpen] = useState(false);
   const [editAllocationModalOpen, setEditAllocationModalOpen] = useState(false);
@@ -127,6 +124,8 @@ export const JournalForm = () => {
           subSegments: selectedAllocation.subSegments,
           metric: selectedAllocation.metric,
           toBalanceValue: formData.toBalanceSegmentValue,
+          userId: user._id,
+          parentMetricId: metricData._id,
         },
         (err, allocationData) => {
           if (err) {
