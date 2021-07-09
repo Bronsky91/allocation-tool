@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { useTracker } from "meteor/react-meteor-data";
+import { MetricsCollection } from "../../api/Metrics";
 import { Meteor } from "meteor/meteor";
 import Modal from "@material-ui/core/Modal";
 import { makeStyles } from "@material-ui/core/styles";
@@ -32,7 +34,8 @@ export const AllocateModal = ({
   open,
   handleClose,
   metricSegments,
-  availableMetrics,
+  availableMethods,
+  selectedMetric,
   setNewestAllocationId, // For creating
   currentAllocation, // For editing
   setEditedCurrentAllocation, // For editing
@@ -46,10 +49,10 @@ export const AllocateModal = ({
     value: m._id,
   }));
 
-  const initialMetricOptions = availableMetrics.map((vm) => ({
+  const initialMethodOptions = availableMethods.map((vm) => ({
     label: vm.title,
     value: vm.title,
-    disabled: currentAllocation ? currentAllocation.metric !== vm.title : false,
+    disabled: currentAllocation ? currentAllocation.method !== vm.title : false,
   }));
 
   // Populates name for editing
@@ -74,12 +77,12 @@ export const AllocateModal = ({
         {}
       )
     : {};
-  // Populates metric for editing
-  const initialSelectedMetric = currentAllocation
+  // Populates method for editing
+  const initialSelectedMethod = currentAllocation
     ? [
         {
-          label: currentAllocation.metric,
-          value: currentAllocation.metric,
+          label: currentAllocation.method,
+          value: currentAllocation.method,
           disabled: false,
         },
       ]
@@ -97,9 +100,9 @@ export const AllocateModal = ({
     intialSubsegmentAllocationData
   );
   // The options for the metric dropdown
-  const [metricOptions, setMetricOptions] = useState(initialMetricOptions);
+  const [methodOptions, setMethodOptions] = useState(initialMethodOptions);
   // The selected metric from the metric dropdown
-  const [selectedMetrics, setSelectedMetrics] = useState(initialSelectedMetric);
+  const [selectedMethods, setSelectedMethods] = useState(initialSelectedMethod);
 
   useEffect(() => {
     // If the modal is closed and is the edit modal
@@ -108,11 +111,24 @@ export const AllocateModal = ({
       setAllocationName(initialAllocationName);
       setSelectedMetricSegments(initialSelectedMetricSegments);
       setSubsegmentAllocationData(intialSubsegmentAllocationData);
-      setMetricOptions(initialMetricOptions);
-      setSelectedMetrics(initialSelectedMetric);
+      setMethodOptions(initialMethodOptions);
+      setSelectedMethods(initialSelectedMethod);
     }
     // Only reset when the modal closes or the currentAllocation updates
   }, [open, currentAllocation]);
+
+  useEffect(() => {
+    // Update the method options when the avaialable methods update during metric switching
+    setMethodOptions(
+      availableMethods.map((vm) => ({
+        label: vm.title,
+        value: vm.title,
+        disabled: currentAllocation
+          ? currentAllocation.method !== vm.title
+          : false,
+      }))
+    );
+  }, [availableMethods]);
 
   const showMetricDropdown = () => {
     if (Object.keys(subsegmentAllocationData).length === 0) return false;
@@ -127,7 +143,7 @@ export const AllocateModal = ({
 
   const readyToSaveAllocate =
     showMetricDropdown() &&
-    selectedMetrics.length !== 0 &&
+    selectedMethods.length !== 0 &&
     allocationName.length !== 0;
 
   // Makes Metric Dropdown single select
@@ -135,7 +151,7 @@ export const AllocateModal = ({
     // If not multi select dropdown after selection disable all other selections
     if (selectedOptions.length === 1) {
       // One option was selected, make all others disabled
-      setMetricOptions((options) =>
+      setMethodOptions((options) =>
         options.map((option) => {
           if (option.value !== selectedOptions[0].value) {
             return { ...option, disabled: true };
@@ -145,16 +161,16 @@ export const AllocateModal = ({
       );
     } else if (selectedOptions.length === 0) {
       // The one option was deselected, make all options enabled
-      setMetricOptions((options) =>
+      setMethodOptions((options) =>
         options.map((option) => ({ ...option, disabled: false }))
       );
     }
-    setSelectedMetrics(selectedOptions);
+    setSelectedMethods(selectedOptions);
   };
 
   const saveAllocation = () => {
     const name = allocationName;
-    const metric = selectedMetrics[0].value;
+    const method = selectedMethods[0].value;
     const subSegments = [];
     for (const segmentName in subsegmentAllocationData) {
       subSegments.push({
@@ -164,11 +180,11 @@ export const AllocateModal = ({
     }
     if (currentAllocation) {
       // Editing
-      console.log("editing", { name, subSegments, metric });
+      console.log("editing", { name, subSegments, method });
       const id = currentAllocation._id;
       Meteor.call(
         "updateAllocation",
-        { id, name, subSegments, metric },
+        { id, name, subSegments, method },
         (err, res) => {
           if (err) {
             console.log("err", err);
@@ -184,7 +200,7 @@ export const AllocateModal = ({
       // Creating
       Meteor.call(
         "insertAllocation",
-        { name, subSegments, metric },
+        { name, subSegments, method, metricId: selectedMetric._id },
         (err, newAllocationId) => {
           if (err) {
             console.log("err", err);
@@ -237,6 +253,7 @@ export const AllocateModal = ({
                     <SubsegmentDropdown
                       key={index}
                       segment={segment}
+                      metric={selectedMetric} // Used to only show the subsegments available in the selected metric
                       isMultiSelect={selectedMetricSegments
                         .map((sm) => sm.value)
                         .includes(segment._id)}
@@ -248,6 +265,7 @@ export const AllocateModal = ({
                     <SubsegmentDropdown
                       key={index}
                       segment={segment}
+                      metric={selectedMetric}
                       isMultiSelect={selectedMetricSegments
                         .map((sm) => sm.value)
                         .includes(segment._id)}
@@ -261,11 +279,11 @@ export const AllocateModal = ({
           <div className="column" style={{ width: 200 }}>
             {showMetricDropdown() ? (
               <div>
-                <h3>Choose allocation by metric</h3>
+                <h3>Choose allocation by method</h3>
                 <MultiSelect
                   hasSelectAll={false}
-                  options={metricOptions}
-                  value={selectedMetrics}
+                  options={methodOptions}
+                  value={selectedMethods}
                   onChange={handleSelectedMetrics}
                   labelledBy="Select"
                 />

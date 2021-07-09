@@ -11,7 +11,7 @@ import { calcAllocation } from "./CalcAllocation";
 Meteor.methods({
   insertSegment: function ({ description, subSegments, chartFieldOrder }) {
     if (!this.userId) {
-      throw new Meteor.Error('Not authorized.');
+      throw new Meteor.Error("Not authorized.");
     }
 
     SegmentsCollection.insert({
@@ -22,19 +22,24 @@ Meteor.methods({
       createdAt: new Date(),
     });
   },
-  removeAllSegments: function ({ }) {
+  removeAllSegments: function ({}) {
     if (!this.userId) {
-      throw new Meteor.Error('Not authorized.');
+      throw new Meteor.Error("Not authorized.");
     }
     SegmentsCollection.remove({});
   },
-  insertMetric: function ({ description, columns, validMethods, metricSegments }) {
+  insertMetric: function ({
+    description,
+    columns,
+    validMethods,
+    metricSegments,
+  }) {
     // column = {
     //   title: "",
     //   rows: [{ value: "", rowNumber: 0 }],
     // };
     if (!this.userId) {
-      throw new Meteor.Error('Not authorized.');
+      throw new Meteor.Error("Not authorized.");
     }
     MetricsCollection.insert({
       description,
@@ -45,42 +50,49 @@ Meteor.methods({
       createdAt: new Date(),
     });
   },
-  insertAllocation: function ({ name, subSegments, metric }) {
+  insertAllocation: function ({ name, subSegments, method, metricId }) {
     // subSegments = [{segmentName: "Department", subSegmentIds: ['010', '020', ...]}]
     if (!this.userId) {
-      throw new Meteor.Error('Not authorized.');
+      throw new Meteor.Error("Not authorized.");
     }
     const newAllocationId = AllocationsCollection.insert({
-      // TODO: Need to add metric (or parent metric)
+      // TODO: Need to add metric (or parent method)
       name,
       subSegments,
-      metric, // TODO: Need to rename this to method (or something other than metric)
+      method,
+      metricId,
       userId: this.userId,
       createdAt: new Date(),
     });
     return newAllocationId;
   },
-  updateAllocation: function ({ id, name, subSegments, metric }) {
+  updateAllocation: function ({ id, name, subSegments, method }) {
     if (!this.userId) {
-      throw new Meteor.Error('Not authorized.');
+      throw new Meteor.Error("Not authorized.");
     }
     AllocationsCollection.update(id, {
-      $set: { name, subSegments, metric },
+      $set: { name, subSegments, method },
     });
   },
   removeAllocation: function ({ id }) {
     if (!this.userId) {
-      throw new Meteor.Error('Not authorized.');
+      throw new Meteor.Error("Not authorized.");
     }
     AllocationsCollection.remove(id);
   },
-  calculateAllocation: function ({ subSegments, metric, toBalanceValue, userId, parentMetricId }) {
+  calculateAllocation: function ({
+    subSegments,
+    method,
+    toBalanceValue,
+    userId,
+    metricId,
+  }) {
     return calcAllocation({
       subSegments,
-      metric,
+      method,
       toBalanceValue,
       userId,
-      parentMetricId
+      metricId,
     });
   },
 });
@@ -88,8 +100,8 @@ Meteor.methods({
 const SEED_USERNAME = "bronsky";
 const SEED_PASSWORD = "password";
 
-const SECOND_SEED_USERNAME = "nate"
-const SECOND_SEE_PASSWORD = "password"
+const SECOND_SEED_USERNAME = "nate";
+const SECOND_SEE_PASSWORD = "password";
 
 Meteor.startup(() => {
   if (!Accounts.findUserByUsername(SEED_USERNAME)) {

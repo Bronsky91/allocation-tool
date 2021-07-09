@@ -2,13 +2,19 @@ import { Decimal } from "decimal.js";
 import { MetricsCollection } from "../imports/api/Metrics";
 import { convertDecimalToFixedFloat } from "../imports/api/utils/ConvertDecimalToFixedFloat";
 
-export const calcAllocation = ({ subSegments, metric, toBalanceValue, userId, parentMetricId }) => {
+export const calcAllocation = ({
+  subSegments,
+  method,
+  toBalanceValue,
+  userId,
+  metricId,
+}) => {
   // subSegments = The subsegments the user chose in the form ie: {SegmentName: [...subsegmentIds]}
-  // metric = The metric that was chosen in the form
+  // method = The method that was chosen in the form
   // toBalanceValue == The balance value the user enters to run the allocation against
 
   const allMetrics = MetricsCollection.find({ userId }).fetch();
-  const metricData = allMetrics.find(parentMetric => parentMetric._id === parentMetricId);
+  const metricData = allMetrics.find((metric) => metric._id === metricId);
 
   // An array of all Chart Field arrays that were selected by segment
   // EX: [[010, 020], [110, 120], ...]
@@ -45,34 +51,34 @@ export const calcAllocation = ({ subSegments, metric, toBalanceValue, userId, pa
     const commonRowNumbersForChartField = chartFieldRowArrays.reduce((p, c) =>
       p.filter((e) => c.includes(e))
     );
-    // The selected metric rows of the common row numbers found above
+    // The selected method rows of the common row numbers found above
     const selectedMetricRows = metricData.columns
-      .find((c) => c.title === metric)
+      .find((c) => c.title === method)
       .rows.filter((row) =>
         commonRowNumbersForChartField.includes(row.rowNumber)
       );
 
-    // The sum of the metric for the common row numbers for this chart field
+    // The sum of the method for the common row numbers for this chart field
     const sumOfSelectedMetric = selectedMetricRows
       .map((row) => new Decimal(row.value))
       .reduce((a, b) => a.plus(b), new Decimal(0));
-
     // Places the sum of the chart field into an object with the chart field shown as connected with dashes
     chartFieldSumObject[chartField.join("-")] = sumOfSelectedMetric;
   }
 
   // Array of just the sums for each chart field
   const chartFieldSums = Object.values(chartFieldSumObject);
-  // The final sum of the selected Metric
+  // The final sum of the selected method
   const sumOfSelectedMetric = chartFieldSums.reduce(
     (a, b) => a.plus(b),
     new Decimal(0)
   );
 
-  // The result of dividing each chart field sum by the the sum of the selected Metric
+  // The result of dividing each chart field sum by the the sum of the selected method
   const allocationValuePerChartField = {};
   for (const chartField in chartFieldSumObject) {
     const chartFieldSum = new Decimal(chartFieldSumObject[chartField]);
+    // TODO: Figure out what to do if sumOfSelectedMetric equals 0
     const allocationValue = chartFieldSum.dividedBy(sumOfSelectedMetric);
     // chartFieldSumObject[chartField] / sumOfSelectedMetric;
     if (allocationValue.equals(0)) {

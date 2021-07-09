@@ -4,16 +4,30 @@ import MultiSelect from "react-multi-select-component";
 
 export const SubsegmentDropdown = ({
   segment,
+  metric,
   subsegmentAllocationData,
   setSubsegmentAllocationData,
   isMultiSelect,
 }) => {
   // Creates the options object for the dropdown
-  const initialOptions = segment?.subSegments.map((s) => ({
-    label: s.description,
-    value: s.segmentId,
-    disabled: false,
-  }));
+  const initialOptions = segment?.subSegments
+    // Filters the subSegmentIds by if they're available in the currently selected metric or not
+    .filter((subSegment) => {
+      // Array of all the subsegment options available in the current metric
+      const availableSubSegments = [
+        ...new Set(
+          metric.columns
+            .find((c) => c.title === segment.description)
+            .rows.map((row) => row.value)
+        ),
+      ];
+      return availableSubSegments.includes(subSegment.segmentId);
+    })
+    .map((s) => ({
+      label: s.description,
+      value: s.segmentId,
+      disabled: false,
+    }));
   const initialSelected = subsegmentAllocationData
     ? segment?.subSegments
         .filter((s) =>

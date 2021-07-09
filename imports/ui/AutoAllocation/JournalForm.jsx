@@ -29,11 +29,15 @@ export const JournalForm = () => {
   const metrics = useTracker(() =>
     MetricsCollection.find({ userId: user._id }).fetch()
   );
-  const allocations = useTracker(() =>
-    AllocationsCollection.find({ userId: user._id }).fetch()
-  );
 
-  console.log("allocations", allocations);
+  const [selectedMetric, setSelectedMetric] = useState(metrics[0]);
+
+  const allocations = useTracker(() =>
+    AllocationsCollection.find({
+      userId: user._id,
+      metricId: selectedMetric._id,
+    }).fetch()
+  );
 
   const GLSegmentNames = [GL_CODE, Sub_GL_CODE];
   const glCodeSegment = segments.find((s) => s.description === GL_CODE);
@@ -44,7 +48,6 @@ export const JournalForm = () => {
 
   const [allocationModalOpen, setAllocationModalOpen] = useState(false);
   const [editAllocationModalOpen, setEditAllocationModalOpen] = useState(false);
-  const [selectedMetric, setSelectedMetric] = useState(metrics[0]);
   const [selectedAllocation, setSelectedAllocation] = useState(allocations[0]);
   const [newestAllocationId, setNewestAllocationId] = useState();
   const [editedCurrentAllocation, setEditedCurrentAllocation] = useState();
@@ -77,7 +80,7 @@ export const JournalForm = () => {
       !selectedMetric.metricSegments.includes(s.description) &&
       !GLSegmentNames.includes(s.description)
   );
-  const availableMetrics = selectedMetric.columns.filter((c) =>
+  const availableMethods = selectedMetric.columns.filter((c) =>
     selectedMetric.validMethods.includes(c.title)
   );
 
@@ -111,6 +114,11 @@ export const JournalForm = () => {
   }, [newestAllocationId]);
 
   useEffect(() => {
+    // Select the first allocation when the selectedMetric changes
+    setSelectedAllocation(allocations[0]);
+  }, [selectedMetric]);
+
+  useEffect(() => {
     // After editing an allocation this is called to refresh the current allocation with the new data from the allocations array
     // This logic needs to be in a useEffect due to the allocations array not updating from the database until a re-render
     setSelectedAllocation(
@@ -124,10 +132,10 @@ export const JournalForm = () => {
         "calculateAllocation",
         {
           subSegments: selectedAllocation.subSegments,
-          metric: selectedAllocation.metric,
+          method: selectedAllocation.method,
           toBalanceValue: formData.toBalanceSegmentValue,
           userId: user._id,
-          parentMetricId: selectedMetric._id,
+          metricId: selectedMetric._id,
         },
         (err, allocationData) => {
           if (err) {
@@ -180,7 +188,6 @@ export const JournalForm = () => {
 
   const handleMetricChange = (e) => {
     const newMetricSelected = metrics[e.target.value];
-    console.log("newMetricSelected", newMetricSelected);
     setSelectedMetric(newMetricSelected);
   };
 
@@ -220,14 +227,16 @@ export const JournalForm = () => {
         open={allocationModalOpen} // Required
         handleClose={closeAllocationModal} // Required
         metricSegments={metricSegments} // Required, used for listing segments and subsegments
-        availableMetrics={availableMetrics} // Required, used for listing which metric options to use
+        selectedMetric={selectedMetric} // Required, used to save the allocation to the selected Metric
+        availableMethods={availableMethods} // Required, used for listing which method options to use
         setNewestAllocationId={setNewestAllocationId} // Set the newest allocation created as selected in the dropdown
       />
       <AllocateModal
         open={editAllocationModalOpen} // Required
         handleClose={closeEditAllocationModal} // Required
         metricSegments={metricSegments} // Required, used for listing segments and subsegments
-        availableMetrics={availableMetrics} // Required, used for listing which metric options to use
+        selectedMetric={selectedMetric} // Required, used to save the allocation to the selected Metric
+        availableMethods={availableMethods} // Required, used for listing which method options to use
         currentAllocation={selectedAllocation} // Used to edit the currently selected allocation
         setEditedCurrentAllocation={setEditedCurrentAllocation} // Set the edited allocation as selected in the dropdown to refresh with new data
       />
