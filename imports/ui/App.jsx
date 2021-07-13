@@ -1,6 +1,8 @@
-import { Meteor } from "meteor/meteor";
 import React, { useState } from "react";
+// Meteor
+import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
+// Components
 import { JournalForm } from "./AutoAllocation/JournalForm.jsx";
 import { JournalFormManual } from "./ManualEntry/JournalFormManual.jsx";
 import { ImportData } from "./Onboarding/ImportData.jsx";

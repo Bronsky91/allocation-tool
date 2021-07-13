@@ -12,13 +12,14 @@ import { GLSegment } from "./GLSegment";
 import { SubGLSegment } from "./SubGLSegment";
 import { OtherSegment } from "./OtherSegment";
 import { AllocateModal } from "./AllocateModal";
-// API
-import { MetricsCollection } from "../../api/Metrics";
-import { CreateWorkbook } from "../../api/CreateWorkbook";
-import { SegmentsCollection } from "../../api/Segments";
-import { AllocationsCollection, removeAllocation } from "../../api/Allocations";
-
-import { GL_CODE, Sub_GL_CODE } from "../../../constants";
+// DB
+import { MetricsCollection } from "../../db/MetricsCollection";
+import { SegmentsCollection } from "../../db/SegmentsCollection";
+import { AllocationsCollection } from "../../db/AllocationsColllection";
+// Utils
+import { CreateWorkbook } from "../../utils/CreateWorkbook";
+// Constants
+import { GL_CODE, SUB_GL_CODE } from "../../../constants";
 
 export const JournalForm = () => {
   // Current user logged in
@@ -39,12 +40,12 @@ export const JournalForm = () => {
     }).fetch()
   );
 
-  const GLSegmentNames = [GL_CODE, Sub_GL_CODE];
+  const GLSegmentNames = [GL_CODE, SUB_GL_CODE];
   const glCodeSegment = segments.find((s) => s.description === GL_CODE);
   const balanceAccountSegments = segments
-    .filter((s) => s.description !== Sub_GL_CODE)
+    .filter((s) => s.description !== SUB_GL_CODE)
     .sort((a, b) => a.chartFieldOrder - b.chartFieldOrder);
-  const subGLCodeSegment = segments.find((s) => s.description === Sub_GL_CODE);
+  const subGLCodeSegment = segments.find((s) => s.description === SUB_GL_CODE);
 
   const [allocationModalOpen, setAllocationModalOpen] = useState(false);
   const [editAllocationModalOpen, setEditAllocationModalOpen] = useState(false);
@@ -180,7 +181,7 @@ export const JournalForm = () => {
       (a) => a._id === selectedAllocation._id
     );
     // Removes the selected Allocation from the database
-    removeAllocation(selectedAllocation._id);
+    Meteor.call("allocation.remove", { id: selectedAllocation._id });
     // Moves the next selectedAllocation down one index, unless it's already 0 then keep it 0
     const nextIndex = currentIndex > 0 ? currentIndex - 1 : 0;
     setSelectedAllocation(allocations[nextIndex]);

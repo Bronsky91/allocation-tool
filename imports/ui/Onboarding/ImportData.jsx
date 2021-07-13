@@ -1,11 +1,15 @@
-import React, { useEffect, useState } from "react";
-import { ReadWorkbook } from "../../api/ReadWorkbook";
+import React, { useState } from "react";
+// Meteor
+import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
-
-import { CreateSegments, SegmentsCollection } from "../../api/Segments";
-import { CreateMetric, MetricsCollection } from "../../api/Metrics";
-import { isChartOfAccountWorkBookDataValid } from "../../api/utils/CheckWorkbookData";
-import { GL_CODE, Sub_GL_CODE } from "../../../constants";
+// Utils
+import { ReadWorkbook } from "../../utils/ReadWorkbook";
+import { isChartOfAccountWorkBookDataValid } from "../../utils/CheckWorkbookData";
+// DB
+import { SegmentsCollection } from "../../db/SegmentsCollection";
+import { MetricsCollection } from "../../db/MetricsCollection";
+// Constants
+import { GL_CODE, SUB_GL_CODE } from "../../../constants";
 
 export const ImportData = () => {
   // Current user logged in
@@ -25,28 +29,29 @@ export const ImportData = () => {
 
   // Segments possible for allocation
   const possibleAllocationSegmentNames = segments
-    .filter((segment) => ![GL_CODE, Sub_GL_CODE].includes(segment.description))
+    .filter((segment) => ![GL_CODE, SUB_GL_CODE].includes(segment.description))
     .map((segment) => segment.description);
 
   const handleChartOfAccountsFile = async (e) => {
     // Excel/CSV File
     const file = e.target.files[0];
     // Formatted Data
-    const data = await ReadWorkbook(file);
+    const workbookData = await ReadWorkbook(file);
+
     // If their are currently segments
     if (segments.length > 0) {
       // TODO: User alert before deleting previous segments
-      // and the data is good
-      if (isChartOfAccountWorkBookDataValid(data)) {
+      // and the workbookData is good
+      if (isChartOfAccountWorkBookDataValid(workbookData)) {
         // then remove the previous segment collection
-        Meteor.call("removeAllSegments", {}, (err, res) => {
+        Meteor.call("segment.removeAll", {}, (err, res) => {
           if (err) {
-            // TODO: User alert of errors in the uploaded data
+            // TODO: User alert of errors in the uploaded workbookData
             console.log("Error Deleting Segments", err);
           } else {
             console.log("Deleted All Segments", res);
-            // Create the Segments from the Formatted Data now that the old segments are deleted
-            CreateSegments(data);
+            // Create the Segments from the Formatted workbookData now that the old segments are deleted
+            Meteor.call("segment.insert", workbookData);
           }
         });
       } else {
@@ -54,7 +59,7 @@ export const ImportData = () => {
       }
     } else {
       // Create the Segments from the Formatted Data if there are no segments currently
-      CreateSegments(data);
+      Meteor.call("segment.insert", workbookData);
     }
     // Clears the Input field, in case the user wanted to upload a new file right away
     setChartOfAccountsFileInputKey(new Date());
@@ -131,7 +136,7 @@ export const ImportData = () => {
       (metric) => metric.name === metricName
     );
     // Saves the metric to the database
-    CreateMetric(completedMetricData);
+    Meteor.call("metric.insert", completedMetricData);
     // Removes the saved metric from the react hook state
     setMetricData((metricData) =>
       metricData.filter((metric) => metric.name !== metricName)

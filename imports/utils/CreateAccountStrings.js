@@ -1,4 +1,4 @@
-import { GL_CODE, Sub_GL_CODE } from "../../../constants";
+import { GL_CODE, SUB_GL_CODE } from "../../constants";
 
 export const createAllocationAccountString = (data, allocationChartField) => {
   // Segments that don't include the ones that used during allocation
@@ -10,7 +10,7 @@ export const createAllocationAccountString = (data, allocationChartField) => {
           chartField: data.selectedAllocationSegment.segmentId,
           chartFieldOrder: s.chartFieldOrder,
         };
-      } else if (s.description === Sub_GL_CODE) {
+      } else if (s.description === SUB_GL_CODE) {
         return {
           chartField: data.subGLSegment.allocations.segmentId,
           chartFieldOrder: s.chartFieldOrder,
@@ -42,7 +42,7 @@ export const createAllocationAccountString = (data, allocationChartField) => {
 export const createBalanceAccountString = (data) => {
   const segments = data.segments
     .map((s) => {
-      if (s.description === Sub_GL_CODE) {
+      if (s.description === SUB_GL_CODE) {
         return {
           chartField: data.subGLSegment.balance.segmentId,
           chartFieldOrder: s.chartFieldOrder,

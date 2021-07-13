@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useEffect } from "react";
-import { createBalanceAccountString } from "../../api/utils/CreateAccountStrings";
+// Utils
+import { createBalanceAccountString } from "../../utils/CreateAccountStrings";
 
 export const BalanceAccount = ({ data, handleChangeFormData, formData }) => {
   const [selectedSegments, setSelectedSegments] = useState(

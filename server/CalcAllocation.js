@@ -1,6 +1,6 @@
 import { Decimal } from "decimal.js";
-import { MetricsCollection } from "../imports/api/Metrics";
-import { convertDecimalToFixedFloat } from "../imports/api/utils/ConvertDecimalToFixedFloat";
+import { MetricsCollection } from "../imports/db/MetricsCollection";
+import { convertDecimalToFixedFloat } from "../imports/utils/ConvertDecimalToFixedFloat";
 
 export const calcAllocation = ({
   subSegments,

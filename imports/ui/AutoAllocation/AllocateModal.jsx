@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { useTracker } from "meteor/react-meteor-data";
-import { MetricsCollection } from "../../api/Metrics";
+// Meteor
 import { Meteor } from "meteor/meteor";
+// Material UI
 import Modal from "@material-ui/core/Modal";
 import { makeStyles } from "@material-ui/core/styles";
+// Packages
 import MultiSelect from "react-multi-select-component";
+// Components
 import { SubsegmentDropdown } from "./SubsegmentDropdown";
 
 const getModalStyle = () => {
@@ -183,7 +185,7 @@ export const AllocateModal = ({
       console.log("editing", { name, subSegments, method });
       const id = currentAllocation._id;
       Meteor.call(
-        "updateAllocation",
+        "allocation.update",
         { id, name, subSegments, method },
         (err, res) => {
           if (err) {
@@ -199,7 +201,7 @@ export const AllocateModal = ({
     } else {
       // Creating
       Meteor.call(
-        "insertAllocation",
+        "allocation.insert",
         { name, subSegments, method, metricId: selectedMetric._id },
         (err, newAllocationId) => {
           if (err) {
