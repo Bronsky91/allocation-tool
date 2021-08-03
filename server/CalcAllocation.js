@@ -1,3 +1,4 @@
+import { Meteor } from "meteor/meteor";
 import { Decimal } from "decimal.js";
 import { MetricsCollection } from "../imports/db/MetricsCollection";
 import { convertDecimalToFixedFloat } from "../imports/utils/ConvertDecimalToFixedFloat";
@@ -12,7 +13,6 @@ export const calcAllocation = ({
   // subSegments = The subsegments the user chose in the form ie: {SegmentName: [...subsegmentIds]}
   // method = The method that was chosen in the form
   // toBalanceValue == The balance value the user enters to run the allocation against
-
   const allMetrics = MetricsCollection.find({ userId }).fetch();
   const metricData = allMetrics.find((metric) => metric._id === metricId);
 

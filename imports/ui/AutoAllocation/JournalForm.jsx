@@ -22,11 +22,18 @@ import { CreateWorkbook } from "../../utils/CreateWorkbook";
 import { GL_CODE, SUB_GL_CODE } from "../../../constants";
 
 export const JournalForm = () => {
+  // Subscriptions
+  Meteor.subscribe("segments");
+  Meteor.subscribe("metrics");
+  Meteor.subscribe("allocations");
+
   // Current user logged in
   const user = useTracker(() => Meteor.user());
+
   const segments = useTracker(() =>
     SegmentsCollection.find({ userId: user._id }).fetch()
   );
+  console.log(segments);
   const metrics = useTracker(() =>
     MetricsCollection.find({ userId: user._id }).fetch()
   );

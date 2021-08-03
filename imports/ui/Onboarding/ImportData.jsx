@@ -12,6 +12,10 @@ import { MetricsCollection } from "../../db/MetricsCollection";
 import { GL_CODE, SUB_GL_CODE } from "../../../constants";
 
 export const ImportData = () => {
+  // Subscriptions
+  Meteor.subscribe("segments");
+  Meteor.subscribe("metrics");
+
   // Current user logged in
   const user = useTracker(() => Meteor.user());
   const segments = useTracker(() =>
