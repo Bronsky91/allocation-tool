@@ -6,6 +6,7 @@ import {
   createAllocationAccountString,
   createBalanceAccountString,
 } from "./CreateAccountStrings";
+import { CURRENCY_FORMAT } from "../../constants";
 
 export const CreateWorkbook = (data) => {
   workbookBuilder(data)
@@ -26,16 +27,62 @@ const workbookBuilder = (data) => {
 
   const reconciledData = reconciliationAdjustments(data);
 
+  // Journal Entry Header
+  const headerRowCount = 4;
+  const timestamp = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+  worksheet.getCell("A1").value = "JE Reference Description:";
+  worksheet.getCell("B1").value = data.journalDescription;
+  worksheet.getCell("A2").value = "Generated Date:";
+  worksheet.getCell("B2").value = timestamp;
+  worksheet.getCell("A3").value = "Author:";
+  worksheet.getCell("B3").value = data.username;
+
+  // Column Headers
+  const headerRow = worksheet.getRow(headerRowCount + 1);
+  headerRow.values = ["Account", "Description", "Debit", "Credit"];
+  headerRow.eachCell((cell, colNumber) => {
+    cell.font = { bold: true };
+    cell.alignment = { horizontal: "center" };
+    cell.border = { bottom: { style: "thin" } };
+  });
+
+  // Column keys
   worksheet.columns = [
     {
-      header: "Account",
       key: "account",
-      width: 32,
+      width: 22 < data.segments.length * 5 ? data.segments.length * 5 : 22,
     },
-    { header: "Description", key: "description", width: 15 },
-    { header: "Debit", key: "debit", width: 15 },
-    { header: "Credit", key: "credit", width: 15 },
+    {
+      key: "description",
+      width:
+        data.journalDescription.length < timestamp.length
+          ? timestamp.length
+          : data.journalDescription.length,
+    },
+    {
+      key: "debit",
+      width:
+        data.toBalanceSegmentValue.toString().length * 2 > 10
+          ? data.toBalanceSegmentValue.toString().length * 2
+          : 10,
+    },
+    {
+      key: "credit",
+      width:
+        data.toBalanceSegmentValue.toString().length * 2 > 10
+          ? data.toBalanceSegmentValue.toString().length * 2
+          : 10,
+    },
   ];
+
+  // Apply currency format to debit and credit cells
+  worksheet.getColumn(3).numFmt = CURRENCY_FORMAT;
+  worksheet.getColumn(4).numFmt = CURRENCY_FORMAT;
 
   const getAmountByTypicalBalance = (typicalBalance, amount, row) =>
     typicalBalance === row ? convertDecimalToFixedFloat(amount.value) : 0;
@@ -104,9 +151,9 @@ const workbookBuilder = (data) => {
       fgColor: { argb: "FFFFFF00" },
     };
 
-    // TODO: TEMP FORMATTING FOR PROTOTYPING
     const rowIndex =
       Object.keys(reconciledData.allocationValueOfBalancePerChartField).length +
+      headerRowCount +
       4;
     const notationRow = worksheet.getRow(rowIndex);
     notationRow.values = [
@@ -119,6 +166,7 @@ const workbookBuilder = (data) => {
       pattern: "solid",
       fgColor: { argb: "FFFFFF00" },
     };
+    worksheet.mergeCells(rowIndex, 1, rowIndex, 4);
   }
 
   // save csv

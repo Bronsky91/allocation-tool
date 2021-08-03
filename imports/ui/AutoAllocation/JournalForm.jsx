@@ -64,6 +64,7 @@ export const JournalForm = () => {
     .sort((a, b) => a.chartFieldOrder - b.chartFieldOrder);
 
   const [formData, setFormData] = useState({
+    username: user.username,
     toBalanceSegmentValue: 0,
     selectedBalanceSegments: balanceAccountSegments.map((bas) => ({
       ...bas,

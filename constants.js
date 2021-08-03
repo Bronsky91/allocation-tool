@@ -9,3 +9,5 @@ export const CHART_OF_ACCOUNT_COLUMNS = {
 };
 
 export const VALID_COLUMN_NAMES = Object.keys(CHART_OF_ACCOUNT_COLUMNS);
+
+export const CURRENCY_FORMAT = "$#,##0.00;[Red]-$#,##0.00";
