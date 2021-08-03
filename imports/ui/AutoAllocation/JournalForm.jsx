@@ -33,7 +33,6 @@ export const JournalForm = () => {
   const segments = useTracker(() =>
     SegmentsCollection.find({ userId: user._id }).fetch()
   );
-  console.log(segments);
   const metrics = useTracker(() =>
     MetricsCollection.find({ userId: user._id }).fetch()
   );

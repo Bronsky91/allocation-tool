@@ -73,6 +73,38 @@ export const SubsegmentDropdown = ({
     }));
   }, [selected]);
 
+  useEffect(() => {
+    if (isMultiSelect) {
+      // If muliselect is true enable all options
+      setOptions((options) =>
+        options.map((option) => ({ ...option, disabled: false }))
+      );
+    } else {
+      // Else make all options disabled, except the options that are selected
+      setOptions((options) => {
+        return options.map((option) => {
+          // If there are selected options and the option value is not included in an array of the selected value disable it
+          if (
+            selected.length > 0 &&
+            !selected
+              .map((selectedOption) => selectedOption.value)
+              .includes(option.value)
+          ) {
+            return { ...option, disabled: true };
+          }
+          return option;
+        });
+      });
+      // Also if there are more than one selection, remove all selection and make all options enabled
+      if (selected.length > 1) {
+        setSelected(() => []);
+        setOptions((options) =>
+          options.map((option) => ({ ...option, disabled: false }))
+        );
+      }
+    }
+  }, [isMultiSelect]);
+
   return (
     <div className="column" style={{ width: 200 }}>
       <h3>Which {segment.description} to include</h3>
