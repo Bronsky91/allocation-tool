@@ -5,10 +5,15 @@ import RadioGroup from "@material-ui/core/RadioGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import FormControl from "@material-ui/core/FormControl";
 
-export const SubGLSegment = ({ data, handleChangeFormData }) => {
+export const SubGLSegment = ({
+  data,
+  handleChangeFormData,
+  showSubGLSegment,
+  setShowSubGLSegment,
+  selectedOption,
+  setSelectedOption,
+}) => {
   const [selectedSegment, setSelectedSegment] = useState(data.subSegments[0]);
-  const [showSubGLSegment, setShowSubGLSegment] = useState(false);
-  const [selectedOption, setSelectedOption] = useState("balance");
 
   const description = data.description;
   const noSubGL = data.subSegments.find((s) => Number(s.segmentId) === 0);

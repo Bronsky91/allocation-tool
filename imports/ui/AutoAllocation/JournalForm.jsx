@@ -64,6 +64,8 @@ export const JournalForm = () => {
   const [newestAllocationId, setNewestAllocationId] = useState();
   const [editedCurrentAllocation, setEditedCurrentAllocation] = useState();
   const [nestingAllocation, setNestingAllocation] = useState(false);
+  const [showSubGLSegment, setShowSubGLSegment] = useState(false);
+  const [selectedSubGLOption, setSelectedSubGLOption] = useState("balance");
 
   const metricSegments = segments
     .filter((s) => selectedMetric.metricSegments.includes(s.description))
@@ -244,21 +246,37 @@ export const JournalForm = () => {
   const closeNestedAllocationWithSelection = (selectionData) => {
     closeNestedAllocationModal();
     // Populate Form with new Nested Allocation Selection Data
-    console.log("selectionData", selectionData);
     handleChangeFormData("toBalanceSegmentValue", selectionData.value);
     handleChangeFormData(
       "selectedBalanceSegments",
-      balanceAccountSegments.map((bas, index) => {
+      balanceAccountSegments.map((bas) => {
         return {
           ...bas,
           selectedSubSegment: bas.subSegments.find(
             (subSegment) =>
               subSegment.segmentId.toString() ===
-              selectionData.chartField[index]
+              selectionData.chartField[bas.chartFieldOrder]
           ),
         };
       })
     );
+    // If there are subaccounts
+    if (subGLCodeSegment) {
+      // Segment ID of subaccount
+      const subGLCode =
+        selectionData.chartField[subGLCodeSegment.chartFieldOrder];
+
+      if (showSubGLSegment) {
+        // If the sub GL code was selected
+        if (selectedSubGLOption === "allocations") {
+          // If the sub GL was used for allocation, switch to balance
+          setSelectedSubGLOption("balance");
+        } else if (selectedSubGLOption === "balance") {
+          // If the sub GL was used for balance, don't use any subGL codes (uncheck option)
+          setShowSubGLSegment(false);
+        }
+      }
+    }
   };
 
   const createJournalEntry = () => {
@@ -309,6 +327,10 @@ export const JournalForm = () => {
           <SubGLSegment
             data={subGLCodeSegment}
             handleChangeFormData={handleChangeFormData}
+            showSubGLSegment={showSubGLSegment}
+            setShowSubGLSegment={setShowSubGLSegment}
+            selectedOption={selectedSubGLOption}
+            setSelectedOption={setSelectedSubGLOption}
           />
         ) : null}
         {nonMetricSegments.map((segment, index) => (
