@@ -3,8 +3,8 @@ import React, { useState } from "react";
 import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
 // Components
+import { UserAccount } from "./Accounts/UserAccount.jsx";
 import { JournalForm } from "./AutoAllocation/JournalForm.jsx";
-import { JournalFormManual } from "./ManualEntry/JournalFormManual.jsx";
 import { ImportData } from "./Onboarding/ImportData.jsx";
 import { LoginForm } from "./Accounts/LoginForm.jsx";
 
@@ -15,8 +15,8 @@ export const App = () => {
   const [selectedPage, setSelectedPage] = useState("import");
 
   const pages = {
+    user: <UserAccount />,
     import: <ImportData />,
-    manual: <JournalFormManual />,
     auto: <JournalForm />,
   };
 
@@ -32,12 +32,28 @@ export const App = () => {
                   {user.username}
                 </span>
               </div>
-              <button
-                style={{ width: "5em", alignSelf: "center", marginTop: "1em" }}
-                onClick={logout}
-              >
-                Logout
-              </button>
+              <div style={{ display: "flex", justifyContent: "space-evenly" }}>
+                <button
+                  style={{
+                    width: "5em",
+                    alignSelf: "center",
+                    marginTop: "1em",
+                  }}
+                  onClick={() => setSelectedPage("user")}
+                >
+                  Account
+                </button>
+                <button
+                  style={{
+                    width: "5em",
+                    alignSelf: "center",
+                    marginTop: "1em",
+                  }}
+                  onClick={logout}
+                >
+                  Logout
+                </button>
+              </div>
             </div>
           </div>
           <h1 className="center">JOURNAL ENTRY!</h1>
@@ -48,15 +64,6 @@ export const App = () => {
             >
               Import/Onboard
             </button>
-            {/*  
-        **DEPRECATED**
-        <button
-          className="mediumButton"
-          onClick={() => setSelectedPage("manual")}
-        >
-          Manual Journal Entry
-        </button> 
-        */}
             <button
               className="mediumButton"
               onClick={() => setSelectedPage("auto")}

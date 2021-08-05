@@ -28,8 +28,14 @@ const workbookBuilder = (data) => {
   const reconciledData = reconciliationAdjustments(data);
 
   // Journal Entry Header
-  const headerRowCount = 4;
+  const headerRowCount = 6;
   const timestamp = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+  const entryDateFormatted = data.entryDate.toLocaleDateString("en-US", {
     weekday: "long",
     year: "numeric",
     month: "long",
@@ -37,10 +43,12 @@ const workbookBuilder = (data) => {
   });
   worksheet.getCell("A1").value = "JE Reference Description:";
   worksheet.getCell("B1").value = data.journalDescription;
-  worksheet.getCell("A2").value = "Generated Date:";
-  worksheet.getCell("B2").value = timestamp;
-  worksheet.getCell("A3").value = "Author:";
-  worksheet.getCell("B3").value = data.username;
+  worksheet.getCell("A2").value = "Journal Entry Date:";
+  worksheet.getCell("B2").value = entryDateFormatted;
+  worksheet.getCell("A3").value = "Generated Date:";
+  worksheet.getCell("B3").value = timestamp;
+  worksheet.getCell("A4").value = "Author:";
+  worksheet.getCell("B4").value = data.username;
 
   // Column Headers
   const headerRow = worksheet.getRow(headerRowCount + 1);
@@ -154,7 +162,7 @@ const workbookBuilder = (data) => {
     const rowIndex =
       Object.keys(reconciledData.allocationValueOfBalancePerChartField).length +
       headerRowCount +
-      4;
+      5;
     const notationRow = worksheet.getRow(rowIndex);
     notationRow.values = [
       `Notation: ${Math.abs(reconciledData.difference).toFixed(2)} was ${

@@ -6,6 +6,9 @@ import { useTracker } from "meteor/react-meteor-data";
 import { IconButton } from "@material-ui/core";
 import EditIcon from "@material-ui/icons/Edit";
 import DeleteIcon from "@material-ui/icons/Delete";
+// React Packages
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 // Components
 import { BalanceAccount } from "./BalanceAccount";
 import { GLSegment } from "./GLSegment";
@@ -77,6 +80,7 @@ export const JournalForm = () => {
     },
     otherSegments: [],
     journalDescription: "",
+    entryDate: new Date(),
     typicalBalance: "",
     allocationValueOfBalancePerChartField: {}, // Allocation calculations
     segments, // All segments, used here for creating the workbook
@@ -286,6 +290,15 @@ export const JournalForm = () => {
               }
             />
           </div>
+          <div className="formRow">
+            <label className="formLabel">Entry Date:</label>
+            <div>
+              <DatePicker
+                selected={formData.entryDate}
+                onChange={(date) => handleChangeFormData("entryDate", date)}
+              />
+            </div>
+          </div>
         </div>
       </div>
       <div className="autoAllocationColumn">
@@ -339,13 +352,13 @@ export const JournalForm = () => {
           </IconButton>
         </div>
         <div>
-          {readyToAllocate ? (
-            <button onClick={createJournalEntry} className="mediumButton">
-              Download!
-            </button>
-          ) : (
-            <p>Press Allocation button to get your journal entry download</p>
-          )}
+          <button
+            onClick={createJournalEntry}
+            className="mediumButton"
+            disabled={!readyToAllocate}
+          >
+            Download!
+          </button>
         </div>
       </div>
     </div>
