@@ -3,15 +3,13 @@ import { useEffect } from "react";
 // Utils
 import { createBalanceAccountString } from "../../utils/CreateAccountStrings";
 
-export const BalanceAccount = ({ data, handleChangeFormData, formData }) => {
-  const [selectedSegments, setSelectedSegments] = useState(
-    data.map((s) => ({ ...s, selectedSubSegment: s.subSegments[0] }))
-  );
-
+export const BalanceAccount = ({ handleChangeFormData, formData }) => {
   const handleChangeSegment = (e, index) => {
     const newSelectedSubsegmentIndex = e.target.value;
-    setSelectedSegments((selectedSegments) =>
-      selectedSegments.map((s, i) => {
+
+    handleChangeFormData(
+      "selectedBalanceSegments",
+      formData.selectedBalanceSegments.map((s, i) => {
         if (index === i) {
           return {
             ...s,
@@ -23,17 +21,13 @@ export const BalanceAccount = ({ data, handleChangeFormData, formData }) => {
     );
   };
 
-  useEffect(() => {
-    handleChangeFormData("selectedBalanceSegments", selectedSegments);
-  }, [selectedSegments]);
-
   return (
     <div>
       <h3>Balancing Account</h3>
 
       <div>
         <div className="formRow">
-          {selectedSegments.map((segment, index) => {
+          {formData.selectedBalanceSegments.map((segment, index) => {
             return (
               <div className="column" key={index}>
                 <label>{segment.description}</label>
@@ -42,7 +36,8 @@ export const BalanceAccount = ({ data, handleChangeFormData, formData }) => {
                   value={segment.subSegments.findIndex(
                     (subSegment) =>
                       subSegment.segmentId ===
-                      selectedSegments[index].selectedSubSegment.segmentId
+                      formData.selectedBalanceSegments[index].selectedSubSegment
+                        .segmentId
                   )}
                   onChange={(e) => handleChangeSegment(e, index)}
                 >
@@ -74,6 +69,7 @@ export const BalanceAccount = ({ data, handleChangeFormData, formData }) => {
               Number(e.target.value)
             )
           }
+          value={formData.toBalanceSegmentValue}
         />
       </div>
     </div>

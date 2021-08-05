@@ -15,6 +15,7 @@ import { GLSegment } from "./GLSegment";
 import { SubGLSegment } from "./SubGLSegment";
 import { OtherSegment } from "./OtherSegment";
 import { AllocateModal } from "./AllocateModal";
+import { NestedAllocationModal } from "./NestedAllocationModal";
 // DB
 import { MetricsCollection } from "../../db/MetricsCollection";
 import { SegmentsCollection } from "../../db/SegmentsCollection";
@@ -58,9 +59,11 @@ export const JournalForm = () => {
 
   const [allocationModalOpen, setAllocationModalOpen] = useState(false);
   const [editAllocationModalOpen, setEditAllocationModalOpen] = useState(false);
+  const [nestedAllocationOpen, setNestedAllocationOpen] = useState(false);
   const [selectedAllocation, setSelectedAllocation] = useState(allocations[0]);
   const [newestAllocationId, setNewestAllocationId] = useState();
   const [editedCurrentAllocation, setEditedCurrentAllocation] = useState();
+  const [nestingAllocation, setNestingAllocation] = useState(false);
 
   const metricSegments = segments
     .filter((s) => selectedMetric.metricSegments.includes(s.description))
@@ -228,7 +231,41 @@ export const JournalForm = () => {
     setEditAllocationModalOpen(false);
   };
 
+  const openNestedAllocationModal = () => {
+    // Opens Nested Allocation Modal
+    setNestedAllocationOpen(true);
+  };
+
+  const closeNestedAllocationModal = () => {
+    // Close Nested Allocation Modal
+    setNestedAllocationOpen(false);
+  };
+
+  const closeNestedAllocationWithSelection = (selectionData) => {
+    closeNestedAllocationModal();
+    // Populate Form with new Nested Allocation Selection Data
+    console.log("selectionData", selectionData);
+    handleChangeFormData("toBalanceSegmentValue", selectionData.value);
+    handleChangeFormData(
+      "selectedBalanceSegments",
+      balanceAccountSegments.map((bas, index) => {
+        return {
+          ...bas,
+          selectedSubSegment: bas.subSegments.find(
+            (subSegment) =>
+              subSegment.segmentId.toString() ===
+              selectionData.chartField[index]
+          ),
+        };
+      })
+    );
+  };
+
   const createJournalEntry = () => {
+    if (nestingAllocation) {
+      // Show Nesting Modal
+      openNestedAllocationModal();
+    }
     console.log(formData);
     CreateWorkbook(formData);
   };
@@ -252,9 +289,14 @@ export const JournalForm = () => {
         currentAllocation={selectedAllocation} // Used to edit the currently selected allocation
         setEditedCurrentAllocation={setEditedCurrentAllocation} // Set the edited allocation as selected in the dropdown to refresh with new data
       />
+      <NestedAllocationModal
+        open={nestedAllocationOpen}
+        handleClose={closeNestedAllocationModal}
+        data={formData}
+        handleCloseComplete={closeNestedAllocationWithSelection}
+      />
       <div className="accountsColumn">
         <BalanceAccount
-          data={balanceAccountSegments}
           handleChangeFormData={handleChangeFormData}
           formData={formData}
         />
@@ -351,7 +393,7 @@ export const JournalForm = () => {
             <DeleteIcon />
           </IconButton>
         </div>
-        <div>
+        <div style={{ display: "flex", flexDirection: "row" }}>
           <button
             onClick={createJournalEntry}
             className="mediumButton"
@@ -359,6 +401,14 @@ export const JournalForm = () => {
           >
             Download!
           </button>
+          <div>
+            <input
+              type="checkbox"
+              onChange={(e) => setNestingAllocation(e.target.checked)}
+              checked={nestingAllocation}
+            />
+            <label>Planning to Nest?</label>
+          </div>
         </div>
       </div>
     </div>

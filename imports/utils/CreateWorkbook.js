@@ -1,12 +1,15 @@
 import { Workbook } from "exceljs";
 import { saveAs } from "file-saver";
 import { reconciliationAdjustments } from "./ReconciliationAdjustments";
-import { convertDecimalToFixedFloat } from "./ConvertDecimalToFixedFloat";
 import {
   createAllocationAccountString,
   createBalanceAccountString,
 } from "./CreateAccountStrings";
 import { CURRENCY_FORMAT } from "../../constants";
+import {
+  getAmountByTypicalBalance,
+  getBalanceByTypicalBalance,
+} from "./getDataByTypicalBalance";
 
 export const CreateWorkbook = (data) => {
   workbookBuilder(data)
@@ -91,11 +94,6 @@ const workbookBuilder = (data) => {
   // Apply currency format to debit and credit cells
   worksheet.getColumn(3).numFmt = CURRENCY_FORMAT;
   worksheet.getColumn(4).numFmt = CURRENCY_FORMAT;
-
-  const getAmountByTypicalBalance = (typicalBalance, amount, row) =>
-    typicalBalance === row ? convertDecimalToFixedFloat(amount.value) : 0;
-  const getBalanceByTypicalBalance = (typicalBalance, amount, row) =>
-    typicalBalance !== row ? convertDecimalToFixedFloat(amount.value) : 0;
 
   // Loop through Allocation Rows
   for (const chartField in reconciledData.allocationValueOfBalancePerChartField) {
