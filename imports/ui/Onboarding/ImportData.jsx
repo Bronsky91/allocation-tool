@@ -27,7 +27,6 @@ export const ImportData = () => {
   const metrics = useTracker(() =>
     MetricsCollection.find({ userId: user?._id }).fetch()
   );
-  console.log(metrics[0]);
   // metricData is uploaded metrics sheets and worked data before saving
   const [metricData, setMetricData] = useState([]);
   const [hideSegments, setHideSegments] = useState(false);

@@ -26,15 +26,15 @@ import { CreateWorkbook } from "../../utils/CreateWorkbook";
 // Constants
 import { GL_CODE, SUB_GL_CODE } from "../../../constants";
 import { Header } from "../Header";
+import { ImportData } from "../Onboarding/ImportData";
 
 export const JournalFormParent = () => {
+  // Current user logged in
+  const user = useTracker(() => Meteor.user());
   // Subscriptions
   Meteor.subscribe("segments");
   Meteor.subscribe("metrics");
   Meteor.subscribe("allocations");
-
-  // Current user logged in
-  const user = useTracker(() => Meteor.user());
 
   const segments = useTracker(() =>
     SegmentsCollection.find({ userId: user?._id }).fetch()
@@ -55,7 +55,6 @@ export const JournalFormParent = () => {
       </div>
     );
   }
-
   return <div>...</div>;
 };
 

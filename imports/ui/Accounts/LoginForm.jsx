@@ -3,9 +3,21 @@ import { Redirect } from "react-router-dom";
 
 import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
+import { SegmentsCollection } from "../../db/SegmentsCollection";
+import { MetricsCollection } from "../../db/MetricsCollection";
 
 export const LoginForm = () => {
   const user = useTracker(() => Meteor.user());
+  // Subscriptions
+  Meteor.subscribe("segments");
+  Meteor.subscribe("metrics");
+
+  const segments = useTracker(() =>
+    SegmentsCollection.find({ userId: user?._id }).fetch()
+  );
+  const metrics = useTracker(() =>
+    MetricsCollection.find({ userId: user?._id }).fetch()
+  );
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -22,6 +34,10 @@ export const LoginForm = () => {
   };
 
   if (user) {
+    // If the user has no data yet, redirect to onboarding page
+    if (segments.length === 0 || metrics.length === 0) {
+      return <Redirect to="/onboard" />;
+    }
     return <Redirect to="/" />;
   }
 

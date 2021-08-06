@@ -8,7 +8,6 @@ import {
 } from "react-router-dom";
 // Meteor
 import { Meteor } from "meteor/meteor";
-import { useTracker } from "meteor/react-meteor-data";
 // Components
 import { UserAccount } from "./Accounts/UserAccount.jsx";
 import { JournalFormParent } from "./AutoAllocation/JournalForm.jsx";
