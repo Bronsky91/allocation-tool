@@ -7,6 +7,7 @@ import { IconButton } from "@material-ui/core";
 import EditIcon from "@material-ui/icons/Edit";
 import DeleteIcon from "@material-ui/icons/Delete";
 // React Packages
+import { Redirect } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 // Components
@@ -24,11 +25,9 @@ import { AllocationsCollection } from "../../db/AllocationsColllection";
 import { CreateWorkbook } from "../../utils/CreateWorkbook";
 // Constants
 import { GL_CODE, SUB_GL_CODE } from "../../../constants";
-import { Redirect } from "react-router-dom";
 import { Header } from "../Header";
-import { NotFound } from "../NotFound";
 
-export const JournalForm = () => {
+export const JournalFormParent = () => {
   // Subscriptions
   Meteor.subscribe("segments");
   Meteor.subscribe("metrics");
@@ -38,12 +37,29 @@ export const JournalForm = () => {
   const user = useTracker(() => Meteor.user());
 
   const segments = useTracker(() =>
-    SegmentsCollection.find({ userId: user._id }).fetch()
+    SegmentsCollection.find({ userId: user?._id }).fetch()
   );
   const metrics = useTracker(() =>
-    MetricsCollection.find({ userId: user._id }).fetch()
+    MetricsCollection.find({ userId: user?._id }).fetch()
   );
 
+  if (!user) {
+    return <Redirect to="/login" />;
+  }
+  if (segments.length > 0 && metrics.length > 0) {
+    // Ensures that the JournalForm as Segments and Metrics to function properly
+    return (
+      <div>
+        <Header />
+        <JournalForm user={user} segments={segments} metrics={metrics} />
+      </div>
+    );
+  }
+
+  return <div>...</div>;
+};
+
+const JournalForm = ({ user, segments, metrics }) => {
   const [selectedMetric, setSelectedMetric] = useState(metrics[0]);
 
   const allocations = useTracker(() =>
