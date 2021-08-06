@@ -24,6 +24,9 @@ import { AllocationsCollection } from "../../db/AllocationsColllection";
 import { CreateWorkbook } from "../../utils/CreateWorkbook";
 // Constants
 import { GL_CODE, SUB_GL_CODE } from "../../../constants";
+import { Redirect } from "react-router-dom";
+import { Header } from "../Header";
+import { NotFound } from "../NotFound";
 
 export const JournalForm = () => {
   // Subscriptions
@@ -46,7 +49,7 @@ export const JournalForm = () => {
   const allocations = useTracker(() =>
     AllocationsCollection.find({
       userId: user._id,
-      metricId: selectedMetric._id,
+      metricId: selectedMetric?._id,
     }).fetch()
   );
 

@@ -1,8 +1,16 @@
-import React from 'react';
-import { Meteor } from 'meteor/meteor';
-import { render } from 'react-dom';
-import { App } from '/imports/ui/App';
+import React from "react";
+// Meteor
+import { Meteor } from "meteor/meteor";
+import { withTracker } from "meteor/react-meteor-data";
+
+import { render } from "react-dom";
+import { App } from "/imports/ui/App";
 
 Meteor.startup(() => {
-  render(<App/>, document.getElementById('react-target'));
+  render(<AppContainer />, document.getElementById("react-target"));
 });
+
+// Reactive Container
+const AppContainer = withTracker(() => ({
+  loggingIn: Meteor.loggingIn(),
+}))(App);
