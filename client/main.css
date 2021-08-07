@@ -115,6 +115,9 @@ tr:nth-child(even) {
   border: solid 1px #d4d9de;
   background-color: #f6f6f6;
 }
+.headerButton:hover {
+  cursor: pointer;
+}
 
 .headerText {
   font-family: OpenSans;
@@ -176,6 +179,10 @@ tr:nth-child(even) {
 
 .onboardHeaderNotActive {
   color: #505d69;
+}
+
+.onboardHeaderNotActive:hover {
+  cursor: pointer;
 }
 
 .onboardHeaderArrow {
