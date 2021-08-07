@@ -1,6 +1,7 @@
 body {
-  padding: 10px;
   font-family: sans-serif;
+  padding: 0;
+  margin: 0;
 }
 table {
   font-family: arial, sans-serif;
@@ -17,6 +18,74 @@ th {
 tr:nth-child(even) {
   background-color: #dddddd;
 }
+
+.loginContainer {
+  background-color: #fbfbfb;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loginFormContainer {
+  border-radius: 10px;
+  box-shadow: 0 3px 10px 0 rgba(0, 0, 0, 0.05);
+  background-color: #fff;
+  height: 450px;
+  width: 660px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+.loginInnerContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+  height: 300px;
+}
+
+.loginInputContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 310px;
+  height: 65px;
+}
+
+.loginInput {
+  padding: 10px 10px 10px 10px;
+  width: 300px;
+  border-radius: 8px;
+  border: solid 0.8px #d4d9de;
+  background-color: #fff;
+}
+
+.loginButton {
+  width: 322px;
+  height: 40px;
+  border-radius: 8px;
+  border-width: 0px;
+  background-color: #3597fe;
+  color: white;
+  margin-left: 10px;
+}
+
+.loginButton:hover {
+  cursor: pointer;
+}
+
+.loginText {
+  font-family: Nunito;
+  font-size: 15px;
+  font-weight: bold;
+  color: #343a40;
+  margin-bottom: 5px;
+}
+
+/* Start of old Styles */
 
 .row {
   display: flex;
@@ -45,37 +114,6 @@ tr:nth-child(even) {
   display: flex;
   flex-direction: row;
   justify-content: space-around;
-}
-
-.loginForm {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  justify-content: center;
-  align-items: center;
-}
-.loginForm > div {
-  margin: 8px;
-}
-
-.loginForm > div > label {
-  font-weight: bold;
-}
-
-.loginForm > div > input {
-  flex-grow: 1;
-  box-sizing: border-box;
-  padding: 10px 6px;
-  background: transparent;
-  border: 1px solid #aaa;
-  width: 100%;
-  font-size: 1em;
-  margin-right: 16px;
-  margin-top: 4px;
-}
-
-.loginForm > div > input:focus {
-  outline: 0;
 }
 
 .user {
