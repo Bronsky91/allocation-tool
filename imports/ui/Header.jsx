@@ -3,6 +3,9 @@ import React from "react";
 import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
 import { Link, Redirect, useHistory } from "react-router-dom";
+// Material UI
+import SettingsIcon from "@material-ui/icons/Settings";
+import PersonIcon from "@material-ui/icons/Person";
 
 export const Header = () => {
   const user = useTracker(() => Meteor.user());
@@ -11,36 +14,22 @@ export const Header = () => {
   const history = useHistory();
 
   return (
-    <div className="user">
-      <div style={{ display: "flex", flexDirection: "column" }}>
-        <div>
-          Currently logged in as:
-          <span style={{ paddingLeft: 5, fontWeight: "bold" }}>
-            {user.username}
-          </span>
-        </div>
-        <div style={{ display: "flex", justifyContent: "space-evenly" }}>
-          <button
-            style={{
-              width: "5em",
-              alignSelf: "center",
-              marginTop: "1em",
-            }}
-            onClick={() => history.push("/account")}
-          >
-            Account
-          </button>
-          <button
-            style={{
-              width: "5em",
-              alignSelf: "center",
-              marginTop: "1em",
-            }}
-            onClick={logout}
-          >
-            Logout
-          </button>
-        </div>
+    <div className="headerContainer">
+      <div className="headerButtonContainer"></div>
+      <div className="headerText">
+        <span className="headerTextLeft">RedSky Innovations</span>{" "}
+        <span className="headerTextRight">Journal Entry Tool</span>
+      </div>
+      <div className="headerButtonContainer">
+        <button className="headerButton">
+          <SettingsIcon color="action" fontSize="small" />
+        </button>
+        <button
+          className="headerButton"
+          onClick={() => history.push("/account")}
+        >
+          <PersonIcon color="action" fontSize="small" />
+        </button>
       </div>
     </div>
   );

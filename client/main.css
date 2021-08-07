@@ -18,6 +18,7 @@ th {
 tr:nth-child(even) {
   background-color: #dddddd;
 }
+/* Login Page */
 
 .loginContainer {
   background-color: #fbfbfb;
@@ -83,6 +84,50 @@ tr:nth-child(even) {
   font-weight: bold;
   color: #343a40;
   margin-bottom: 5px;
+}
+
+/* Header */
+
+.headerContainer {
+  padding: 13px 11px 12px 5px;
+  box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.06);
+  background-color: #fff;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.headerButtonContainer {
+  width: 90px;
+  height: 30px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.headerButton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 30px;
+  width: 30px;
+  border-radius: 6px;
+  border: solid 1px #d4d9de;
+  background-color: #f6f6f6;
+}
+
+.headerText {
+  font-family: OpenSans;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.headerTextLeft {
+  color: #57585a;
+}
+
+.headerTextRight {
+  color: #3597fe;
 }
 
 /* Start of old Styles */
