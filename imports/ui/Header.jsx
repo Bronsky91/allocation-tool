@@ -8,9 +8,6 @@ import SettingsIcon from "@material-ui/icons/Settings";
 import PersonIcon from "@material-ui/icons/Person";
 
 export const Header = () => {
-  const user = useTracker(() => Meteor.user());
-  const logout = () => Meteor.logout();
-
   const history = useHistory();
 
   return (

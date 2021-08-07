@@ -21,7 +21,7 @@ tr:nth-child(even) {
 /* Login Page */
 
 .loginContainer {
-  background-color: #fbfbfb;
+  background-color: #f1f5f7;
   height: 100vh;
   display: flex;
   justify-content: center;
@@ -130,6 +130,161 @@ tr:nth-child(even) {
   color: #3597fe;
 }
 
+/* Onboarding Page */
+
+.onboardPageContainer {
+  height: 90%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow-y: hidden;
+}
+
+.onboardContainer {
+  width: 90%;
+  height: 80%;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 3px 5px 0 rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.onboardHeaderContainer {
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+  background-color: #fbfbfb;
+}
+
+.onboardHeaderText {
+  font-family: Nunito;
+  font-size: 20px;
+  color: #3597fe;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.onboardHeaderActive {
+  color: #3597fe;
+}
+
+.onboardHeaderNotActive {
+  color: #505d69;
+}
+
+.onboardHeaderArrow {
+  color: #3597fe;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.onboardInnerContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.onboardTitle {
+  font-family: RobotoSlab;
+  font-size: 20px;
+  font-weight: bold;
+  color: #373737;
+  letter-spacing: -0.48px;
+  margin-top: 20px;
+}
+
+input[type="file"] {
+  display: none;
+}
+.onboardFileInput {
+  padding: 15px 85px;
+  border-radius: 8px;
+  box-shadow: 0 3px 5px 0 rgba(0, 0, 0, 0.04);
+  border: dashed 2px #60cead;
+  background-color: #fff;
+  margin-top: 20px;
+}
+.onboardFileInput:hover {
+  cursor: pointer;
+}
+.onboardFileName {
+  margin: 10px;
+  font-family: Nunito;
+  font-size: 15px;
+  font-weight: 600;
+  font-stretch: normal;
+  font-style: normal;
+  line-height: normal;
+  letter-spacing: normal;
+  text-align: left;
+  color: #343a40;
+}
+
+.onboardShowSegmentsButton {
+  width: 179px;
+  height: 40px;
+  margin: 20px;
+  padding: 10px 14.3px 10px 29px;
+  border-radius: 8px;
+  border: solid 1px #3597fe;
+  background-color: #fff;
+  font-family: Nunito;
+  font-size: 15px;
+  color: #3597fe;
+}
+
+.onboardSegmentsContainer {
+  width: 90%;
+  height: 250px;
+  overflow-y: scroll;
+  margin: 10px;
+  border-radius: 8px;
+  background-color: #fbfbfb;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.onboardSegmentsInnerContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.onboardSegmentTitle {
+  font-family: Nunito;
+  font-size: 16px;
+  font-weight: 600;
+  color: #373737;
+}
+
+.onboardSubsegmentTitle {
+  font-family: Nunito;
+  font-size: 14px;
+  font-weight: 600;
+  color: #373737;
+}
+
+.onboardNextButton {
+  margin: 20px;
+  width: 180px;
+  height: 40px;
+  border-radius: 8px;
+  background-color: #3597fe;
+  border-width: 0px;
+  color: white;
+}
+.onboardNextButton:hover {
+  cursor: pointer;
+}
 /* Start of old Styles */
 
 .row {

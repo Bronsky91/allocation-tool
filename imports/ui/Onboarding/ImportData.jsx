@@ -12,6 +12,10 @@ import { MetricsCollection } from "../../db/MetricsCollection";
 import { GL_CODE, SUB_GL_CODE } from "../../../constants";
 import { Header } from "../Header";
 import { Redirect } from "react-router-dom";
+// Material UI
+import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 
 export const ImportData = () => {
   // Subscriptions
@@ -28,6 +32,8 @@ export const ImportData = () => {
     MetricsCollection.find({ userId: user?._id }).fetch()
   );
   // metricData is uploaded metrics sheets and worked data before saving
+  const [fileName, setFileName] = useState("");
+  const [metricFileNames, setMetricFileNames] = useState([]);
   const [metricData, setMetricData] = useState([]);
   const [hideSegments, setHideSegments] = useState(false);
   const [chartOfAccountsFileInputKey, setChartOfAccountsFileInputKey] =
@@ -42,6 +48,7 @@ export const ImportData = () => {
   const handleChartOfAccountsFile = async (e) => {
     // Excel/CSV File
     const file = e.target.files[0];
+    setFileName(file.name);
     // Formatted Data
     const workbookData = await ReadWorkbook(file);
 
@@ -155,116 +162,151 @@ export const ImportData = () => {
   }
 
   return (
-    <div>
+    <div style={{ height: "100vh", backgroundColor: "#F1F5F7" }}>
       <Header />
-      <div className="importDataContainer">
-        <div>
-          <h2>Import Chart of Accounts: </h2>
-          <input
-            type="file"
-            onChange={handleChartOfAccountsFile}
-            key={chartOfAccountsFileInputKey}
-          ></input>
-          {segments.length > 0 ? (
-            <button
-              onClick={() => setHideSegments((hideSegments) => !hideSegments)}
-            >
-              {hideSegments ? "Hide" : "Show"} Segments
-            </button>
-          ) : null}
-          {hideSegments && segments.length > 0 ? (
-            <div>
-              <h2>Segments:</h2>
-              {segments.map((segment, index) => {
-                return (
-                  <div key={index}>
-                    <h3>{segment.description}</h3>
-                    <ul>
-                      {segment.subSegments.map((subSegment, i) => (
-                        <li key={i}>{subSegment.description}</li>
-                      ))}
-                    </ul>
-                  </div>
-                );
-              })}
+      <div className="onboardPageContainer">
+        <div className="onboardContainer">
+          <div className="onboardHeaderContainer">
+            <div className="onboardHeaderText">
+              <span className="onboardHeaderActive">
+                Import Chart of Accounts
+              </span>
+              <ChevronRightIcon className="onboardHeaderArrow" />
+              <span className="onboardHeaderNotActive">Import Metrics</span>
             </div>
-          ) : null}
-          {segments.length > 0 ? (
-            <div>
-              <h2>Import Metric: </h2>
-              <input
-                type="file"
-                onChange={handleMetricFile}
-                key={metricFileInputKey}
-              ></input>
-            </div>
-          ) : null}
-          {metrics.map((metric, index) => (
-            <div key={index}>
-              <h3>{metric.description}</h3>
-              <div>Allocation Segments</div>
-              <ul>
-                {metric.metricSegments.map((segment, i) => (
-                  <li key={i}>{segment}</li>
-                ))}
-              </ul>
-              <div>Allocation Methods</div>
-              <ul>
-                {metric.validMethods.map((method, i) => (
-                  <li key={i}>{method}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-        <div>
-          <h2>Onboarding</h2>
-          {metricData.map((data, index) => (
-            <div key={index}>
-              <h3 style={{ textDecoration: "underline" }}>{data.name}</h3>
-              <h3 style={{ fontWeight: "normal" }}>
-                Segments that can be used in allocations
-              </h3>
-              <ul>
-                {data.columns.map((column, i) => {
-                  if (possibleAllocationSegmentNames.includes(column)) {
+          </div>
+          <div className="onboardInnerContainer">
+            <div className="onboardTitle">Upload the Chart of Accounts</div>
+            <label htmlFor="file-upload" className="onboardFileInput">
+              <span>Choose File</span>
+            </label>
+            <input
+              type="file"
+              id="file-upload"
+              accept=".xls,.xlsx"
+              onChange={handleChartOfAccountsFile}
+              key={chartOfAccountsFileInputKey}
+            />
+            <div className="onboardFileName">{fileName}</div>
+            {segments.length > 0 ? (
+              <button
+                onClick={() => setHideSegments((hideSegments) => !hideSegments)}
+                className="onboardShowSegmentsButton"
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  {hideSegments ? "Hide" : "Show"} Segments{" "}
+                  {hideSegments ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                </div>
+              </button>
+            ) : null}
+            {hideSegments && segments.length > 0 ? (
+              <div className="onboardSegmentsContainer">
+                <div className="onboardTitle">Segments:</div>
+                <div className="onboardSegmentsInnerContainer">
+                  {segments.map((segment, index) => {
                     return (
-                      <li key={i} style={{ fontWeight: "bold" }} key={i}>
-                        {column}
-                      </li>
+                      <div key={index}>
+                        <div className="segmentTitle">
+                          {segment.description}
+                        </div>
+                        <ul style={{ paddingLeft: 18, paddingRight: 10 }}>
+                          {segment.subSegments.map((subSegment, i) => (
+                            <li key={i} className="onboardSubsegmentTitle">
+                              {subSegment.description}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : null}
+            <button className="onboardNextButton">Next</button>
+            {/* {segments.length > 0 ? (
+              <div>
+                <h2>Import Metric: </h2>
+                <input
+                  type="file"
+                  onChange={handleMetricFile}
+                  key={metricFileInputKey}
+                ></input>
+              </div>
+            ) : null}
+            {metrics.map((metric, index) => (
+              <div key={index}>
+                <h3>{metric.description}</h3>
+                <div>Allocation Segments</div>
+                <ul>
+                  {metric.metricSegments.map((segment, i) => (
+                    <li key={i}>{segment}</li>
+                  ))}
+                </ul>
+                <div>Allocation Methods</div>
+                <ul>
+                  {metric.validMethods.map((method, i) => (
+                    <li key={i}>{method}</li>
+                  ))}
+                </ul>
+              </div>
+            ))} */}
+          </div>
+          {/* <div>
+            <h2>Onboarding</h2>
+            {metricData.map((data, index) => (
+              <div key={index}>
+                <h3 style={{ textDecoration: "underline" }}>{data.name}</h3>
+                <h3 style={{ fontWeight: "normal" }}>
+                  Segments that can be used in allocations
+                </h3>
+                <ul>
+                  {data.columns.map((column, i) => {
+                    if (possibleAllocationSegmentNames.includes(column)) {
+                      return (
+                        <li key={i} style={{ fontWeight: "bold" }} key={i}>
+                          {column}
+                        </li>
+                      );
+                    }
+                  })}
+                </ul>
+                <h3 style={{ fontWeight: "normal" }}>
+                  Select methods that will be used for allocations
+                </h3>
+
+                {data.columns.map((column, i) => {
+                  // Exclude any columns that match possible allocation segment names
+                  if (!possibleAllocationSegmentNames.includes(column)) {
+                    return (
+                      <div key={i}>
+                        <input
+                          type="checkbox"
+                          onChange={(e) =>
+                            handleMetricChecked(e, data.name, column)
+                          }
+                          value={column}
+                        />
+                        <label style={{ fontWeight: "bold" }}>{column}</label>
+                      </div>
                     );
                   }
                 })}
-              </ul>
-              <h3 style={{ fontWeight: "normal" }}>
-                Select methods that will be used for allocations
-              </h3>
-
-              {data.columns.map((column, i) => {
-                // Exclude any columns that match possible allocation segment names
-                if (!possibleAllocationSegmentNames.includes(column)) {
-                  return (
-                    <div key={i}>
-                      <input
-                        type="checkbox"
-                        onChange={(e) =>
-                          handleMetricChecked(e, data.name, column)
-                        }
-                        value={column}
-                      />
-                      <label style={{ fontWeight: "bold" }}>{column}</label>
-                    </div>
-                  );
-                }
-              })}
-              <button
-                onClick={() => handleSaveMetric(data.name)}
-                style={{ padding: 5, marginTop: "1em" }}
-              >
-                Save Metric
-              </button>
-            </div>
-          ))}
+                <button
+                  onClick={() => handleSaveMetric(data.name)}
+                  style={{ padding: 5, marginTop: "1em" }}
+                >
+                  Save Metric
+                </button>
+              </div>
+            ))}
+          </div> */}
         </div>
       </div>
     </div>
