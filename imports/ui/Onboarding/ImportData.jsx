@@ -281,7 +281,7 @@ export const ImportData = () => {
                 onChange={handleMetricFile}
                 key={metricFileInputKey}
               />
-              <div className="onboardFileName">{fileName}</div>
+              <div className="onboardFileName">{metricFileName}</div>
               {metrics.length > 0 ? (
                 <button
                   onClick={() => setShowMetrics((showMetrics) => !showMetrics)}
