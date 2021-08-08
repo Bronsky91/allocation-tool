@@ -250,7 +250,7 @@ input[type="file"] {
 .onboardSegmentsContainer {
   width: 90%;
   height: 250px;
-  overflow-y: scroll;
+  overflow: scroll;
   margin: 10px;
   border-radius: 8px;
   background-color: #fbfbfb;
@@ -292,6 +292,66 @@ input[type="file"] {
 .onboardNextButton:hover {
   cursor: pointer;
 }
+
+.onboardMetricOnboardContainer {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 35%;
+  height: 100%;
+  background-color: white;
+  box-shadow: 0 3px 12px 0 rgba(0, 0, 0, 0.08);
+  background-color: #fff;
+}
+
+.onboardMetricOnboardHeaderContainer {
+  box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.06);
+  padding: 0px 10px 10px 20px;
+}
+
+.onboardMetricOnboardInnerContainer {
+  padding-left: 20px;
+  overflow-y: scroll;
+}
+
+.onboardMetricOnboardTitle {
+  font-family: RobotoSlab;
+  font-size: 20px;
+  color: #373737;
+  margin-top: 20px;
+}
+
+.onboardMetricOnboardText {
+  font-family: Nunito;
+  font-size: 16px;
+  color: #373737;
+  margin-top: 20px;
+}
+
+.onboardMetricOnboardSelectionContainer {
+  margin-top: 15px;
+}
+
+.onboardMetricOnboardSelection {
+  margin-top: 5px;
+  font-family: Nunito;
+  font-size: 16px;
+  color: #373737;
+}
+
+.onboardMetricOnboardButton {
+  margin-top: 20px;
+  width: 134px;
+  height: 40px;
+  border-radius: 8px;
+  background-color: #3597fe;
+  border-width: 0px;
+  color: white;
+}
+.onboardMetricOnboardButton:hover {
+  cursor: pointer;
+}
+
 /* Start of old Styles */
 
 .row {

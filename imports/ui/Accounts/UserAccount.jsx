@@ -34,8 +34,8 @@ export const UserAccount = () => {
           <div style={{ marginTop: 10 }}>
             <div style={{ fontWeight: "bold" }}>Chart of Accounts:</div>
             <ul>
-              {segments.map((segment) => (
-                <li>{segment.description}</li>
+              {segments.map((segment, index) => (
+                <li key={index}>{segment.description}</li>
               ))}
             </ul>
           </div>
