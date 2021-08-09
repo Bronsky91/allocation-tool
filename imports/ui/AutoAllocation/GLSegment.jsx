@@ -35,7 +35,7 @@ export const GLSegment = ({ data, handleChangeFormData }) => {
               (subSegment) => subSegment.segmentId === selectedSegment.segmentId
             )}
             onChange={handleChangeSegment}
-            style={{ width: 200 }}
+            className="journalFormInput"
           >
             {data.subSegments.map((subSegment, index) => {
               return (
@@ -52,7 +52,11 @@ export const GLSegment = ({ data, handleChangeFormData }) => {
         </div>
         <div className="formColumn">
           <label className="journalFormText">Typical Balance:</label>
-          <select onChange={handleChangeTypicalBalance} value={typicalBalance}>
+          <select
+            className="journalFormInput"
+            onChange={handleChangeTypicalBalance}
+            value={typicalBalance}
+          >
             <option value="debit">Debit</option>
             <option value="credit">Credit</option>
           </select>

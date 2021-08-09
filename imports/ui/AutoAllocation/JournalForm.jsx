@@ -344,7 +344,7 @@ const JournalForm = ({ user, segments, metrics }) => {
                   handleChangeFormData("journalDescription", e.target.value)
                 }
                 style={{ width: "20em", height: "1.5em" }}
-                className="journalFormInput"
+                className="journalFormInputLarge"
               />
             </div>
             <div className="formColumn">
