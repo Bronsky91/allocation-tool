@@ -22,8 +22,8 @@ export const createAllocationAccountString = (data, allocationChartField) => {
           chartFieldOrder: s.chartFieldOrder,
         };
       }
-    });
-
+    })
+    .filter((s) => s);
   // The Allocation Chart Field with the first segment's order number
   const allocationChartFieldWithOrder = {
     chartField: allocationChartField,

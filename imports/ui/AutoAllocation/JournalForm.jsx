@@ -116,7 +116,7 @@ const JournalForm = ({ user, segments, metrics }) => {
       !selectedMetric.metricSegments.includes(s.description) &&
       !GLSegmentNames.includes(s.description)
   );
-  console.log("nonMetricSegments", nonMetricSegments);
+
   const availableMethods = selectedMetric.columns.filter((c) =>
     selectedMetric.validMethods.includes(c.title)
   );
@@ -127,19 +127,15 @@ const JournalForm = ({ user, segments, metrics }) => {
     Object.keys(formData.allocationValueOfBalancePerChartField).length > 0;
 
   useEffect(() => {
-    if (nonMetricSegments.length > 0) {
-      // Populate the formData with the retrieved nonMetricSegments
-      if (formData.otherSegments.length === 0) {
-        const otherSegments = nonMetricSegments.map((segment) => ({
-          _id: segment._id,
-          description: segment.description,
-          selectedSubSegment: segment.subSegments[0],
-        }));
+    // Populate the formData with
+    const otherSegments = nonMetricSegments.map((segment) => ({
+      _id: segment._id,
+      description: segment.description,
+      selectedSubSegment: segment.subSegments[0],
+    }));
 
-        handleChangeFormData("otherSegments", otherSegments);
-      }
-    }
-  }, [nonMetricSegments]);
+    handleChangeFormData("otherSegments", otherSegments);
+  }, [selectedMetric]);
 
   useEffect(() => {
     // After a new allocation is created, make it the currently selected allocation in the dropdown
@@ -154,6 +150,13 @@ const JournalForm = ({ user, segments, metrics }) => {
     // Select the first allocation when the selectedMetric changes
     setSelectedAllocation(allocations[0]);
   }, [selectedMetric]);
+
+  useEffect(() => {
+    // Select the first allocation when the allocations load
+    if (allocations.length > 0 && !selectedMetric) {
+      setSelectedAllocation(allocations[0]);
+    }
+  }, [allocations]);
 
   useEffect(() => {
     // After editing an allocation this is called to refresh the current allocation with the new data from the allocations array
@@ -189,7 +192,6 @@ const JournalForm = ({ user, segments, metrics }) => {
   }, [formData.toBalanceSegmentValue, selectedAllocation]);
 
   const handleChangeFormData = (field, value) => {
-    console.log(formData);
     setFormData((formData) => ({
       ...formData,
       [field]: value,
