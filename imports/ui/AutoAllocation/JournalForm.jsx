@@ -6,6 +6,7 @@ import { useTracker } from "meteor/react-meteor-data";
 import { IconButton } from "@material-ui/core";
 import EditIcon from "@material-ui/icons/Edit";
 import DeleteIcon from "@material-ui/icons/Delete";
+import GetAppIcon from "@material-ui/icons/GetApp";
 // React Packages
 import { Redirect } from "react-router-dom";
 import DatePicker from "react-datepicker";
@@ -400,13 +401,16 @@ const JournalForm = ({ user, segments, metrics }) => {
           </div>
         </div>
         <div className="journalFormAllocationContainer">
-          <div>
-            <label>Select Metric to Allocate with:</label>
+          <div className="formColumn">
+            <label className="journalFormText">
+              Select Metric to Allocate with:
+            </label>
             <select
               value={metrics.findIndex(
                 (metric) => metric._id === selectedMetric?._id
               )}
               onChange={handleMetricChange}
+              className="journalFormInput"
             >
               {metrics.map((metric, index) => (
                 <option key={index} value={index}>
@@ -415,56 +419,78 @@ const JournalForm = ({ user, segments, metrics }) => {
               ))}
             </select>
           </div>
-          <button onClick={openAllocationModal} className="mediumButton">
+          <button
+            onClick={openAllocationModal}
+            className="journalFormAllocationButton"
+          >
             Create new Allocation Technique
           </button>
-          <div className="row">
-            <label className="center">Select Allocation Technique:</label>
-            <select
-              value={allocations.findIndex(
-                (allocation) => allocation._id === selectedAllocation?._id
-              )}
-              onChange={handleAllocationChange}
-            >
-              {allocations.map((allocation, index) => {
-                return (
-                  <option key={index} value={index}>
-                    {allocation.name}
-                  </option>
-                );
-              })}
-            </select>
-            <IconButton
-              color="inherit"
-              onClick={openEditAllocationModal}
-              disabled={!selectedAllocation}
-            >
-              <EditIcon />
-            </IconButton>
-            <IconButton
-              color="inherit"
-              onClick={handleDeleteAllocation}
-              disabled={!selectedAllocation}
-            >
-              <DeleteIcon />
-            </IconButton>
-          </div>
-          <div style={{ display: "flex", flexDirection: "row" }}>
-            <button
-              onClick={createJournalEntry}
-              className="mediumButton"
-              disabled={!readyToAllocate}
-            >
-              Download!
-            </button>
-            <div>
-              <input
-                type="checkbox"
-                onChange={(e) => setNestingAllocation(e.target.checked)}
-                checked={nestingAllocation}
-              />
-              <label>Planning to Nest?</label>
+          <div className="formColumn">
+            <label className="journalFormText">
+              Select Allocation Technique:
+            </label>
+            <div className="formRow" style={{ justifyContent: "flex-start" }}>
+              <select
+                value={allocations.findIndex(
+                  (allocation) => allocation._id === selectedAllocation?._id
+                )}
+                onChange={handleAllocationChange}
+                className="journalFormInput"
+              >
+                {allocations.map((allocation, index) => {
+                  return (
+                    <option key={index} value={index}>
+                      {allocation.name}
+                    </option>
+                  );
+                })}
+              </select>
+              <IconButton
+                color="inherit"
+                onClick={openEditAllocationModal}
+                disabled={!selectedAllocation}
+                style={{ color: "#60cead" }}
+              >
+                <EditIcon fontSize="small" />
+              </IconButton>
+              <IconButton
+                color="inherit"
+                onClick={handleDeleteAllocation}
+                disabled={!selectedAllocation}
+                style={{ color: "#f54747" }}
+              >
+                <DeleteIcon fontSize="small" />
+              </IconButton>
             </div>
+          </div>
+          <div className="journalFormDownloadContainer">
+            {readyToAllocate ? (
+              <div className="journalFormDownloadInnerContainer">
+                <div className="journalFormText">
+                  Your file is ready, click download button below to download
+                  your journal entry
+                </div>
+
+                <button
+                  onClick={createJournalEntry}
+                  className="journalFormDownloadButton"
+                  disabled={!readyToAllocate}
+                >
+                  <GetAppIcon />
+                  Download
+                </button>
+                <div>
+                  <input
+                    type="checkbox"
+                    onChange={(e) => setNestingAllocation(e.target.checked)}
+                    checked={nestingAllocation}
+                  />
+                  <label className="journalFormText">
+                    Nest this Allocation?
+                  </label>
+                </div>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
