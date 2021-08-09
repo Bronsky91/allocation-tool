@@ -17,29 +17,28 @@ export const OtherSegment = ({ data, handleChangeOtherSegments }) => {
 
   return (
     <div>
-      <h3>{description}</h3>
-      <div>
-        <div className="formRow">
-          <label className="formLabel">Description:</label>
-          <select
-            value={data.subSegments.findIndex(
-              (subSegment) => subSegment.segmentId === selectedSegment.segmentId
-            )}
-            onChange={handleChangeSegment}
-          >
-            {data.subSegments.map((subSegment, index) => {
-              return (
-                <option key={index} value={index}>
-                  {subSegment.description}
-                </option>
-              );
-            })}
-          </select>
-        </div>
-        <div className="formRow">
-          <label className="formLabel">Segment ID:</label>
-          <div>{selectedSegment.segmentId}</div>
-        </div>
+      <div className="formColumn">
+        <label className="journalFormText">{description}</label>
+        <select
+          value={data.subSegments.findIndex(
+            (subSegment) => subSegment.segmentId === selectedSegment.segmentId
+          )}
+          onChange={handleChangeSegment}
+          className="journalFormInput"
+          style={{ width: "10em" }}
+        >
+          {data.subSegments.map((subSegment, index) => {
+            return (
+              <option key={index} value={index}>
+                {subSegment.description}
+              </option>
+            );
+          })}
+        </select>
+      </div>
+      <div className="formColumn">
+        <label className="journalFormText">Segment ID:</label>
+        <div>{selectedSegment.segmentId}</div>
       </div>
     </div>
   );

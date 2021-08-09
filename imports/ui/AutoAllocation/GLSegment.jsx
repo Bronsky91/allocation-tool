@@ -25,16 +25,17 @@ export const GLSegment = ({ data, handleChangeFormData }) => {
 
   return (
     <div>
-      <h3>GL Code to Allocate</h3>
+      <div className="journalFormTitle">GL Code to Allocate</div>
 
-      <div>
-        <div className="formRow">
-          <label className="formLabel">Description:</label>
+      <div className="formRow">
+        <div className="formColumn">
+          <label className="journalFormText">Description:</label>
           <select
             value={data.subSegments.findIndex(
               (subSegment) => subSegment.segmentId === selectedSegment.segmentId
             )}
             onChange={handleChangeSegment}
+            style={{ width: 200 }}
           >
             {data.subSegments.map((subSegment, index) => {
               return (
@@ -45,18 +46,17 @@ export const GLSegment = ({ data, handleChangeFormData }) => {
             })}
           </select>
         </div>
-        <div className="formRow">
-          <label className="formLabel">Segment ID:</label>
+        <div className="formColumn">
+          <label className="journalFormText">Segment ID:</label>
           <div>{selectedSegment.segmentId}</div>
         </div>
-      </div>
-
-      <div>
-        <label>Typical Balance:</label>
-        <select onChange={handleChangeTypicalBalance} value={typicalBalance}>
-          <option value="debit">Debit</option>
-          <option value="credit">Credit</option>
-        </select>
+        <div className="formColumn">
+          <label className="journalFormText">Typical Balance:</label>
+          <select onChange={handleChangeTypicalBalance} value={typicalBalance}>
+            <option value="debit">Debit</option>
+            <option value="credit">Credit</option>
+          </select>
+        </div>
       </div>
     </div>
   );

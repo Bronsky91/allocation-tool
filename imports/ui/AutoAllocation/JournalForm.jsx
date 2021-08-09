@@ -49,7 +49,7 @@ export const JournalFormParent = () => {
   if (segments.length > 0 && metrics.length > 0) {
     // Ensures that the JournalForm as Segments and Metrics to function properly
     return (
-      <div>
+      <div className="journalFormParent">
         <Header />
         <JournalForm user={user} segments={segments} metrics={metrics} />
       </div>
@@ -115,6 +115,7 @@ const JournalForm = ({ user, segments, metrics }) => {
       !selectedMetric.metricSegments.includes(s.description) &&
       !GLSegmentNames.includes(s.description)
   );
+  console.log("nonMetricSegments", nonMetricSegments);
   const availableMethods = selectedMetric.columns.filter((c) =>
     selectedMetric.validMethods.includes(c.title)
   );
@@ -307,7 +308,7 @@ const JournalForm = ({ user, segments, metrics }) => {
   };
 
   return (
-    <div className="form">
+    <div className="journalFormMain">
       <AllocateModal
         open={allocationModalOpen} // Required
         handleClose={closeAllocationModal} // Required
@@ -331,123 +332,139 @@ const JournalForm = ({ user, segments, metrics }) => {
         data={formData}
         handleCloseComplete={closeNestedAllocationWithSelection}
       />
-      <div className="accountsColumn">
-        <BalanceAccount
-          handleChangeFormData={handleChangeFormData}
-          formData={formData}
-        />
-        <GLSegment
-          data={glCodeSegment}
-          handleChangeFormData={handleChangeFormData}
-          segmentType="toAllocate"
-        />
-        {subGLCodeSegment ? (
-          <SubGLSegment
-            data={subGLCodeSegment}
-            handleChangeFormData={handleChangeFormData}
-            showSubGLSegment={showSubGLSegment}
-            setShowSubGLSegment={setShowSubGLSegment}
-            selectedOption={selectedSubGLOption}
-            setSelectedOption={setSelectedSubGLOption}
-          />
-        ) : null}
-        {nonMetricSegments.map((segment, index) => (
-          <OtherSegment
-            key={index}
-            data={segment}
-            handleChangeOtherSegments={handleChangeOtherSegments}
-          />
-        ))}
-
-        <hr />
-
-        <div>
-          <h3>Journal Entry Meta Data</h3>
-          <div className="formRow">
-            <label className="formLabel">Description:</label>
-            <input
-              type="text"
-              onChange={(e) =>
-                handleChangeFormData("journalDescription", e.target.value)
-              }
-            />
-          </div>
-          <div className="formRow">
-            <label className="formLabel">Entry Date:</label>
-            <div>
-              <DatePicker
-                selected={formData.entryDate}
-                onChange={(date) => handleChangeFormData("entryDate", date)}
+      <div className="journalFormContainer">
+        <div className="journalFormAccountsContainer">
+          <div className="journalFormMetaContainer">
+            <div className="journalFormTitle">Journal Entry Meta Data</div>
+            <div className="formColumn">
+              <label className="journalFormText">Description</label>
+              <input
+                type="text"
+                onChange={(e) =>
+                  handleChangeFormData("journalDescription", e.target.value)
+                }
+                style={{ width: "20em", height: "1.5em" }}
+                className="journalFormInput"
               />
             </div>
+            <div className="formColumn">
+              <label className="journalFormText">Entry Date:</label>
+              <div>
+                <DatePicker
+                  selected={formData.entryDate}
+                  onChange={(date) => handleChangeFormData("entryDate", date)}
+                  className="journalFormInput"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="journalFormBalanceContainer journalAccountContainer">
+            <BalanceAccount
+              handleChangeFormData={handleChangeFormData}
+              formData={formData}
+            />
+          </div>
+          {nonMetricSegments.length > 0 ? (
+            <div className="journalAccountContainer">
+              <div className="journalFormTitle">Unused Allocation Fields</div>
+              <div
+                className="formRow"
+                style={{ justifyContent: "flex-start", flexWrap: "wrap" }}
+              >
+                {nonMetricSegments.map((segment, index) => (
+                  <OtherSegment
+                    key={index}
+                    data={segment}
+                    handleChangeOtherSegments={handleChangeOtherSegments}
+                  />
+                ))}
+              </div>
+            </div>
+          ) : null}
+          <div className="journalAccountContainer">
+            <GLSegment
+              data={glCodeSegment}
+              handleChangeFormData={handleChangeFormData}
+              segmentType="toAllocate"
+            />
+            {subGLCodeSegment ? (
+              <SubGLSegment
+                data={subGLCodeSegment}
+                handleChangeFormData={handleChangeFormData}
+                showSubGLSegment={showSubGLSegment}
+                setShowSubGLSegment={setShowSubGLSegment}
+                selectedOption={selectedSubGLOption}
+                setSelectedOption={setSelectedSubGLOption}
+              />
+            ) : null}
           </div>
         </div>
-      </div>
-      <div className="autoAllocationColumn">
-        <div>
-          <label>Select Metric to Allocate with:</label>
-          <select
-            value={metrics.findIndex(
-              (metric) => metric._id === selectedMetric?._id
-            )}
-            onChange={handleMetricChange}
-          >
-            {metrics.map((metric, index) => (
-              <option key={index} value={index}>
-                {metric.description}
-              </option>
-            ))}
-          </select>
-        </div>
-        <button onClick={openAllocationModal} className="mediumButton">
-          Create new Allocation Technique
-        </button>
-        <div className="row">
-          <label className="center">Select Allocation Technique:</label>
-          <select
-            value={allocations.findIndex(
-              (allocation) => allocation._id === selectedAllocation?._id
-            )}
-            onChange={handleAllocationChange}
-          >
-            {allocations.map((allocation, index) => {
-              return (
-                <option key={index} value={index}>
-                  {allocation.name}
-                </option>
-              );
-            })}
-          </select>
-          <IconButton
-            color="inherit"
-            onClick={openEditAllocationModal}
-            disabled={!selectedAllocation}
-          >
-            <EditIcon />
-          </IconButton>
-          <IconButton
-            color="inherit"
-            onClick={handleDeleteAllocation}
-            disabled={!selectedAllocation}
-          >
-            <DeleteIcon />
-          </IconButton>
-        </div>
-        <div style={{ display: "flex", flexDirection: "row" }}>
-          <button
-            onClick={createJournalEntry}
-            className="mediumButton"
-            disabled={!readyToAllocate}
-          >
-            Download!
-          </button>
+        <div className="journalFormAllocationContainer">
           <div>
-            <input
-              type="checkbox"
-              onChange={(e) => setNestingAllocation(e.target.checked)}
-              checked={nestingAllocation}
-            />
-            <label>Planning to Nest?</label>
+            <label>Select Metric to Allocate with:</label>
+            <select
+              value={metrics.findIndex(
+                (metric) => metric._id === selectedMetric?._id
+              )}
+              onChange={handleMetricChange}
+            >
+              {metrics.map((metric, index) => (
+                <option key={index} value={index}>
+                  {metric.description}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button onClick={openAllocationModal} className="mediumButton">
+            Create new Allocation Technique
+          </button>
+          <div className="row">
+            <label className="center">Select Allocation Technique:</label>
+            <select
+              value={allocations.findIndex(
+                (allocation) => allocation._id === selectedAllocation?._id
+              )}
+              onChange={handleAllocationChange}
+            >
+              {allocations.map((allocation, index) => {
+                return (
+                  <option key={index} value={index}>
+                    {allocation.name}
+                  </option>
+                );
+              })}
+            </select>
+            <IconButton
+              color="inherit"
+              onClick={openEditAllocationModal}
+              disabled={!selectedAllocation}
+            >
+              <EditIcon />
+            </IconButton>
+            <IconButton
+              color="inherit"
+              onClick={handleDeleteAllocation}
+              disabled={!selectedAllocation}
+            >
+              <DeleteIcon />
+            </IconButton>
+          </div>
+          <div style={{ display: "flex", flexDirection: "row" }}>
+            <button
+              onClick={createJournalEntry}
+              className="mediumButton"
+              disabled={!readyToAllocate}
+            >
+              Download!
+            </button>
+            <div>
+              <input
+                type="checkbox"
+                onChange={(e) => setNestingAllocation(e.target.checked)}
+                checked={nestingAllocation}
+              />
+              <label>Planning to Nest?</label>
+            </div>
           </div>
         </div>
       </div>

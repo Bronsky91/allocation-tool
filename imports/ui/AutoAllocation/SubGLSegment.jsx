@@ -63,15 +63,15 @@ export const SubGLSegment = ({
           onChange={handleChecked}
           checked={showSubGLSegment}
         />
-        <label style={{ fontWeight: "bold" }}>
+        <label className="journalFormText">
           Would you like to select a Sub GL Code?
         </label>
       </div>
       {showSubGLSegment ? (
-        <div>
-          <h3>{description}</h3>
-          <div>
-            <div className="formRow">
+        <div className="journalSubGLContainer">
+          <div className="journalFormTitle">Sub GL Code</div>
+          <div className="formRow" style={{ justifyContent: "flex-start" }}>
+            <div className="formColumn">
               <label className="formLabel">Description:</label>
               <select
                 value={data.subSegments.findIndex(
@@ -79,6 +79,7 @@ export const SubGLSegment = ({
                     subSegment.segmentId === selectedSegment.segmentId
                 )}
                 onChange={handleChangeSegment}
+                style={{ width: "10em" }}
               >
                 {data.subSegments.map((subSegment, index) => {
                   return (
@@ -89,7 +90,7 @@ export const SubGLSegment = ({
                 })}
               </select>
             </div>
-            <div className="formRow">
+            <div className="formColumn">
               <label className="formLabel">Segment ID:</label>
               <div>{selectedSegment.segmentId}</div>
             </div>
@@ -101,6 +102,7 @@ export const SubGLSegment = ({
               onChange={handleOptionChange}
               defaultValue="balance"
               defaultChecked="balance"
+              className="formRow"
             >
               <FormControlLabel
                 value="balance"

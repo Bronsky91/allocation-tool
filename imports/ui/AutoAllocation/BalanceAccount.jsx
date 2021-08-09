@@ -23,14 +23,20 @@ export const BalanceAccount = ({ handleChangeFormData, formData }) => {
 
   return (
     <div>
-      <h3>Balancing Account</h3>
+      <div className="journalFormTitle">Balancing Account</div>
 
-      <div>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-evenly",
+        }}
+      >
         <div className="formRow">
           {formData.selectedBalanceSegments.map((segment, index) => {
             return (
-              <div className="column" key={index}>
-                <label>{segment.description}</label>
+              <div className="formColumn" key={index}>
+                <label className="journalFormText">{segment.description}</label>
                 <select
                   style={{ maxWidth: "10em", marginTop: ".5em" }}
                   value={segment.subSegments.findIndex(
@@ -40,6 +46,7 @@ export const BalanceAccount = ({ handleChangeFormData, formData }) => {
                         .segmentId
                   )}
                   onChange={(e) => handleChangeSegment(e, index)}
+                  className="journalFormInput"
                 >
                   {segment.subSegments.map((subSegment, index) => {
                     return (
@@ -53,24 +60,27 @@ export const BalanceAccount = ({ handleChangeFormData, formData }) => {
             );
           })}
         </div>
-        <div className="formRow">
-          <label className="formLabel">Full Chart Field String:</label>
-          <div>{createBalanceAccountString(formData)}</div>
+        <div className="formRow" style={{ justifyContent: "flex-start" }}>
+          <div className="formColumn">
+            <label className="journalFormText">Full Chart Field String:</label>
+            <div>{createBalanceAccountString(formData)}</div>
+          </div>
+          <div className="formColumn" style={{ marginLeft: "1em" }}>
+            <label className="journalFormText">Value:</label>
+            <input
+              type="number"
+              onChange={(e) =>
+                handleChangeFormData(
+                  "toBalanceSegmentValue",
+                  Number(e.target.value)
+                )
+              }
+              className="journalFormInput"
+              style={{ width: "15em", height: "1.5em" }}
+              value={formData.toBalanceSegmentValue}
+            />
+          </div>
         </div>
-      </div>
-
-      <div className="formRow">
-        <label className="formLabel">Value:</label>
-        <input
-          type="number"
-          onChange={(e) =>
-            handleChangeFormData(
-              "toBalanceSegmentValue",
-              Number(e.target.value)
-            )
-          }
-          value={formData.toBalanceSegmentValue}
-        />
       </div>
     </div>
   );
