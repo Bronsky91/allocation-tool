@@ -153,7 +153,7 @@ const JournalForm = ({ user, segments, metrics }) => {
 
   useEffect(() => {
     // Select the first allocation when the allocations load
-    if (allocations.length > 0 && !selectedMetric) {
+    if (allocations.length > 0 && !selectedAllocation) {
       setSelectedAllocation(allocations[0]);
     }
   }, [allocations]);

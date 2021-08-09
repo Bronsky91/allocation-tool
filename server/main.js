@@ -20,7 +20,7 @@ Meteor.methods({
     userId,
     metricId,
   }) {
-    console.log("What do subSegments look like?", subSegments);
+    // console.log("What do subSegments look like?", subSegments);
     // TODO: run check
     return calcAllocation({
       subSegments,

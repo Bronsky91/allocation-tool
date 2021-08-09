@@ -15,7 +15,6 @@ export const SubGLSegment = ({
 }) => {
   const [selectedSegment, setSelectedSegment] = useState(data.subSegments[0]);
 
-  const description = data.description;
   const noSubGL = data.subSegments.find((s) => Number(s.segmentId) === 0);
 
   const handleChangeSegment = (e) => {
@@ -102,8 +101,7 @@ export const SubGLSegment = ({
               onChange={handleOptionChange}
               defaultValue="balance"
               defaultChecked="balance"
-              className="formRow"
-              style={{ width: "100%" }}
+              style={{ width: "100%", flexDirection: "row" }}
             >
               <FormControlLabel
                 value="balance"
