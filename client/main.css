@@ -499,6 +499,97 @@ input[type="file"] {
   cursor: pointer;
 }
 
+/* Allocation Modal */
+
+.allocationHeaderContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1em;
+}
+
+.allocationTitle {
+  font-family: RobotoSlab;
+  font-size: 20px;
+  font-weight: 500;
+  color: #373737;
+  font-weight: 600;
+}
+
+.allocationText {
+  font-family: Nunito;
+  font-size: 18px;
+  color: #373737;
+  margin: 0.5em;
+}
+
+.allocationNameContainer {
+  background-color: #fbfbfb;
+  padding: 1em;
+  padding-bottom: 1.5em;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.12) inset;
+}
+
+.allocationNameInnerContainer {
+  margin-left: 2em;
+  border-radius: 8px;
+}
+
+.allocationNameInput {
+  border-radius: 8px;
+  border: solid 0.8px #d4d9de;
+  margin-top: 0.5em;
+  width: 90%;
+  padding: 6px;
+}
+
+.allocationSectionContainer {
+  padding: 1em;
+  padding-left: 2em;
+  /* width: 100%; */
+  border-bottom: 1px solid #ebedee;
+  /* min-height: 5em; */
+}
+
+.allocationSectionHeaderContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.allocationSectionTitle {
+  font-family: Nunito;
+  font-size: 16px;
+  color: #728495;
+}
+
+.allocationSectionInput {
+  border-radius: 8px;
+  border: solid 0.8px #d4d9de;
+  background-color: #fff;
+  font-family: Nunito;
+  font-size: 15px;
+  width: 260px;
+}
+
+.allocationSaveButton {
+  padding: 12px 21px;
+  border-radius: 8px;
+  color: white;
+  margin: 1em;
+  border-width: 0;
+}
+.allocationSaveButton:hover {
+  cursor: pointer;
+}
+.allocationSaveButtonDisabled {
+  background-color: #37b1ff;
+}
+.allocationSaveButtonActive {
+  background-color: #3597fe;
+}
+
 /* Start of old Styles */
 
 .row {

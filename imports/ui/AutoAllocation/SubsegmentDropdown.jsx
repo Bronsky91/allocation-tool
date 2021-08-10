@@ -106,14 +106,17 @@ export const SubsegmentDropdown = ({
   }, [isMultiSelect]);
 
   return (
-    <div className="column" style={{ width: 200 }}>
-      <h3>Which {segment.description} to include</h3>
+    <div className="column">
+      <div className="allocationText">
+        Which {segment.description} to include?
+      </div>
       <MultiSelect
         hasSelectAll={isMultiSelect}
         options={options}
         value={selected}
         onChange={handleSelect}
         labelledBy="Select"
+        className="allocationSectionInput"
       />
     </div>
   );

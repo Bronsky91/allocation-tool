@@ -4,6 +4,10 @@ import { Meteor } from "meteor/meteor";
 // Material UI
 import Modal from "@material-ui/core/Modal";
 import { makeStyles } from "@material-ui/core/styles";
+import { IconButton } from "@material-ui/core";
+import CloseIcon from "@material-ui/icons/Close";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 // Packages
 import MultiSelect from "react-multi-select-component";
 // Components
@@ -23,12 +27,14 @@ const getModalStyle = () => {
 const useStyles = makeStyles((theme) => ({
   paper: {
     position: "absolute",
-    height: "70%",
-    width: "80%",
+    height: "80%",
+    width: "50%",
     backgroundColor: theme.palette.background.paper,
     boxShadow: theme.shadows[5],
-    padding: theme.spacing(2, 4, 3),
-    overflow: "scroll",
+    // padding: theme.spacing(2, 4, 3),
+    overflowY: "auto",
+    overflowX: "hidden",
+    borderRadius: 8,
   },
 }));
 
@@ -225,77 +231,113 @@ export const AllocateModal = ({
       aria-describedby="simple-modal-description"
     >
       <div style={modalStyle} className={classes.paper}>
-        <h2 id="simple-modal-title" className="center">
-          Create your Allocation
-        </h2>
-        <div className="row center">
-          <h3>Technique Name: </h3>
-          <input
-            type="text"
-            value={allocationName}
-            onChange={(e) => setAllocationName(e.target.value)}
-          />
+        <div className="allocationHeaderContainer">
+          <div id="simple-modal-title" className="allocationTitle">
+            Create Your Allocation
+          </div>
+          <IconButton color="inherit" onClick={handleClose}>
+            <CloseIcon />
+          </IconButton>
         </div>
-        <div className="autoAllocationRow">
-          <div className="column" style={{ width: 200 }}>
-            <h3>Choose allocation by Segment</h3>
-            <MultiSelect
-              options={metricSegmentOptions}
-              value={selectedMetricSegments}
-              onChange={setSelectedMetricSegments}
-              labelledBy="Select"
+        <div className="allocationNameContainer">
+          <div className="allocationNameInnerContainer">
+            <div className="allocationText">Technique Name: </div>
+            <input
+              type="text"
+              value={allocationName}
+              onChange={(e) => setAllocationName(e.target.value)}
+              className="allocationNameInput"
             />
           </div>
-
-          <div className="dropDownColumn" style={{ width: 200 }}>
-            {selectedMetricSegments.length > 0
-              ? metricSegments.map((segment, index) => {
-                  return currentAllocation ? (
-                    // Subsegment dropdowns used for editing
-                    <SubsegmentDropdown
-                      key={index}
-                      segment={segment}
-                      metric={selectedMetric} // Used to only show the subsegments available in the selected metric
-                      isMultiSelect={selectedMetricSegments
-                        .map((sm) => sm.value)
-                        .includes(segment._id)}
-                      subsegmentAllocationData={subsegmentAllocationData}
-                      setSubsegmentAllocationData={setSubsegmentAllocationData} // Used to prepopulate the allocation data for editing
-                    />
-                  ) : (
-                    // Subsegments dropdowns used for creating
-                    <SubsegmentDropdown
-                      key={index}
-                      segment={segment}
-                      metric={selectedMetric}
-                      isMultiSelect={selectedMetricSegments
-                        .map((sm) => sm.value)
-                        .includes(segment._id)}
-                      setSubsegmentAllocationData={setSubsegmentAllocationData}
-                    />
-                  );
-                })
-              : null}
+        </div>
+        <div className="allocationSectionContainer">
+          <div className="allocationSectionHeaderContainer">
+            <div className="allocationSectionTitle">ALLOCATION BY SEGMENT</div>
+            <ExpandLessIcon />
           </div>
+          <div className="allocationText">Choose allocation by Segment</div>
+          <MultiSelect
+            options={metricSegmentOptions}
+            value={selectedMetricSegments}
+            onChange={setSelectedMetricSegments}
+            labelledBy="Select"
+            className="allocationSectionInput"
+          />
+        </div>
 
-          <div className="column" style={{ width: 200 }}>
+        <div className="allocationSectionContainer">
+          <div className="allocationSectionHeaderContainer">
+            <div className="allocationSectionTitle">SEGMENTS</div>
+            {selectedMetricSegments.length > 0 ? (
+              <ExpandLessIcon />
+            ) : (
+              <ExpandMoreIcon />
+            )}
+          </div>
+          {selectedMetricSegments.length > 0
+            ? metricSegments.map((segment, index) => {
+                return currentAllocation ? (
+                  // Subsegment dropdowns used for editing
+                  <SubsegmentDropdown
+                    key={index}
+                    segment={segment}
+                    metric={selectedMetric} // Used to only show the subsegments available in the selected metric
+                    isMultiSelect={selectedMetricSegments
+                      .map((sm) => sm.value)
+                      .includes(segment._id)}
+                    subsegmentAllocationData={subsegmentAllocationData}
+                    setSubsegmentAllocationData={setSubsegmentAllocationData} // Used to prepopulate the allocation data for editing
+                  />
+                ) : (
+                  // Subsegments dropdowns used for creating
+                  <SubsegmentDropdown
+                    key={index}
+                    segment={segment}
+                    metric={selectedMetric}
+                    isMultiSelect={selectedMetricSegments
+                      .map((sm) => sm.value)
+                      .includes(segment._id)}
+                    setSubsegmentAllocationData={setSubsegmentAllocationData}
+                  />
+                );
+              })
+            : null}
+        </div>
+
+        <div className="allocationSectionContainer">
+          <div>
+            <div className="allocationSectionHeaderContainer">
+              <div className="allocationSectionTitle">ALLOCATION BY METHOD</div>
+              {showMetricDropdown() > 0 ? (
+                <ExpandLessIcon />
+              ) : (
+                <ExpandMoreIcon />
+              )}
+            </div>
             {showMetricDropdown() ? (
               <div>
-                <h3>Choose allocation by method</h3>
+                <div className="allocationText">
+                  Choose allocation by method:
+                </div>
                 <MultiSelect
                   hasSelectAll={false}
                   options={methodOptions}
                   value={selectedMethods}
                   onChange={handleSelectedMetrics}
                   labelledBy="Select"
+                  className="allocationSectionInput"
                 />
               </div>
             ) : null}
           </div>
         </div>
-        <div className="center" style={{ marginTop: "5em" }}>
+        <div className="center">
           <button
-            className="mediumButton"
+            className={`allocationSaveButton ${
+              !readyToSaveAllocate
+                ? "allocationSaveButtonDisabled"
+                : "allocationSaveButtonActive"
+            }`}
             onClick={saveAllocation}
             disabled={!readyToSaveAllocate}
           >
