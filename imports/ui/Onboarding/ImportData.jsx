@@ -57,31 +57,35 @@ export const ImportData = () => {
     // Formatted Data
     const workbookData = await ReadWorkbook(file);
 
-    // If their are currently segments
-    if (segments.length > 0) {
-      // TODO: User alert before deleting previous segments
-      // and the workbookData is good
-      if (isChartOfAccountWorkBookDataValid(workbookData)) {
+    // The workbookData is good
+    if (isChartOfAccountWorkBookDataValid(workbookData)) {
+      // If their are currently segments
+      if (segments.length > 0) {
+        // TODO: User alert before deleting previous segments
         // then remove the previous segment collection
         Meteor.call("segment.removeAll", {}, (err, res) => {
           if (err) {
             // TODO: User alert of errors in the uploaded workbookData
             console.log("Error Deleting Segments", err);
+            alert(err);
           } else {
             console.log("Deleted All Segments", res);
             // Create the Segments from the Formatted workbookData now that the old segments are deleted
             Meteor.call("segment.insert", workbookData);
+            // Clears the Input field, in case the user wanted to upload a new file right away
+            setChartOfAccountsFileInputKey(new Date());
           }
         });
       } else {
-        // TODO: User alert of errors in the uploaded data
+        // Create the Segments from the Formatted Data if there are no segments currently
+        Meteor.call("segment.insert", workbookData);
+        // Clears the Input field, in case the user wanted to upload a new file right away
+        setChartOfAccountsFileInputKey(new Date());
       }
     } else {
-      // Create the Segments from the Formatted Data if there are no segments currently
-      Meteor.call("segment.insert", workbookData);
+      // TODO: User alert of errors in the uploaded data
+      alert("Chart of Accounts is not Valid, please check the file format");
     }
-    // Clears the Input field, in case the user wanted to upload a new file right away
-    setChartOfAccountsFileInputKey(new Date());
   };
 
   const handleMetricFile = async (e) => {
@@ -260,12 +264,14 @@ export const ImportData = () => {
                   </div>
                 </div>
               ) : null}
-              <button
-                className="onboardNextButton"
-                onClick={() => setImportPage("metrics")}
-              >
-                Next
-              </button>
+              {segments.length > 0 ? (
+                <button
+                  className="onboardNextButton"
+                  onClick={() => setImportPage("metrics")}
+                >
+                  Next
+                </button>
+              ) : null}
             </div>
           ) : (
             // ### METRICS PAGE ###
