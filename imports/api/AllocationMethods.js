@@ -48,4 +48,10 @@ Meteor.methods({
     }
     AllocationsCollection.remove(id);
   },
+  "allocation.removeAll": function ({}) {
+    if (!this.userId) {
+      throw new Meteor.Error("Not authorized.");
+    }
+    AllocationsCollection.remove({ userId: this.userId });
+  },
 });

@@ -14,6 +14,7 @@ import { JournalFormParent } from "./AutoAllocation/JournalForm.jsx";
 import { ImportData } from "./Onboarding/ImportData.jsx";
 import { LoginForm } from "./Accounts/LoginForm.jsx";
 import { NotFound } from "./NotFound.jsx";
+import { UserSettings } from "./Accounts/UserSettings.jsx";
 
 export const App = ({ loggingIn }) => {
   // Must be logged in for this route... Briefly shows '...' while loading account data rather than redirecting...
@@ -59,6 +60,12 @@ export const App = ({ loggingIn }) => {
           exact
           path="/account"
           component={UserAccount}
+        />
+        <ProtectedRoute
+          loggingIn={loggingIn}
+          exact
+          path="/settings"
+          component={UserSettings}
         />
         <ProtectedRoute
           loggingIn={loggingIn}

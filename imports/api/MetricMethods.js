@@ -38,4 +38,10 @@ Meteor.methods({
       createdAt: new Date(),
     });
   },
+  "metric.removeAll": function ({}) {
+    if (!this.userId) {
+      throw new Meteor.Error("Not authorized.");
+    }
+    MetricsCollection.remove({ userId: this.userId });
+  },
 });

@@ -18,7 +18,10 @@ export const Header = () => {
         <span className="headerTextRight">Journal Entry Tool</span>
       </div>
       <div className="headerButtonContainer">
-        <button className="headerButton">
+        <button
+          className="headerButton"
+          onClick={() => history.push("/settings")}
+        >
           <SettingsIcon color="action" fontSize="small" />
         </button>
         <button

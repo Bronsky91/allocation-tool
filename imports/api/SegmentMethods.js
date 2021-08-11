@@ -64,6 +64,6 @@ Meteor.methods({
     if (!this.userId) {
       throw new Meteor.Error("Not authorized.");
     }
-    SegmentsCollection.remove({});
+    SegmentsCollection.remove({ userId: this.userId });
   },
 });

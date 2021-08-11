@@ -13,13 +13,6 @@ export const UserAccount = () => {
   const user = useTracker(() => Meteor.user());
   const logout = () => Meteor.logout();
 
-  const segments = useTracker(() =>
-    SegmentsCollection.find({ userId: user?._id }).fetch()
-  );
-  const metrics = useTracker(() =>
-    MetricsCollection.find({ userId: user?._id }).fetch()
-  );
-
   if (!user) {
     return <Redirect to="/login" />;
   }
@@ -27,26 +20,22 @@ export const UserAccount = () => {
   return (
     <div>
       <Header />
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        <div style={{ display: "flex", flexDirection: "column" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "50vh",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
           <div> User Account Page for {user.username}</div>
           <button onClick={logout}>Logout</button>
-          <div style={{ marginTop: 10 }}>
-            <div style={{ fontWeight: "bold" }}>Chart of Accounts:</div>
-            <ul>
-              {segments.map((segment, index) => (
-                <li key={index}>{segment.description}</li>
-              ))}
-            </ul>
-          </div>
-          <div style={{ marginTop: 10 }}>
-            <div style={{ fontWeight: "bold" }}>Metrics:</div>
-            <ul>
-              {metrics.map((metric) => (
-                <li>{metric.description}</li>
-              ))}
-            </ul>
-          </div>
         </div>
       </div>
     </div>
