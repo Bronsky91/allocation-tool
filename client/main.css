@@ -639,6 +639,12 @@ input[type="file"] {
   padding: 5px;
   flex-wrap: wrap;
 }
+.row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
 .formColumn {
   display: flex;
   flex-direction: column;

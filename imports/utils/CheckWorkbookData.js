@@ -2,13 +2,13 @@ import { GL_CODE, SUB_GL_CODE } from "../../constants";
 
 // TODO: Add user alerts to this
 export const isChartOfAccountWorkBookDataValid = (data) => {
+  const messageEnd = `Please check the file format.`;
+
   if (!("sheets" in data)) {
-    console.log("Sheets key not in data");
-    return false;
+    return { err: "Could not find any excel sheets", valid: false };
   }
   if (data.sheets.length === 0) {
-    console.log("There are no sheets");
-    return false;
+    return { err: "Could not find any excel sheets", valid: false };
   }
 
   let hasGLSheet = false;
@@ -31,22 +31,28 @@ export const isChartOfAccountWorkBookDataValid = (data) => {
     }
     // If the sheet doesn't have at least segment and description
     if (minValidColumnCount !== 2) {
-      console.log("No segmentId or description columns in sheet", sheet);
-      return false;
+      return {
+        err: `No Segment ID and/or Description columns found in sheet ${sheet.name}. ${messageEnd}`,
+        valid: false,
+      };
     }
 
     for (const row of sheet.columns) {
       // Each sheet needs at least 1 row
       if (row.length === 0) {
-        console.log("No rows in the sheet", sheet);
-        return false;
+        return {
+          err: `No valid rows found in sheet ${sheet.name}. ${messageEnd}`,
+          valid: false,
+        };
       }
     }
   }
   // If the data doesn't have a GLSheet OR SubGLSheet
   if (!hasGLSheet || !hasSubGLSheet) {
-    console.log("the data doesn't have a GLSheet OR SubGLSheet");
-    return false;
+    return {
+      err: `The file doesn't have a GL_Code and/or Sub_GL_Code Sheet. ${messageEnd}`,
+      valid: false,
+    };
   }
-  return true;
+  return { valid: true };
 };

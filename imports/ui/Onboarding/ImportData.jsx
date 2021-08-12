@@ -56,9 +56,9 @@ export const ImportData = () => {
     setFileName(file.name);
     // Formatted Data
     const workbookData = await ReadWorkbook(file);
-
-    // The workbookData is good
-    if (isChartOfAccountWorkBookDataValid(workbookData)) {
+    // Checks if the workbookData is valid
+    const output = isChartOfAccountWorkBookDataValid(workbookData);
+    if (output.valid) {
       // If their are currently segments
       if (segments.length > 0) {
         // TODO: User alert before deleting previous segments
@@ -83,8 +83,8 @@ export const ImportData = () => {
         setChartOfAccountsFileInputKey(new Date());
       }
     } else {
-      // TODO: User alert of errors in the uploaded data
-      alert("Chart of Accounts is not Valid, please check the file format");
+      // Displays an alert to the user and an error message why the chart of the accounts isn't valid
+      alert(output.err);
     }
   };
 

@@ -83,6 +83,7 @@ const JournalForm = ({ user, segments, metrics }) => {
   const [newestAllocationId, setNewestAllocationId] = useState();
   const [editedCurrentAllocation, setEditedCurrentAllocation] = useState();
   const [nestingAllocation, setNestingAllocation] = useState(false);
+  const [savingAllocation, setSavingAllocation] = useState(false);
   const [showSubGLSegment, setShowSubGLSegment] = useState(false);
   const [selectedSubGLOption, setSelectedSubGLOption] = useState("balance");
 
@@ -339,16 +340,24 @@ const JournalForm = ({ user, segments, metrics }) => {
         <div className="journalFormAccountsContainer">
           <div className="journalFormMetaContainer">
             <div className="journalFormTitle">Journal Entry Meta Data</div>
-            <div className="formColumn">
-              <label className="journalFormText">Description</label>
-              <input
-                type="text"
-                onChange={(e) =>
-                  handleChangeFormData("journalDescription", e.target.value)
-                }
-                style={{ width: "20em", height: "1.5em" }}
-                className="journalFormInputLarge"
-              />
+            <div className="row">
+              <div className="formColumn">
+                <label className="journalFormText">Description</label>
+                <input
+                  type="text"
+                  onChange={(e) =>
+                    handleChangeFormData("journalDescription", e.target.value)
+                  }
+                  style={{ width: "20em", height: "1.5em" }}
+                  className="journalFormInputLarge"
+                />
+              </div>
+              <div className="formColumn">
+                <label className="journalFormText">
+                  Select Saved Allocation Model
+                </label>
+                <select className="journalFormInput"></select>
+              </div>
             </div>
             <div className="formColumn">
               <label className="journalFormText">Entry Date:</label>
@@ -481,15 +490,27 @@ const JournalForm = ({ user, segments, metrics }) => {
                   <GetAppIcon />
                   Download
                 </button>
-                <div>
-                  <input
-                    type="checkbox"
-                    onChange={(e) => setNestingAllocation(e.target.checked)}
-                    checked={nestingAllocation}
-                  />
-                  <label className="journalFormText">
-                    Nest this Allocation?
-                  </label>
+                <div className="formColumn">
+                  <div>
+                    <input
+                      type="checkbox"
+                      onChange={(e) => setNestingAllocation(e.target.checked)}
+                      checked={nestingAllocation}
+                    />
+                    <label className="journalFormText">
+                      Nest this Allocation?
+                    </label>
+                  </div>
+                  <div style={{ marginTop: 5 }}>
+                    <input
+                      type="checkbox"
+                      onChange={(e) => setSavingAllocation(e.target.checked)}
+                      checked={savingAllocation}
+                    />
+                    <label className="journalFormText">
+                      Save this Allocation Model?
+                    </label>
+                  </div>
                 </div>
               </div>
             ) : null}
