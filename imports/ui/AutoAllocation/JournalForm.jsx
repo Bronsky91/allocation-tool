@@ -56,7 +56,11 @@ export const JournalFormParent = () => {
       </div>
     );
   }
-  return <div>...</div>;
+  return (
+    <div>
+      <Header />
+    </div>
+  );
 };
 
 const JournalForm = ({ user, segments, metrics }) => {

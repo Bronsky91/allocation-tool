@@ -124,6 +124,9 @@ tr:nth-child(even) {
   font-size: 22px;
   font-weight: bold;
 }
+.headerText:hover {
+  cursor: pointer;
+}
 
 .headerTextLeft {
   color: #57585a;

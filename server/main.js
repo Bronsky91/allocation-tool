@@ -8,6 +8,7 @@ import "/imports/api/SegmentMethods";
 import "/imports/api/AllocationPublications";
 import "/imports/api/MetricPublications";
 import "/imports/api/SegmentPublications";
+import "/imports/api/UserPublications";
 // Utils
 import { calcAllocation } from "./CalcAllocation";
 
@@ -32,6 +33,11 @@ Meteor.methods({
   },
 });
 
+Accounts.onCreateUser((options, user) => {
+  user.redskyAdmin = options.redskyAdmin;
+  return user;
+});
+
 const SEED_USERNAME = "bronsky";
 const SEED_PASSWORD = "password";
 
@@ -43,10 +49,17 @@ Meteor.startup(() => {
     Accounts.createUser({
       username: SEED_USERNAME,
       password: SEED_PASSWORD,
+      redskyAdmin: true,
     });
     Accounts.createUser({
       username: SECOND_SEED_USERNAME,
       password: SECOND_SEE_PASSWORD,
+      redskyAdmin: true,
+    });
+    Accounts.createUser({
+      username: "test",
+      password: "test",
+      redskyAdmin: false,
     });
   }
 });
