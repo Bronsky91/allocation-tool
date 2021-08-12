@@ -2,13 +2,20 @@ import React from "react";
 
 import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
-import { Link, Redirect, useHistory } from "react-router-dom";
+import { Link, Redirect, useHistory, useLocation } from "react-router-dom";
 // Material UI
 import SettingsIcon from "@material-ui/icons/Settings";
 import PersonIcon from "@material-ui/icons/Person";
 
 export const Header = () => {
   const history = useHistory();
+  const location = useLocation();
+
+  const handleNavigation = (routeName) => {
+    if (location.pathname !== routeName) {
+      history.push(routeName);
+    }
+  };
 
   return (
     <div className="headerContainer">
@@ -20,13 +27,13 @@ export const Header = () => {
       <div className="headerButtonContainer">
         <button
           className="headerButton"
-          onClick={() => history.push("/settings")}
+          onClick={() => handleNavigation("/settings")}
         >
           <SettingsIcon color="action" fontSize="small" />
         </button>
         <button
           className="headerButton"
-          onClick={() => history.push("/account")}
+          onClick={() => handleNavigation("/account")}
         >
           <PersonIcon color="action" fontSize="small" />
         </button>

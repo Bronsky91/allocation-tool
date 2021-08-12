@@ -70,10 +70,7 @@ export const BalanceAccount = ({ handleChangeFormData, formData }) => {
             <input
               type="number"
               onChange={(e) =>
-                handleChangeFormData(
-                  "toBalanceSegmentValue",
-                  Number(e.target.value)
-                )
+                handleChangeFormData("toBalanceSegmentValue", e.target.value)
               }
               className="journalFormInput"
               style={{ width: "15em", height: "1.5em" }}

@@ -28,12 +28,12 @@ const useStyles = makeStyles((theme) => ({
   paper: {
     position: "absolute",
     height: "80%",
-    width: "50%",
+    width: "40%",
     backgroundColor: theme.palette.background.paper,
     boxShadow: theme.shadows[5],
     // padding: theme.spacing(2, 4, 3),
     overflowY: "auto",
-    overflowX: "hidden",
+    // overflowX: "hidden",
     borderRadius: 8,
   },
 }));
