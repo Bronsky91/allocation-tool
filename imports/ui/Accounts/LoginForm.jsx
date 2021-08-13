@@ -11,6 +11,7 @@ export const LoginForm = () => {
   // Subscriptions
   Meteor.subscribe("segments");
   Meteor.subscribe("metrics");
+  Meteor.subscribe("Meteor.user.redskyAdmin");
 
   const segments = useTracker(() =>
     SegmentsCollection.find({ userId: user?._id }).fetch()
@@ -34,8 +35,12 @@ export const LoginForm = () => {
   };
 
   if (user) {
-    // If the user has no data yet, redirect to onboarding page
+    if (user.redskyAdmin) {
+      // User is a RedskyAdmin
+      return <Redirect to="/admin" />;
+    }
     if (segments.length === 0 || metrics.length === 0) {
+      // If the user has no data yet, redirect to onboarding page
       return <Redirect to="/onboard" />;
     }
     return <Redirect to="/" />;

@@ -15,6 +15,7 @@ import { ImportData } from "./Onboarding/ImportData.jsx";
 import { LoginForm } from "./Accounts/LoginForm.jsx";
 import { NotFound } from "./NotFound.jsx";
 import { UserSettings } from "./Accounts/UserSettings.jsx";
+import { RedskyAdmin } from "./Accounts/RedskyAdmin.jsx";
 
 export const App = ({ loggingIn }) => {
   // Must be logged in for this route... Briefly shows '...' while loading account data rather than redirecting...
@@ -80,12 +81,12 @@ export const App = ({ loggingIn }) => {
           component={JournalFormParent}
         />
         {/* ### USE FOR REDSKY ADMIN ### */}
-        {/* <AdminRoute
+        <AdminRoute
           loggingIn={loggingIn}
           exact
           path="/admin"
-          component={UserAccount}
-        /> */}
+          component={RedskyAdmin}
+        />
         <Route component={NotFound} />
       </Switch>
     </Router>

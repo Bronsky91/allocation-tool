@@ -7,12 +7,15 @@ import { useTracker } from "meteor/react-meteor-data";
 import { Header } from "../Header";
 
 export const RedskyAdmin = () => {
+  Meteor.subscribe("userList");
+
   const user = useTracker(() => Meteor.user());
   console.log("user", user);
+
   const history = useHistory();
 
   if (!user) {
-    // return <Redirect to="/login" />;
+    return <Redirect to="/login" />;
   }
 
   return (
