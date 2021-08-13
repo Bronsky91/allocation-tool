@@ -19,16 +19,17 @@ export const SubsegmentDropdown = ({
         ...new Set(
           metric.columns
             .find((c) => c.title === segment.description)
-            .rows.map((row) => row.value)
+            .rows.map((row) => row.value.toString())
         ),
       ];
-      return availableSubSegments.includes(subSegment.segmentId);
+      return availableSubSegments.includes(subSegment.segmentId.toString());
     })
     .map((s) => ({
       label: s.description,
       value: s.segmentId,
       disabled: false,
     }));
+
   const initialSelected = subsegmentAllocationData
     ? segment?.subSegments
         .filter((s) =>

@@ -634,6 +634,48 @@ input[type="file"] {
   background-color: #3597fe;
 }
 
+/* User Account */
+
+.userAccountParentContainer {
+  background-color: #f1f5f7;
+  height: 100vh;
+}
+
+.userAccountContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 94%;
+}
+
+.userAccountInnerContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 3px 5px 0 rgba(0, 0, 0, 0.04);
+  height: 90%;
+  width: 90%;
+}
+
+.userAccountImageContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  padding: 10px;
+  background-color: #43bf9a;
+  margin: 15px;
+}
+
+.userAccountName {
+  font-size: 20px;
+  font-weight: 500;
+  color: #373737;
+}
+
 /* Start of old Styles */
 
 .row {
