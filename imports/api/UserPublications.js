@@ -1,8 +1,7 @@
 import { Meteor } from "meteor/meteor";
 
 Meteor.publish("userList", function () {
-  console.log("userList publication", Meteor.user());
-  if (Meteor.user().redskyAdmin) {
+  if (Meteor.user()?.redskyAdmin) {
     return Meteor.users.find({});
   }
 });

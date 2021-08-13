@@ -10,7 +10,7 @@ export const RedskyAdmin = () => {
   Meteor.subscribe("userList");
 
   const user = useTracker(() => Meteor.user());
-  console.log("user", user);
+  const allUsers = useTracker(() => Meteor.users.find({}, {}).fetch());
 
   const history = useHistory();
 
@@ -24,11 +24,20 @@ export const RedskyAdmin = () => {
       <div
         style={{
           display: "flex",
+          flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
+          marginTop: 50,
         }}
       >
         Welcome to the super secret Redsky admin page
+        <div>
+          <ul>
+            {allUsers.map((user, index) => (
+              <li key={index}>{user.username}</li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );

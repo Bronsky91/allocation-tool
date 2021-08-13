@@ -10,6 +10,8 @@ import { MetricsCollection } from "../../db/MetricsCollection";
 import { Header } from "../Header";
 
 export const UserSettings = () => {
+  Meteor.subscribe("Meteor.user.redskyAdmin");
+
   const user = useTracker(() => Meteor.user());
   const logout = () => Meteor.logout();
 
@@ -97,6 +99,11 @@ export const UserSettings = () => {
                 onClick={() => history.push("/onboard")}
               >
                 Return to Onboarding
+              </button>
+            ) : null}
+            {user.redskyAdmin ? (
+              <button onClick={() => history.push("/admin")}>
+                Admin Panel
               </button>
             ) : null}
           </div>

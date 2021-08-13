@@ -40,7 +40,7 @@ export const App = ({ loggingIn }) => {
     <Route
       {...rest}
       render={(props) => {
-        const isAdmin = Meteor.user() ? Meteor.user().admin : false;
+        const isAdmin = Meteor.user() ? Meteor.user().redskyAdmin : false;
         return rest.loggingIn ? (
           <span>...</span>
         ) : isAdmin ? (
