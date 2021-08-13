@@ -46,13 +46,17 @@ export const App = ({ loggingIn }) => {
     <Route
       {...rest}
       render={(props) => {
+        const isLoggedIn = Meteor.userId() !== null;
         const isAdmin = user ? user.redskyAdmin : false;
+
         return rest.loggingIn ? (
           <Header />
         ) : isAdmin ? (
           <Component {...props} />
-        ) : (
+        ) : isLoggedIn ? (
           <NotFound />
+        ) : (
+          <Redirect to={{ pathname: "/login" }} />
         );
       }}
     />
