@@ -7,11 +7,12 @@ import { SegmentsCollection } from "../../db/SegmentsCollection";
 import { MetricsCollection } from "../../db/MetricsCollection";
 
 export const LoginForm = () => {
-  const user = useTracker(() => Meteor.user());
   // Subscriptions
   Meteor.subscribe("segments");
   Meteor.subscribe("metrics");
   Meteor.subscribe("Meteor.user.redskyAdmin");
+
+  const user = useTracker(() => Meteor.user());
 
   const segments = useTracker(() =>
     SegmentsCollection.find({ userId: user?._id }).fetch()

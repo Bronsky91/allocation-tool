@@ -136,6 +136,47 @@ tr:nth-child(even) {
   color: #3597fe;
 }
 
+/* Registration Page */
+
+.registerFormContainer {
+  border-radius: 10px;
+  box-shadow: 0 3px 10px 0 rgba(0, 0, 0, 0.05);
+  background-color: #fff;
+  height: 40em;
+  width: 660px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+.registerInnerContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+  height: 550px;
+}
+
+.registerButton {
+  width: 322px;
+  height: 40px;
+  border-radius: 8px;
+  border-width: 0px;
+  color: white;
+  margin-left: 10px;
+}
+
+.registerButton:hover {
+  cursor: pointer;
+}
+.registerButtonDisabled {
+  background-color: #37b1ff;
+}
+.registerButtonActive {
+  background-color: #3597fe;
+}
+
 /* Onboarding Page */
 
 .onboardPageContainer {

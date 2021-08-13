@@ -31,7 +31,8 @@ export const RedskyAdmin = () => {
         }}
       >
         Welcome to the super secret Redsky admin page
-        <div>
+        <div style={{ marginTop: 10 }}>
+          User List
           <ul>
             {allUsers.map((user, index) => (
               <li key={index}>{user.username}</li>

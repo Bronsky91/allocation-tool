@@ -34,7 +34,15 @@ Meteor.methods({
 });
 
 Accounts.onCreateUser((options, user) => {
+  // User's actual name, used in Journal Entries
+  user.name = options.name;
+  // User's Email, used for password resets, etc
+  user.email = options.email;
+  // RedskyAdmins are people that work for Redsky and manage users
   user.redskyAdmin = options.redskyAdmin;
+  // Default redskyAdmins to have paid accounts
+  user.paid = options.redskyAdmin;
+
   return user;
 });
 

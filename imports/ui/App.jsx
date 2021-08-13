@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 // React Router
 import {
   BrowserRouter as Router,
@@ -8,6 +8,7 @@ import {
 } from "react-router-dom";
 // Meteor
 import { Meteor } from "meteor/meteor";
+import { useTracker } from "meteor/react-meteor-data";
 // Components
 import { UserAccount } from "./Accounts/UserAccount.jsx";
 import { JournalFormParent } from "./AutoAllocation/JournalForm.jsx";
@@ -16,8 +17,13 @@ import { LoginForm } from "./Accounts/LoginForm.jsx";
 import { NotFound } from "./NotFound.jsx";
 import { UserSettings } from "./Accounts/UserSettings.jsx";
 import { RedskyAdmin } from "./Accounts/RedskyAdmin.jsx";
+import { RegisterForm } from "./Accounts/RegisterForm.jsx";
+import { Header } from "./Header.jsx";
 
 export const App = ({ loggingIn }) => {
+  Meteor.subscribe("Meteor.user.redskyAdmin");
+
+  const user = useTracker(() => Meteor.user());
   // Must be logged in for this route... Briefly shows '...' while loading account data rather than redirecting...
   const ProtectedRoute = ({ component: Component, ...rest }) => (
     <Route
@@ -25,7 +31,7 @@ export const App = ({ loggingIn }) => {
       render={(props) => {
         const isLoggedIn = Meteor.userId() !== null;
         return rest.loggingIn ? (
-          <span>...</span>
+          <Header />
         ) : isLoggedIn ? (
           <Component {...props} />
         ) : (
@@ -40,13 +46,13 @@ export const App = ({ loggingIn }) => {
     <Route
       {...rest}
       render={(props) => {
-        const isAdmin = Meteor.user() ? Meteor.user().redskyAdmin : false;
+        const isAdmin = user ? user.redskyAdmin : false;
         return rest.loggingIn ? (
-          <span>...</span>
+          <Header />
         ) : isAdmin ? (
           <Component {...props} />
         ) : (
-          <Redirect to={{ pathname: "/login" }} />
+          <NotFound />
         );
       }}
     />
@@ -56,6 +62,7 @@ export const App = ({ loggingIn }) => {
     <Router>
       <Switch>
         <Route exact path="/login" component={LoginForm} />
+        <Route exact path="/register" component={RegisterForm} />
         <ProtectedRoute
           loggingIn={loggingIn}
           exact
@@ -83,6 +90,7 @@ export const App = ({ loggingIn }) => {
         {/* ### USE FOR REDSKY ADMIN ### */}
         <AdminRoute
           loggingIn={loggingIn}
+          user={user}
           exact
           path="/admin"
           component={RedskyAdmin}
