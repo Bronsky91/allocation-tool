@@ -4,6 +4,7 @@ import { Accounts } from "meteor/accounts-base";
 import "/imports/api/AllocationMethods";
 import "/imports/api/MetricMethods";
 import "/imports/api/SegmentMethods";
+import "/imports/api/UserMethods";
 // Publications
 import "/imports/api/AllocationPublications";
 import "/imports/api/MetricPublications";

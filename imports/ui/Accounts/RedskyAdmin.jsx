@@ -11,7 +11,7 @@ export const RedskyAdmin = () => {
 
   const user = useTracker(() => Meteor.user());
   const allUsers = useTracker(() => Meteor.users.find({}, {}).fetch());
-
+  console.log("allUsers", allUsers);
   const history = useHistory();
 
   if (!user) {
@@ -35,7 +35,20 @@ export const RedskyAdmin = () => {
           User List
           <ul>
             {allUsers.map((user, index) => (
-              <li key={index}>{user.username}</li>
+              <li key={index}>
+                {user.username} - admin:{user.redskyAdmin ? "Yes" : "No"}
+                <button
+                  style={{ marginLeft: 5 }}
+                  onClick={() =>
+                    Meteor.call("user.admin", {
+                      id: user._id,
+                      admin: !user.redskyAdmin,
+                    })
+                  }
+                >
+                  Toggle Admin
+                </button>
+              </li>
             ))}
           </ul>
         </div>
