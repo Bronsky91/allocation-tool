@@ -28,6 +28,7 @@ import { CreateWorkbook } from "../../utils/CreateWorkbook";
 import { GL_CODE, SUB_GL_CODE } from "../../../constants";
 import { Header } from "../Header";
 import { ImportData } from "../Onboarding/ImportData";
+import { TemplateCollection } from "../../db/TemplateCollection";
 
 export const JournalFormParent = () => {
   // Current user logged in
@@ -36,6 +37,7 @@ export const JournalFormParent = () => {
   Meteor.subscribe("segments");
   Meteor.subscribe("metrics");
   Meteor.subscribe("allocations");
+  Meteor.subscribe("templates");
 
   const segments = useTracker(() =>
     SegmentsCollection.find({ userId: user?._id }).fetch()
@@ -73,6 +75,12 @@ const JournalForm = ({ user, segments, metrics }) => {
     }).fetch()
   );
 
+  const templates = useTracker(() =>
+    TemplateCollection.find({
+      userId: user._id,
+    })
+  );
+
   const GLSegmentNames = [GL_CODE, SUB_GL_CODE];
   const glCodeSegment = segments.find((s) => s.description === GL_CODE);
   const balanceAccountSegments = segments
@@ -87,7 +95,6 @@ const JournalForm = ({ user, segments, metrics }) => {
   const [newestAllocationId, setNewestAllocationId] = useState();
   const [editedCurrentAllocation, setEditedCurrentAllocation] = useState();
   const [nestingAllocation, setNestingAllocation] = useState(false);
-  const [savingAllocation, setSavingAllocation] = useState(false);
   const [showSubGLSegment, setShowSubGLSegment] = useState(false);
   const [selectedSubGLOption, setSelectedSubGLOption] = useState("balance");
 
@@ -102,15 +109,19 @@ const JournalForm = ({ user, segments, metrics }) => {
       ...bas,
       selectedSubSegment: bas.subSegments[0],
     })),
-    selectedAllocationSegment: {},
+    selectedAllocationSegment: glCodeSegment.subSegments[0],
     subGLSegment: {
-      balance: { segmentId: "0000", description: "None" },
-      allocations: { segmentId: "0000", description: "None" },
+      balance: subGLCodeSegment.subSegments.find(
+        (s) => Number(s.segmentId) === 0
+      ),
+      allocations: subGLCodeSegment.subSegments.find(
+        (s) => Number(s.segmentId) === 0
+      ),
     },
     otherSegments: [],
     journalDescription: "",
     entryDate: new Date(),
-    typicalBalance: "",
+    typicalBalance: glCodeSegment.subSegments[0].typicalBalance,
     allocationValueOfBalancePerChartField: {}, // Allocation calculations
     segments, // All segments, used here for creating the workbook
     metricSegments, // Used to dynamically create the chart order in workbook
@@ -130,6 +141,9 @@ const JournalForm = ({ user, segments, metrics }) => {
     formData.toBalanceSegmentValue > 0 &&
     formData.journalDescription.length > 0 &&
     Object.keys(formData.allocationValueOfBalancePerChartField).length > 0;
+
+  const templateReady =
+    selectedAllocation && formData.journalDescription.length > 0;
 
   useEffect(() => {
     // Populate the formData with
@@ -306,6 +320,29 @@ const JournalForm = ({ user, segments, metrics }) => {
     }
   };
 
+  const saveTemplate = (name) => {
+    const template = {
+      name,
+      description: formData.journalDescription,
+      balancingAccount: formData.selectedBalanceSegments,
+      glCodeToAllocate: {
+        allocationSegment: formData.selectedAllocationSegment,
+        typicalBalance: formData.typicalBalance,
+      },
+      otherSegments: formData.otherSegments,
+      subGLCode: {
+        subGLSegment: formData.subGLSegment,
+        showSubGLSegment,
+        selectedSubGLOption,
+      },
+      metricToAllocate: selectedMetric,
+      allocationTechinque: selectedAllocation,
+      nestThisAllocation: nestingAllocation,
+    };
+
+    console.log("template", template);
+  };
+
   const createJournalEntry = () => {
     if (nestingAllocation) {
       // Show Nesting Modal
@@ -357,21 +394,31 @@ const JournalForm = ({ user, segments, metrics }) => {
                 />
               </div>
               <div className="formColumn">
-                <label className="journalFormText">
-                  Select Saved Allocation Model
-                </label>
-                <select className="journalFormInput"></select>
+                <label className="journalFormText">Select Saved Template</label>
+                <select className="journalFormInput">
+                  <option>No Template Selected</option>
+                </select>
               </div>
             </div>
-            <div className="formColumn">
-              <label className="journalFormText">Entry Date:</label>
-              <div>
-                <DatePicker
-                  selected={formData.entryDate}
-                  onChange={(date) => handleChangeFormData("entryDate", date)}
-                  className="journalFormInput"
-                />
+            <div className="formRow" style={{ alignItems: "center" }}>
+              <div className="formColumn">
+                <label className="journalFormText">Entry Date:</label>
+                <div>
+                  <DatePicker
+                    selected={formData.entryDate}
+                    onChange={(date) => handleChangeFormData("entryDate", date)}
+                    className="journalFormInput"
+                  />
+                </div>
               </div>
+              {templateReady ? (
+                <button
+                  className="journalFormSaveTemplateButton"
+                  onClick={saveTemplate}
+                >
+                  Save New Template
+                </button>
+              ) : null}
             </div>
           </div>
           <div className="journalFormBalanceContainer journalAccountContainer">
@@ -390,7 +437,8 @@ const JournalForm = ({ user, segments, metrics }) => {
                 {nonMetricSegments.map((segment, index) => (
                   <OtherSegment
                     key={index}
-                    data={segment}
+                    segment={segment}
+                    formData={formData}
                     handleChangeOtherSegments={handleChangeOtherSegments}
                   />
                 ))}
@@ -399,13 +447,14 @@ const JournalForm = ({ user, segments, metrics }) => {
           ) : null}
           <div className="journalAccountContainer">
             <GLSegment
-              data={glCodeSegment}
+              glCodeSegment={glCodeSegment}
+              formData={formData}
               handleChangeFormData={handleChangeFormData}
-              segmentType="toAllocate"
             />
             {subGLCodeSegment ? (
               <SubGLSegment
-                data={subGLCodeSegment}
+                subGLCodeSegment={subGLCodeSegment}
+                formData={formData}
                 handleChangeFormData={handleChangeFormData}
                 showSubGLSegment={showSubGLSegment}
                 setShowSubGLSegment={setShowSubGLSegment}
@@ -479,6 +528,12 @@ const JournalForm = ({ user, segments, metrics }) => {
             </div>
           </div>
           <div className="journalFormDownloadContainer">
+            {!readyToAllocate ? (
+              <div className="journalFormText">
+                When your journal entry file is ready it will be available for
+                download here
+              </div>
+            ) : null}
             {readyToAllocate ? (
               <div className="journalFormDownloadInnerContainer">
                 <div className="journalFormText">
@@ -503,16 +558,6 @@ const JournalForm = ({ user, segments, metrics }) => {
                     />
                     <label className="journalFormText">
                       Nest this Allocation?
-                    </label>
-                  </div>
-                  <div style={{ marginTop: 5 }}>
-                    <input
-                      type="checkbox"
-                      onChange={(e) => setSavingAllocation(e.target.checked)}
-                      checked={savingAllocation}
-                    />
-                    <label className="journalFormText">
-                      Save this Allocation Model?
                     </label>
                   </div>
                 </div>

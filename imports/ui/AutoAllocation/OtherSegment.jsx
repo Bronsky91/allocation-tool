@@ -1,15 +1,25 @@
 import React, { useState } from "react";
 
-export const OtherSegment = ({ data, handleChangeOtherSegments }) => {
-  const [selectedSegment, setSelectedSegment] = useState(data.subSegments[0]);
-  const description = data.description;
+export const OtherSegment = ({
+  segment,
+  formData,
+  handleChangeOtherSegments,
+}) => {
+  const [selectedSegment, setSelectedSegment] = useState(
+    segment.subSegments[0]
+  );
+  const description = segment.description;
+
+  const formDataOtherSegment = formData.otherSegments.find(
+    (os) => os._id === segment._id
+  );
 
   const handleChangeSegment = (e) => {
-    const newSelectedSegment = data.subSegments[e.target.value];
+    const newSelectedSegment = segment.subSegments[e.target.value];
     setSelectedSegment(newSelectedSegment);
 
     handleChangeOtherSegments(
-      data._id,
+      segment._id,
       "selectedSubSegment",
       newSelectedSegment
     );
@@ -19,22 +29,26 @@ export const OtherSegment = ({ data, handleChangeOtherSegments }) => {
     <div>
       <div className="formColumn">
         <label className="journalFormText">{description}</label>
-        <select
-          value={data.subSegments.findIndex(
-            (subSegment) => subSegment.segmentId === selectedSegment.segmentId
-          )}
-          onChange={handleChangeSegment}
-          className="journalFormInput"
-          style={{ width: "10em" }}
-        >
-          {data.subSegments.map((subSegment, index) => {
-            return (
-              <option key={index} value={index}>
-                {subSegment.description}
-              </option>
-            );
-          })}
-        </select>
+        {formDataOtherSegment ? (
+          <select
+            value={segment.subSegments.findIndex(
+              (subSegment) =>
+                subSegment.segmentId ===
+                formDataOtherSegment.selectedSubSegment.segmentId
+            )}
+            onChange={handleChangeSegment}
+            className="journalFormInput"
+            style={{ width: "10em" }}
+          >
+            {segment.subSegments.map((subSegment, index) => {
+              return (
+                <option key={index} value={index}>
+                  {subSegment.description}
+                </option>
+              );
+            })}
+          </select>
+        ) : null}
       </div>
       <div className="formColumn">
         <label className="journalFormText">Segment ID:</label>

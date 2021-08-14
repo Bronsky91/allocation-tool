@@ -6,19 +6,29 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import FormControl from "@material-ui/core/FormControl";
 
 export const SubGLSegment = ({
-  data,
+  subGLCodeSegment,
+  formData,
   handleChangeFormData,
   showSubGLSegment,
   setShowSubGLSegment,
   selectedOption,
   setSelectedOption,
 }) => {
-  const [selectedSegment, setSelectedSegment] = useState(data.subSegments[0]);
+  const [selectedSegment, setSelectedSegment] = useState(
+    subGLCodeSegment.subSegments[0]
+  );
 
-  const noSubGL = data.subSegments.find((s) => Number(s.segmentId) === 0);
+  const noSubGL = subGLCodeSegment.subSegments.find(
+    (s) => Number(s.segmentId) === 0
+  );
+
+  const formSelectedSubSegment =
+    selectedOption !== "both"
+      ? formData.subGLSegment[selectedOption]
+      : formData.subGLSegment["balance"];
 
   const handleChangeSegment = (e) => {
-    const newSelectedSegment = data.subSegments[e.target.value];
+    const newSelectedSegment = subGLCodeSegment.subSegments[e.target.value];
     setSelectedSegment(newSelectedSegment);
   };
 
@@ -73,14 +83,14 @@ export const SubGLSegment = ({
             <div className="formColumn">
               <label className="journalFormText">Description:</label>
               <select
-                value={data.subSegments.findIndex(
+                value={subGLCodeSegment.subSegments.findIndex(
                   (subSegment) =>
-                    subSegment.segmentId === selectedSegment.segmentId
+                    subSegment.segmentId === formSelectedSubSegment.segmentId
                 )}
                 onChange={handleChangeSegment}
                 className="journalFormInput"
               >
-                {data.subSegments.map((subSegment, index) => {
+                {subGLCodeSegment.subSegments.map((subSegment, index) => {
                   return (
                     <option key={index} value={index}>
                       {subSegment.description}

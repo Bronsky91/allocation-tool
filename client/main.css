@@ -499,6 +499,16 @@ input[type="file"] {
   color: white;
 }
 
+.journalFormSaveTemplateButton {
+  /* width: 250px; */
+  height: 40px;
+  padding: 10px 14px 10px;
+  border-radius: 8px;
+  background-color: #3597fe;
+  border-width: 0;
+  color: white;
+}
+
 .journalFormEditButtonContainer {
   border-radius: 8px;
   box-shadow: 0 3px 5px 0 rgba(0, 0, 0, 0.04);
@@ -508,6 +518,8 @@ input[type="file"] {
 }
 
 .journalFormDownloadContainer {
+  display: flex;
+  justify-content: center;
   width: 80%;
   height: 30%;
   border-radius: 8px;

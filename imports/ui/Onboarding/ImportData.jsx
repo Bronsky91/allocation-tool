@@ -61,21 +61,25 @@ export const ImportData = () => {
     if (output.valid) {
       // If their are currently segments
       if (segments.length > 0) {
-        // TODO: User alert before deleting previous segments
-        // then remove the previous segment collection
-        Meteor.call("segment.removeAll", {}, (err, res) => {
-          if (err) {
-            // TODO: User alert of errors in the uploaded workbookData
-            console.log("Error Deleting Segments", err);
-            alert(err);
-          } else {
-            console.log("Deleted All Segments", res);
-            // Create the Segments from the Formatted workbookData now that the old segments are deleted
-            Meteor.call("segment.insert", workbookData);
-            // Clears the Input field, in case the user wanted to upload a new file right away
-            setChartOfAccountsFileInputKey(new Date());
-          }
-        });
+        if (
+          confirm(
+            "You already uploaded a Chart of Accounts, do you want to replace it with the new file?"
+          )
+        ) {
+          // then remove the previous segment collection
+          Meteor.call("segment.removeAll", {}, (err, res) => {
+            if (err) {
+              console.log("Error Deleting Segments", err);
+              alert(err);
+            } else {
+              console.log("Deleted All Segments", res);
+              // Create the Segments from the Formatted workbookData now that the old segments are deleted
+              Meteor.call("segment.insert", workbookData);
+              // Clears the Input field, in case the user wanted to upload a new file right away
+              setChartOfAccountsFileInputKey(new Date());
+            }
+          });
+        }
       } else {
         // Create the Segments from the Formatted Data if there are no segments currently
         Meteor.call("segment.insert", workbookData);

@@ -1,27 +1,26 @@
 import React, { useState } from "react";
 import { useEffect } from "react";
 
-export const GLSegment = ({ data, handleChangeFormData }) => {
-  const [selectedSegment, setSelectedSegment] = useState(data?.subSegments[0]);
-  const [typicalBalance, setTypicalBalance] = useState("debit");
-
+export const GLSegment = ({
+  glCodeSegment,
+  formData,
+  handleChangeFormData,
+}) => {
   const handleChangeSegment = (e) => {
-    const newSelectedSegment = data.subSegments[e.target.value];
+    const newSelectedSegment = glCodeSegment.subSegments[e.target.value];
     if (newSelectedSegment.typicalBalance) {
       // If there's a typical balance assigned to the new subsegment, auto choose it as default
-      setTypicalBalance(newSelectedSegment.typicalBalance.toLowerCase());
+      handleChangeFormData(
+        "typicalBalance",
+        newSelectedSegment.typicalBalance.toLowerCase()
+      );
     }
-    setSelectedSegment(newSelectedSegment);
+    handleChangeFormData("selectedAllocationSegment", newSelectedSegment);
   };
 
   const handleChangeTypicalBalance = (e) => {
-    setTypicalBalance(e.target.value);
+    handleChangeFormData("typicalBalance", e.target.value);
   };
-
-  useEffect(() => {
-    handleChangeFormData("selectedAllocationSegment", selectedSegment);
-    handleChangeFormData("typicalBalance", typicalBalance);
-  }, [selectedSegment, typicalBalance]);
 
   return (
     <div>
@@ -31,13 +30,15 @@ export const GLSegment = ({ data, handleChangeFormData }) => {
         <div className="formColumn">
           <label className="journalFormText">Description:</label>
           <select
-            value={data.subSegments.findIndex(
-              (subSegment) => subSegment.segmentId === selectedSegment.segmentId
+            value={glCodeSegment.subSegments.findIndex(
+              (subSegment) =>
+                subSegment.segmentId ===
+                formData.selectedAllocationSegment.segmentId
             )}
             onChange={handleChangeSegment}
             className="journalFormInput"
           >
-            {data.subSegments.map((subSegment, index) => {
+            {glCodeSegment.subSegments.map((subSegment, index) => {
               return (
                 <option key={index} value={index}>
                   {subSegment.description}
@@ -48,14 +49,14 @@ export const GLSegment = ({ data, handleChangeFormData }) => {
         </div>
         <div className="formColumn">
           <label className="journalFormText">Segment ID:</label>
-          <div>{selectedSegment.segmentId}</div>
+          <div>{formData.selectedAllocationSegment.segmentId}</div>
         </div>
         <div className="formColumn">
           <label className="journalFormText">Typical Balance:</label>
           <select
             className="journalFormInput"
             onChange={handleChangeTypicalBalance}
-            value={typicalBalance}
+            value={formData.typicalBalance}
           >
             <option value="debit">Debit</option>
             <option value="credit">Credit</option>
