@@ -12,6 +12,7 @@ import { Redirect } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 // Components
+import { Header } from "../Header";
 import { BalanceAccount } from "./BalanceAccount";
 import { GLSegment } from "./GLSegment";
 import { SubGLSegment } from "./SubGLSegment";
@@ -19,42 +20,31 @@ import { OtherSegment } from "./OtherSegment";
 import { AllocateModal } from "./AllocateModal";
 import { NestedAllocationModal } from "./NestedAllocationModal";
 // DB
-import { MetricsCollection } from "../../db/MetricsCollection";
-import { SegmentsCollection } from "../../db/SegmentsCollection";
-import { AllocationsCollection } from "../../db/AllocationsColllection";
+import { ChartOfAccountsCollection } from "../../db/ChartOfAccountsCollection";
 // Utils
 import { CreateWorkbook } from "../../utils/CreateWorkbook";
 // Constants
 import { GL_CODE, SUB_GL_CODE } from "../../../constants";
-import { Header } from "../Header";
-import { ImportData } from "../Onboarding/ImportData";
-import { TemplateCollection } from "../../db/TemplateCollection";
 
 export const JournalFormParent = () => {
   // Current user logged in
   const user = useTracker(() => Meteor.user());
   // Subscriptions
-  Meteor.subscribe("segments");
-  Meteor.subscribe("metrics");
-  Meteor.subscribe("allocations");
-  Meteor.subscribe("templates");
+  Meteor.subscribe("chartOfAccounts");
 
-  const segments = useTracker(() =>
-    SegmentsCollection.find({ userId: user?._id }).fetch()
-  );
-  const metrics = useTracker(() =>
-    MetricsCollection.find({ userId: user?._id }).fetch()
+  const chartOfAccounts = useTracker(() =>
+    ChartOfAccountsCollection.find({}).fetch()
   );
 
   if (!user) {
     return <Redirect to="/login" />;
   }
-  if (segments.length > 0 && metrics.length > 0) {
+  if (chartOfAccounts.length > 0) {
     // Ensures that the JournalForm as Segments and Metrics to function properly
     return (
       <div className="journalFormParent">
         <Header />
-        <JournalForm user={user} segments={segments} metrics={metrics} />
+        <JournalForm user={user} chartOfAccounts={chartOfAccounts} />
       </div>
     );
   }
@@ -65,21 +55,24 @@ export const JournalFormParent = () => {
   );
 };
 
-const JournalForm = ({ user, segments, metrics }) => {
-  const [selectedMetric, setSelectedMetric] = useState(metrics[0]);
-
-  const allocations = useTracker(() =>
-    AllocationsCollection.find({
-      userId: user._id,
-      metricId: selectedMetric?._id,
-    }).fetch()
+const JournalForm = ({ user, chartOfAccounts }) => {
+  console.log("chartOfAccounts", chartOfAccounts);
+  const [selectedChartOfAccountsId, setSelectChartOfAccountsId] = useState(
+    chartOfAccounts[0]._id
+  );
+  const [selectedMetric, setSelectedMetric] = useState(
+    chartOfAccounts[0].metrics[0]
   );
 
-  const templates = useTracker(() =>
-    TemplateCollection.find({
-      userId: user._id,
-    })
+  const selectedChartOfAccounts = chartOfAccounts.find(
+    (coa) => coa._id === selectedChartOfAccountsId
   );
+  const segments = selectedChartOfAccounts.segments;
+  const metrics = selectedChartOfAccounts.metrics;
+  const allocations = selectedChartOfAccounts.metrics.find(
+    (metric) => metric._id === selectedMetric._id
+  ).allocations;
+  const templates = selectedChartOfAccounts.templates;
 
   const GLSegmentNames = [GL_CODE, SUB_GL_CODE];
   const glCodeSegment = segments.find((s) => s.description === GL_CODE);
@@ -121,7 +114,7 @@ const JournalForm = ({ user, segments, metrics }) => {
     otherSegments: [],
     journalDescription: "",
     entryDate: new Date(),
-    typicalBalance: glCodeSegment.subSegments[0].typicalBalance,
+    typicalBalance: glCodeSegment.subSegments[0].typicalBalance.toLowerCase(),
     allocationValueOfBalancePerChartField: {}, // Allocation calculations
     segments, // All segments, used here for creating the workbook
     metricSegments, // Used to dynamically create the chart order in workbook
@@ -164,6 +157,7 @@ const JournalForm = ({ user, segments, metrics }) => {
       );
     }
   }, [newestAllocationId]);
+  console.log("allocations", allocations);
 
   useEffect(() => {
     // Select the first allocation when the selectedMetric changes
@@ -190,10 +184,10 @@ const JournalForm = ({ user, segments, metrics }) => {
       Meteor.call(
         "calculateAllocation",
         {
+          chartOfAccountsId: selectedChartOfAccountsId,
           subSegments: selectedAllocation.subSegments,
           method: selectedAllocation.method,
           toBalanceValue: formData.toBalanceSegmentValue,
-          userId: user._id,
           metricId: selectedMetric._id,
         },
         (err, allocationData) => {
@@ -358,7 +352,8 @@ const JournalForm = ({ user, segments, metrics }) => {
         open={allocationModalOpen} // Required
         handleClose={closeAllocationModal} // Required
         metricSegments={metricSegments} // Required, used for listing segments and subsegments
-        selectedMetric={selectedMetric} // Required, used to save the allocation to the selected Metric
+        selectedChartOfAccounts={selectedChartOfAccounts} // Required, used to save the allocation to the selected Technique
+        selectedMetric={selectedMetric} // Required, used to save the allocation to the selected Technique
         availableMethods={availableMethods} // Required, used for listing which method options to use
         setNewestAllocationId={setNewestAllocationId} // Set the newest allocation created as selected in the dropdown
       />
@@ -366,7 +361,8 @@ const JournalForm = ({ user, segments, metrics }) => {
         open={editAllocationModalOpen} // Required
         handleClose={closeEditAllocationModal} // Required
         metricSegments={metricSegments} // Required, used for listing segments and subsegments
-        selectedMetric={selectedMetric} // Required, used to save the allocation to the selected Metric
+        selectedChartOfAccounts={selectedChartOfAccounts} // Required, used to save the allocation to the selected Technique
+        selectedMetric={selectedMetric} // Required, used to save the allocation to the selected Technique
         availableMethods={availableMethods} // Required, used for listing which method options to use
         currentAllocation={selectedAllocation} // Used to edit the currently selected allocation
         setEditedCurrentAllocation={setEditedCurrentAllocation} // Set the edited allocation as selected in the dropdown to refresh with new data

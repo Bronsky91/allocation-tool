@@ -3,23 +3,18 @@ import { Redirect } from "react-router-dom";
 
 import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
-import { SegmentsCollection } from "../../db/SegmentsCollection";
-import { MetricsCollection } from "../../db/MetricsCollection";
+import { ChartOfAccountsCollection } from "../../db/ChartOfAccountsCollection";
 
 export const LoginForm = () => {
   // Subscriptions
-  Meteor.subscribe("segments");
-  Meteor.subscribe("metrics");
+  Meteor.subscribe("chartOfAccounts");
   Meteor.subscribe("Meteor.user.redskyAdmin");
 
-  const user = useTracker(() => Meteor.user());
+  const chartOfAccounts = useTracker(() =>
+    ChartOfAccountsCollection.find({}).fetch()
+  );
 
-  const segments = useTracker(() =>
-    SegmentsCollection.find({ userId: user?._id }).fetch()
-  );
-  const metrics = useTracker(() =>
-    MetricsCollection.find({ userId: user?._id }).fetch()
-  );
+  const user = useTracker(() => Meteor.user());
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -40,7 +35,7 @@ export const LoginForm = () => {
       // User is a RedskyAdmin
       return <Redirect to="/admin" />;
     }
-    if (segments.length === 0 || metrics.length === 0) {
+    if (chartOfAccounts.length === 0) {
       // If the user has no data yet, redirect to onboarding page
       return <Redirect to="/onboard" />;
     }

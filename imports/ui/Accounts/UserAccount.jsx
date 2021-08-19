@@ -3,9 +3,6 @@ import { Redirect } from "react-router-dom";
 // Meteor
 import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
-// DB Collections
-import { SegmentsCollection } from "../../db/SegmentsCollection";
-import { MetricsCollection } from "../../db/MetricsCollection";
 // Components
 import { Header } from "../Header";
 // Material UI
@@ -27,7 +24,7 @@ export const UserAccount = () => {
           <div className="userAccountImageContainer">
             <PersonOutlineIcon style={{ color: "white" }} />
           </div>
-          <div class="userAccountName">{user.username}</div>
+          <div className="userAccountName">{user.username}</div>
           <div className="loginInputContainer" style={{ marginTop: 10 }}>
             <label className="loginText" htmlFor="name">
               Name
@@ -58,6 +55,14 @@ export const UserAccount = () => {
             style={{ marginTop: 20 }}
           >
             Update
+          </button>
+          <button
+            type="submit"
+            className="loginButton"
+            style={{ marginTop: 20 }}
+            onClick={logout}
+          >
+            Log Out
           </button>
         </div>
       </div>

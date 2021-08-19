@@ -1,20 +1,24 @@
 import { Meteor } from "meteor/meteor";
 import { Decimal } from "decimal.js";
-import { MetricsCollection } from "../imports/db/MetricsCollection";
 import { convertDecimalToFixedFloat } from "../imports/utils/ConvertDecimalToFixedFloat";
+import { ChartOfAccountsCollection } from "../imports/db/ChartOfAccountsCollection";
 
 export const calcAllocation = ({
+  chartOfAccountsId,
   subSegments,
   method,
   toBalanceValue,
-  userId,
   metricId,
 }) => {
   // subSegments = The subsegments the user chose in the form ie: {SegmentName: [...subsegmentIds]}
   // method = The method that was chosen in the form
   // toBalanceValue == The balance value the user enters to run the allocation against
-  const allMetrics = MetricsCollection.find({ userId }).fetch();
-  const metricData = allMetrics.find((metric) => metric._id === metricId);
+  const chartOfAccounts = ChartOfAccountsCollection.find({
+    _id: chartOfAccountsId,
+  }).fetch();
+  const metricData = chartOfAccounts[0].metrics.find(
+    (metric) => metric._id === metricId
+  );
 
   // An array of all Chart Field arrays that were selected by segment
   // EX: [[010, 020], [110, 120], ...]

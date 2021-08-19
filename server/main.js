@@ -1,16 +1,10 @@
 import { Meteor } from "meteor/meteor";
 import { Accounts } from "meteor/accounts-base";
 // API
-import "/imports/api/AllocationMethods";
-import "/imports/api/MetricMethods";
-import "/imports/api/SegmentMethods";
-import "/imports/api/TemplateMethods";
+import "/imports/api/ChartOfAccountMethods";
 import "/imports/api/UserMethods";
 // Publications
-import "/imports/api/AllocationPublications";
-import "/imports/api/MetricPublications";
-import "/imports/api/SegmentPublications";
-import "/imports/api/TemplatePublications";
+import "/imports/api/ChartOfAccountPublications";
 import "/imports/api/UserPublications";
 // Utils
 import { calcAllocation } from "./CalcAllocation";
@@ -18,19 +12,19 @@ import { calcAllocation } from "./CalcAllocation";
 // Arrow functions aren't going to work with these Methods while using this.userId
 Meteor.methods({
   calculateAllocation: function ({
+    chartOfAccountsId,
     subSegments,
     method,
     toBalanceValue,
-    userId,
     metricId,
   }) {
     // console.log("What do subSegments look like?", subSegments);
     // TODO: run check
     return calcAllocation({
+      chartOfAccountsId,
       subSegments,
       method,
       toBalanceValue,
-      userId,
       metricId,
     });
   },
@@ -43,8 +37,8 @@ Accounts.onCreateUser((options, user) => {
   user.email = options.email;
   // RedskyAdmins are people that work for Redsky and manage users
   user.redskyAdmin = options.redskyAdmin;
-  // Default redskyAdmins to have paid accounts
-  user.paid = options.redskyAdmin;
+  // Admins are Client Admins that pay for the tool
+  user.admin = options.admin;
 
   return user;
 });
@@ -63,20 +57,15 @@ Meteor.startup(() => {
       name: "Bryan Reed",
       email: "bryan@redsky.com",
       redskyAdmin: true,
+      admin: true,
     });
     Accounts.createUser({
       username: SECOND_SEED_USERNAME,
       password: SECOND_SEE_PASSWORD,
       name: "Nate Curi",
-      email: "nate@redsky.com",
-      redskyAdmin: true,
-    });
-    Accounts.createUser({
-      username: "test",
-      password: "test",
-      name: "Test Testerson",
-      email: "test@accountant.com",
+      email: "nate@dci.com",
       redskyAdmin: false,
+      admin: true,
     });
   }
 });

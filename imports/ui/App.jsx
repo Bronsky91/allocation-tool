@@ -24,6 +24,7 @@ export const App = ({ loggingIn }) => {
   Meteor.subscribe("Meteor.user.redskyAdmin");
 
   const user = useTracker(() => Meteor.user());
+
   // Must be logged in for this route... Briefly shows '...' while loading account data rather than redirecting...
   const ProtectedRoute = ({ component: Component, ...rest }) => (
     <Route

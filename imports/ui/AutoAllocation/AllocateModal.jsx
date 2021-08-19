@@ -43,6 +43,7 @@ export const AllocateModal = ({
   handleClose,
   metricSegments,
   availableMethods,
+  selectedChartOfAccounts,
   selectedMetric,
   setNewestAllocationId, // For creating
   currentAllocation, // For editing
@@ -207,14 +208,21 @@ export const AllocateModal = ({
     } else {
       // Creating
       Meteor.call(
-        "allocation.insert",
-        { name, subSegments, method, metricId: selectedMetric._id },
-        (err, newAllocationId) => {
+        "chartOfAccounts.metrics.allocations.insert",
+        selectedChartOfAccounts._id,
+        selectedMetric._id,
+        name,
+        subSegments,
+        method,
+        (err, result) => {
           if (err) {
             console.log("err", err);
           } else {
-            // Once the allocation is saved, make it the selected the allocation in the dropdown
-            setNewestAllocationId(newAllocationId);
+            console.log("result", result);
+            if (result.numberOfDocumentsUpdate > 0 && result.allocationId) {
+              // Once the allocation is saved, make it the selected the allocation in the dropdown
+              setNewestAllocationId(result.allocationId);
+            }
           }
         }
       );

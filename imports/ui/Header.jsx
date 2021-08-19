@@ -2,25 +2,22 @@ import React from "react";
 
 import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
+// Router
 import { Link, Redirect, useHistory, useLocation } from "react-router-dom";
+// DB
+import { ChartOfAccountsCollection } from "../db/ChartOfAccountsCollection";
 // Material UI
 import SettingsIcon from "@material-ui/icons/Settings";
 import PersonIcon from "@material-ui/icons/Person";
-import { SegmentsCollection } from "../db/SegmentsCollection";
-import { MetricsCollection } from "../db/MetricsCollection";
 
 export const Header = () => {
   // Current user logged in
   const user = useTracker(() => Meteor.user());
   // Subscriptions
-  Meteor.subscribe("segments");
-  Meteor.subscribe("metrics");
+  Meteor.subscribe("chartOfAccounts");
 
-  const segments = useTracker(() =>
-    SegmentsCollection.find({ userId: user?._id }).fetch()
-  );
-  const metrics = useTracker(() =>
-    MetricsCollection.find({ userId: user?._id }).fetch()
+  const chartOfAccounts = useTracker(() =>
+    ChartOfAccountsCollection.find({}).fetch()
   );
 
   const history = useHistory();
@@ -38,11 +35,7 @@ export const Header = () => {
       <div
         className="headerText"
         onClick={() => {
-          console.log(
-            "segments.length === 0 || metrics.length === 0",
-            segments.length === 0 || metrics.length === 0
-          );
-          if (segments.length === 0 || metrics.length === 0) {
+          if (chartOfAccounts.length === 0) {
             handleNavigation("/onboard");
           } else {
             handleNavigation("/");
