@@ -29,7 +29,6 @@ const workbookBuilder = (data) => {
   const worksheet = workbook.addWorksheet(data.journalDescription);
 
   const reconciledData = reconciliationAdjustments(data);
-  console.log("reconciledData", reconciledData);
   // Journal Entry Header
   const headerRowCount = 6;
   const timestamp = new Date().toLocaleDateString("en-US", {
@@ -104,7 +103,6 @@ const workbookBuilder = (data) => {
     // Amount for each row
     const amount =
       reconciledData.allocationValueOfBalancePerChartField[chartField];
-    console.log("amount", amount);
     // Row Object
     const rowObject = {
       account: createAllocationAccountString(reconciledData, chartField),
@@ -120,7 +118,6 @@ const workbookBuilder = (data) => {
         "credit"
       ),
     };
-    console.log("rowObject", rowObject);
     // Adds row to worksheet
     const row = worksheet.addRow(rowObject);
     if (amount.reconciled) {

@@ -217,9 +217,9 @@ Meteor.methods({
     if (!this.userId) {
       throw new Meteor.Error("Not authorized.");
     }
-    AllocationsCollection.update(id, {
-      $set: { name, subSegments, method },
-    });
+    // AllocationsCollection.update(id, {
+    //   $set: { name, subSegments, method },
+    // });
   },
   "chartOfAccounts.metrics.allocations.remove": function (
     chartOfAccountId,
@@ -233,7 +233,7 @@ Meteor.methods({
     if (!this.userId) {
       throw new Meteor.Error("Not authorized.");
     }
-    AllocationsCollection.remove(id);
+    // AllocationsCollection.remove(id);
   },
   "chartOfAccounts.metric.allocations.removeAll": function (
     chartOfAccountId,
@@ -244,6 +244,6 @@ Meteor.methods({
     if (!this.userId) {
       throw new Meteor.Error("Not authorized.");
     }
-    AllocationsCollection.remove({ userId: this.userId });
+    // AllocationsCollection.remove({ userId: this.userId });
   },
 });
