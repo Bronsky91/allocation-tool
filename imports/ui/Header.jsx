@@ -10,7 +10,10 @@ import { ChartOfAccountsCollection } from "../db/ChartOfAccountsCollection";
 import SettingsIcon from "@material-ui/icons/Settings";
 import PersonIcon from "@material-ui/icons/Person";
 
-export const Header = () => {
+export const Header = ({
+  selectedChartOfAccountsId,
+  setSelectChartOfAccountsId,
+}) => {
   // Current user logged in
   const user = useTracker(() => Meteor.user());
   // Subscriptions
@@ -29,9 +32,15 @@ export const Header = () => {
     }
   };
 
+  const headerButtonContainerWidth =
+    location.pathname === "/" ? "21.5em" : "90px";
+
   return (
     <div className="headerContainer">
-      <div className="headerButtonContainer"></div>
+      <div
+        className="headerButtonContainer"
+        style={{ width: headerButtonContainerWidth }}
+      ></div>
       <div
         className="headerText"
         onClick={() => {
@@ -45,7 +54,23 @@ export const Header = () => {
         <span className="headerTextLeft">RedSky Innovations</span>{" "}
         <span className="headerTextRight">Journal Entry Tool</span>
       </div>
-      <div className="headerButtonContainer">
+      <div
+        className="headerButtonContainer"
+        style={{ width: headerButtonContainerWidth }}
+      >
+        {location.pathname === "/" ? (
+          <select
+            value={selectedChartOfAccountsId}
+            onChange={(e) => setSelectChartOfAccountsId(e.target.value)}
+            style={{ width: "224px" }}
+          >
+            {chartOfAccounts.map((coa, index) => (
+              <option key={index} value={coa._id}>
+                {coa.name}
+              </option>
+            ))}
+          </select>
+        ) : null}
         <button
           className="headerButton"
           onClick={() => handleNavigation("/settings")}

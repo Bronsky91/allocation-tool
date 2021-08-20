@@ -98,7 +98,6 @@ tr:nth-child(even) {
 }
 
 .headerButtonContainer {
-  width: 90px;
   height: 30px;
   display: flex;
   flex-direction: row;

@@ -23,22 +23,13 @@ export const UserSettings = () => {
   );
 
   const handleRemoveAllData = () => {
-    Meteor.call("segment.removeAll", {}, (err, res) => {
+    Meteor.call("chartOfAccounts.removeAll", {}, (err, res) => {
       if (err) {
         // TODO: User alert of errors in the uploaded workbookData
         console.log("Error Deleting Segments", err);
         alert(err);
       } else {
         console.log("Deleted All Segments", res);
-      }
-    });
-    Meteor.call("metric.removeAll", {}, (err, res) => {
-      if (err) {
-        // TODO: User alert of errors in the uploaded workbookData
-        console.log("Error Deleting Metrics", err);
-        alert(err);
-      } else {
-        console.log("Deleted All Metrics", res);
       }
     });
   };
@@ -60,36 +51,44 @@ export const UserSettings = () => {
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div style={{ marginTop: 10 }}>
             <div style={{ fontWeight: "bold" }}>Chart of Accounts:</div>
-            <ul>
-              {/* {segments.map((segment, index) => (
-                <li key={index}>{segment.description}</li>
-              ))} */}
-            </ul>
+
+            {chartOfAccounts.map((coa, index) => (
+              <ul key={index}>
+                <li>{coa.name}</li>
+                <ul>
+                  <li>Segments:</li>
+                  <ul>
+                    {coa.segments.map((segment) => (
+                      <li>{segment.description}</li>
+                    ))}
+                  </ul>
+                  <li>Metrics:</li>
+                  <ul>
+                    {coa.metrics.map((metric) => (
+                      <li>{metric.description}</li>
+                    ))}
+                  </ul>
+                </ul>
+              </ul>
+            ))}
           </div>
-          <div style={{ marginTop: 10 }}>
-            <div style={{ fontWeight: "bold" }}>Metrics:</div>
-            <ul>
-              {/* {metrics.map((metric, index) => (
-                <li key={index}>{metric.description}</li>
-              ))} */}
-            </ul>
-          </div>
+
           <div style={{ display: "flex", flexDirection: "column" }}>
-            {/* <button
+            <button
               style={{ margin: 10 }}
               onClick={handleRemoveAllData}
-              disabled={segments.length === 0 && metrics.length === 0}
+              disabled={chartOfAccounts.length === 0}
             >
               Delete All Data
-            </button> */}
-            {/* {segments.length === 0 && metrics.length === 0 ? (
+            </button>
+            {chartOfAccounts.length === 0 ? (
               <button
                 style={{ margin: 10 }}
                 onClick={() => history.push("/onboard")}
               >
                 Return to Onboarding
               </button>
-            ) : null} */}
+            ) : null}
             {user.redskyAdmin ? (
               <button onClick={() => history.push("/admin")}>
                 Admin Panel

@@ -23,6 +23,13 @@ Meteor.methods({
       templates: [],
     });
   },
+  "chartOfAccounts.removeAll": function () {
+    // If a user not logged in or the user is not an admin
+    if (!this.userId && !Meteor.user()?.admin) {
+      throw new Meteor.Error("Not authorized.");
+    }
+    return ChartOfAccountsCollection.remove({});
+  },
   "chartOfAccounts.segments.insert": function (id, workbookData) {
     check(id, String);
     check(workbookData, {
