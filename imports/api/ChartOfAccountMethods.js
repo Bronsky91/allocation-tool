@@ -192,6 +192,7 @@ Meteor.methods({
             metricId,
             userId: this.userId,
             createdAt: new Date(),
+            updatedAt: new Date(),
           },
         },
       }
@@ -201,13 +202,24 @@ Meteor.methods({
   "chartOfAccounts.metrics.allocations.update": function (
     chartOfAccountId,
     metricId,
-    allocationId,
+    currentAllocation,
     name,
     subSegments,
     method
   ) {
     check(chartOfAccountId, String);
-    check(allocationId, String);
+    check(currentAllocation, {
+      _id: String,
+      name: String,
+      subSegments: [
+        { segmentName: String, subSegmentIds: [Match.OneOf(String, Number)] },
+      ],
+      method: String,
+      metricId: String,
+      userId: String,
+      createdAt: Date,
+      updatedAt: Date,
+    });
     check(name, String);
     check(subSegments, [
       { segmentName: String, subSegmentIds: [Match.OneOf(String, Number)] },
@@ -217,9 +229,31 @@ Meteor.methods({
     if (!this.userId) {
       throw new Meteor.Error("Not authorized.");
     }
-    // AllocationsCollection.update(id, {
-    //   $set: { name, subSegments, method },
-    // });
+
+    const updatedAt = new Date();
+
+    ChartOfAccountsCollection.update(
+      { _id: chartOfAccountId },
+      {
+        $set: {
+          "metrics.$[m].allocations.$[a]": {
+            ...currentAllocation,
+            name,
+            subSegments,
+            method,
+            updatedAt,
+          },
+        },
+      },
+      {
+        arrayFilters: [
+          { "m._id": metricId },
+          { "a._id": currentAllocation._id },
+        ],
+      }
+    );
+
+    return updatedAt;
   },
   "chartOfAccounts.metrics.allocations.remove": function (
     chartOfAccountId,
@@ -233,17 +267,14 @@ Meteor.methods({
     if (!this.userId) {
       throw new Meteor.Error("Not authorized.");
     }
-    // AllocationsCollection.remove(id);
-  },
-  "chartOfAccounts.metric.allocations.removeAll": function (
-    chartOfAccountId,
-    metricId
-  ) {
-    check(chartOfAccountId, String);
-    check(metricId, String);
-    if (!this.userId) {
-      throw new Meteor.Error("Not authorized.");
-    }
-    // AllocationsCollection.remove({ userId: this.userId });
+
+    return ChartOfAccountsCollection.update(
+      { _id: chartOfAccountId, "metrics._id": metricId },
+      {
+        $pull: {
+          "metrics.$.allocations": { _id: allocationId },
+        },
+      }
+    );
   },
 });

@@ -189,19 +189,24 @@ export const AllocateModal = ({
     }
     if (currentAllocation) {
       // Editing
-      console.log("editing", { name, subSegments, method });
-      const id = currentAllocation._id;
       Meteor.call(
-        "allocation.update",
-        { id, name, subSegments, method },
+        "chartOfAccounts.metrics.allocations.update",
+        selectedChartOfAccounts._id,
+        selectedMetric._id,
+        currentAllocation,
+        name,
+        subSegments,
+        method,
         (err, res) => {
           if (err) {
             console.log("err", err);
+            alert("Unable to update Allocation");
           } else {
+            console.log(res);
             // Once the edit is complete re-select the edited allocation technique to update values for when the modal is next opened
             // A Date timestamp is being used here to be provie a new value for the useEffect so it will be triggered each time
             // This needs to be in a useEffect because the allocations array is only updated on re-renders, which this causes
-            setEditedCurrentAllocation(new Date());
+            setEditedCurrentAllocation(res);
           }
         }
       );

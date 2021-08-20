@@ -41,15 +41,6 @@ export const UserSettings = () => {
         console.log("Deleted All Metrics", res);
       }
     });
-    Meteor.call("allocation.removeAll", {}, (err, res) => {
-      if (err) {
-        // TODO: User alert of errors in the uploaded workbookData
-        console.log("Error Deleting Allocations", err);
-        alert(err);
-      } else {
-        console.log("Deleted All Allocations", res);
-      }
-    });
   };
 
   if (!user) {

@@ -56,7 +56,6 @@ export const JournalFormParent = () => {
 };
 
 const JournalForm = ({ user, chartOfAccounts }) => {
-  console.log("chartOfAccounts", chartOfAccounts);
   const [selectedChartOfAccountsId, setSelectChartOfAccountsId] = useState(
     chartOfAccounts[0]._id
   );
@@ -150,16 +149,6 @@ const JournalForm = ({ user, chartOfAccounts }) => {
   }, [selectedMetric]);
 
   useEffect(() => {
-    // After a new allocation is created, make it the currently selected allocation in the dropdown
-    if (newestAllocationId) {
-      setSelectedAllocation(
-        allocations.find((a) => a._id === newestAllocationId)
-      );
-    }
-  }, [newestAllocationId]);
-  console.log("allocations", allocations);
-
-  useEffect(() => {
     // Select the first allocation when the selectedMetric changes
     setSelectedAllocation(allocations[0]);
   }, [selectedMetric]);
@@ -172,12 +161,34 @@ const JournalForm = ({ user, chartOfAccounts }) => {
   }, [allocations]);
 
   useEffect(() => {
-    // After editing an allocation this is called to refresh the current allocation with the new data from the allocations array
-    // This logic needs to be in a useEffect due to the allocations array not updating from the database until a re-render
-    setSelectedAllocation(
-      allocations.find((a) => a._id === selectedAllocation._id)
-    );
-  }, [editedCurrentAllocation]);
+    // After a new allocation is created, make it the currently selected allocation in the dropdown
+    //
+    if (
+      newestAllocationId &&
+      selectedAllocation &&
+      selectedAllocation._id !== newestAllocationId
+    ) {
+      setSelectedAllocation(
+        allocations.find((a) => a._id === newestAllocationId)
+      );
+    }
+  }, [allocations]);
+
+  useEffect(() => {
+    // After a new allocation is edited, update the selectedAllocation state to reflect
+    // This is required because the next time the user opens the edit modal we want the data to reflect their most recent changes
+    if (
+      selectedAllocation &&
+      editedCurrentAllocation &&
+      selectedAllocation.updatedAt !== editedCurrentAllocation
+    ) {
+      setSelectedAllocation(
+        allocations.find((a) => a._id === selectedAllocation._id)
+      );
+      // Once the updated selectedAllocation state is refreshed, set the edit flag to undefined
+      setEditedCurrentAllocation();
+    }
+  }, [allocations]);
 
   useEffect(() => {
     if (selectedAllocation && formData.toBalanceSegmentValue > 0) {
@@ -232,7 +243,20 @@ const JournalForm = ({ user, chartOfAccounts }) => {
       (a) => a._id === selectedAllocation._id
     );
     // Removes the selected Allocation from the database
-    Meteor.call("allocation.remove", { id: selectedAllocation._id });
+    Meteor.call(
+      "chartOfAccounts.metrics.allocations.remove",
+      selectedChartOfAccountsId,
+      selectedMetric._id,
+      selectedAllocation._id,
+      (err, res) => {
+        if (err) {
+          console.log("Error Deleting Allocation", err);
+          alert(err);
+        } else {
+          console.log("Deleted Alloction", res);
+        }
+      }
+    );
     // Moves the next selectedAllocation down one index, unless it's already 0 then keep it 0
     const nextIndex = currentIndex > 0 ? currentIndex - 1 : 0;
     setSelectedAllocation(allocations[nextIndex]);
