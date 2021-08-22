@@ -284,4 +284,58 @@ Meteor.methods({
       }
     );
   },
+  'chartOfAccounts.templates.insert': function (id, template) {
+    check(id, String);
+    check(template, {
+      name: String,
+      description: String,
+      balancingAccount: [String],
+      glCodeToAllocate: {
+        allocationSegment: {
+          category: String,
+          description: String,
+          segmentId: Match.OneOf(String, Number),
+          typicalBalance: String
+        },
+        typicalBalance: String
+      },
+      otherSegments: Match.Maybe([String]),
+      subGLCode: {
+        subGLSegment: {
+          allocations: {
+            description: String,
+            segmentId: Match.OneOf(String, Number)
+          },
+          balance: {
+            description: String,
+            segmentId: Match.OneOf(String, Number)
+          }
+        },
+        selectedSubGLOption: String,
+        showSubGLSegment: Boolean,
+      },
+      metricToAllocate: String,
+      allocationTechinque: String,
+      nestThisAllocation: Boolean,
+    });
+
+    if (!this.userId) {
+      // TODO: Add proper permissions
+      throw new Meteor.Error("Not authorized.");
+    }
+    const templateId = new Mongo.ObjectID()._str;
+
+    const numberOfDocumentsUpdate = ChartOfAccountsCollection.update(
+      { _id: id },
+      {
+        $push: {
+          templates: {
+            _id: templateId,
+            ...template
+          },
+        },
+      }
+    );
+    return { templateId, numberOfDocumentsUpdate };
+  }
 });

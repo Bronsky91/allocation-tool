@@ -25,6 +25,7 @@ import { ChartOfAccountsCollection } from "../../db/ChartOfAccountsCollection";
 import { CreateWorkbook } from "../../utils/CreateWorkbook";
 // Constants
 import { GL_CODE, SUB_GL_CODE } from "../../../constants";
+import { SaveTemplateModal } from "./SaveTemplateModal";
 
 export const JournalFormParent = () => {
   // Current user logged in
@@ -35,6 +36,7 @@ export const JournalFormParent = () => {
   const chartOfAccounts = useTracker(() =>
     ChartOfAccountsCollection.find({}).fetch()
   );
+  console.log("chartOfAccounts", chartOfAccounts);
 
   if (!user) {
     return <Redirect to="/login" />;
@@ -86,16 +88,22 @@ const JournalForm = ({ user, chartOfAccounts }) => {
   const [allocationModalOpen, setAllocationModalOpen] = useState(false);
   const [editAllocationModalOpen, setEditAllocationModalOpen] = useState(false);
   const [nestedAllocationOpen, setNestedAllocationOpen] = useState(false);
+  const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
   const [selectedAllocation, setSelectedAllocation] = useState(allocations[0]);
   const [newestAllocationId, setNewestAllocationId] = useState();
   const [editedCurrentAllocation, setEditedCurrentAllocation] = useState();
   const [nestingAllocation, setNestingAllocation] = useState(false);
   const [showSubGLSegment, setShowSubGLSegment] = useState(false);
   const [selectedSubGLOption, setSelectedSubGLOption] = useState("balance");
+  const [selectedTemplateId, setSelectedTemplateId] = useState("0");
 
   const metricSegments = segments
     .filter((s) => selectedMetric.metricSegments.includes(s.description))
     .sort((a, b) => a.chartFieldOrder - b.chartFieldOrder);
+
+  const selectedTemplate = templates.find(
+    (template) => template._id === selectedTemplateId
+  );
 
   const [formData, setFormData] = useState({
     username: user.username,
@@ -225,6 +233,12 @@ const JournalForm = ({ user, chartOfAccounts }) => {
     }
   }, [formData.toBalanceSegmentValue, selectedAllocation]);
 
+  useEffect(() => {
+    if (selectedTemplate) {
+      console.log("New Selected Template", selectedTemplate);
+    }
+  }, [selectedTemplate]);
+
   const handleChangeFormData = (field, value) => {
     setFormData((formData) => ({
       ...formData,
@@ -312,6 +326,14 @@ const JournalForm = ({ user, chartOfAccounts }) => {
     setNestedAllocationOpen(false);
   };
 
+  const openSaveTemplateModal = () => {
+    setSaveTemplateOpen(true);
+  };
+
+  const closeSaveTemplateModal = () => {
+    setSaveTemplateOpen(false);
+  };
+
   const closeNestedAllocationWithSelection = (selectionData) => {
     closeNestedAllocationModal();
     // Populate Form with new Nested Allocation Selection Data
@@ -352,22 +374,37 @@ const JournalForm = ({ user, chartOfAccounts }) => {
     const template = {
       name,
       description: formData.journalDescription,
-      balancingAccount: formData.selectedBalanceSegments,
+      balancingAccount: formData.selectedBalanceSegments.map((bs) => bs._id),
       glCodeToAllocate: {
         allocationSegment: formData.selectedAllocationSegment,
         typicalBalance: formData.typicalBalance,
       },
-      otherSegments: formData.otherSegments,
+      otherSegments: formData.otherSegments.map((os) => os._id),
       subGLCode: {
         subGLSegment: formData.subGLSegment,
         showSubGLSegment,
         selectedSubGLOption,
       },
-      metricToAllocate: selectedMetric,
-      allocationTechinque: selectedAllocation,
+      metricToAllocate: selectedMetric._id,
+      allocationTechinque: selectedAllocation._id,
       nestThisAllocation: nestingAllocation,
     };
 
+    Meteor.call(
+      "chartOfAccounts.templates.insert",
+      selectedChartOfAccountsId,
+      template,
+      (err, res) => {
+        if (err) {
+          console.log(err);
+          alert("Unable to save template", err);
+        } else {
+          // TODO: Decide if the modal should still close if the save failed
+          console.log(res);
+          closeSaveTemplateModal();
+        }
+      }
+    );
     console.log("template", template);
   };
 
@@ -412,6 +449,11 @@ const JournalForm = ({ user, chartOfAccounts }) => {
           data={formData}
           handleCloseComplete={closeNestedAllocationWithSelection}
         />
+        <SaveTemplateModal
+          open={saveTemplateOpen}
+          handleClose={closeSaveTemplateModal}
+          handleCloseComplete={saveTemplate}
+        />
         <div className="journalFormContainer">
           <div className="journalFormAccountsContainer">
             <div className="journalFormMetaContainer">
@@ -432,8 +474,20 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                   <label className="journalFormText">
                     Select Saved Template
                   </label>
-                  <select className="journalFormInput">
-                    <option>No Template Selected</option>
+                  <select
+                    className="journalFormInput"
+                    value={selectedTemplateId || "0"}
+                    onChange={(e) => setSelectedTemplateId(e.target.value)}
+                  >
+                    <option value="0">No Template Selected</option>
+                    {selectedChartOfAccounts &&
+                      selectedChartOfAccounts.templates.map(
+                        (template, index) => (
+                          <option value={template._id} key={index}>
+                            {template.name}
+                          </option>
+                        )
+                      )}
                   </select>
                 </div>
               </div>
@@ -453,7 +507,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                 {templateReady ? (
                   <button
                     className="journalFormSaveTemplateButton"
-                    onClick={saveTemplate}
+                    onClick={() => openSaveTemplateModal()}
                   >
                     Save New Template
                   </button>
