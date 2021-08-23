@@ -19,13 +19,13 @@ import { SubGLSegment } from "./SubGLSegment";
 import { OtherSegment } from "./OtherSegment";
 import { AllocateModal } from "./AllocateModal";
 import { NestedAllocationModal } from "./NestedAllocationModal";
+import { SaveTemplateModal } from "./SaveTemplateModal";
 // DB
 import { ChartOfAccountsCollection } from "../../db/ChartOfAccountsCollection";
 // Utils
 import { CreateWorkbook } from "../../utils/CreateWorkbook";
 // Constants
 import { GL_CODE, SUB_GL_CODE } from "../../../constants";
-import { SaveTemplateModal } from "./SaveTemplateModal";
 
 export const JournalFormParent = () => {
   // Current user logged in
@@ -533,7 +533,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
           open={saveTemplateOpen}
           handleClose={closeSaveTemplateModal}
           handleCloseComplete={saveTemplate}
-          templateEdit={templateEdit}
+          selectedTemplate={selectedTemplate}
         />
         <div className="journalFormContainer">
           <div className="journalFormAccountsContainer">
@@ -592,7 +592,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                       className="journalFormSaveTemplateButton"
                       onClick={() => openSaveTemplateModal()}
                     >
-                      Edit Template
+                      Update Template
                     </button>
                   ) : (
                     <button

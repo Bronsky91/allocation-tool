@@ -30,6 +30,7 @@ export const SaveTemplateModal = ({
   open,
   handleClose,
   handleCloseComplete,
+  selectedTemplate,
 }) => {
   // getModalStyle is not a pure function, we roll the style only on the first render
   const classes = useStyles();
@@ -37,6 +38,10 @@ export const SaveTemplateModal = ({
   const [modalStyle] = React.useState(getModalStyle);
 
   const [templateName, setTemplateName] = useState("");
+
+  useEffect(() => {
+    setTemplateName(selectedTemplate?.name || "");
+  }, [selectedTemplate]);
 
   return (
     <Modal
