@@ -124,7 +124,9 @@ const JournalForm = ({ user, chartOfAccounts }) => {
     otherSegments: [],
     journalDescription: "",
     entryDate: new Date(),
-    typicalBalance: glCodeSegment.subSegments[0].typicalBalance.toLowerCase(),
+    typicalBalance: glCodeSegment.subSegments[0].typicalBalance
+      ? glCodeSegment.subSegments[0].typicalBalance.toLowerCase()
+      : "debit",
     allocationValueOfBalancePerChartField: {}, // Allocation calculations
     segments, // All segments, used here for creating the workbook
     metricSegments, // Used to dynamically create the chart order in workbook

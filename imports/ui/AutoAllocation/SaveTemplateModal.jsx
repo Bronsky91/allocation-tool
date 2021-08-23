@@ -17,8 +17,8 @@ const getModalStyle = () => {
 const useStyles = makeStyles((theme) => ({
   paper: {
     position: "absolute",
-    height: "40%",
-    width: "40%",
+    height: "20%",
+    width: "30%",
     backgroundColor: theme.palette.background.paper,
     boxShadow: theme.shadows[5],
     padding: theme.spacing(2, 4, 3),
@@ -46,15 +46,23 @@ export const SaveTemplateModal = ({
       aria-describedby="simple-modal-description"
     >
       <div style={modalStyle} className={classes.paper}>
-        <h2 id="simple-modal-title" className="center">
-          Name for Template:
-        </h2>
-        <input
-          type="text"
-          value={templateName}
-          onChange={(e) => setTemplateName(e.target.value)}
-        />
-        <button onClick={() => handleCloseComplete(templateName)}>Save</button>
+        <div className="saveTemplateContainer">
+          <h2 id="simple-modal-title" className="center">
+            Name for Template:
+          </h2>
+          <input
+            type="text"
+            value={templateName}
+            onChange={(e) => setTemplateName(e.target.value)}
+            className="journalFormInput"
+          />
+          <button
+            onClick={() => handleCloseComplete(templateName)}
+            className="allocationSaveButton allocationSaveButtonActive"
+          >
+            Save
+          </button>
+        </div>
       </div>
     </Modal>
   );

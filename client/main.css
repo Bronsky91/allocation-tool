@@ -687,6 +687,15 @@ input[type="file"] {
   color: #373737;
 }
 
+/* Save Template Modal */
+
+.saveTemplateContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
 /* Start of old Styles */
 
 .row {

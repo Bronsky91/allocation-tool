@@ -67,12 +67,21 @@ Meteor.methods({
         {}
       );
 
+      console.log("columnIndexRef", columnIndexRef);
+
       const subSegments = sheet.rows
         .filter((row) => row.length > 1)
         .map((row) => {
           const subSegment = {};
           row.map((r, i) => {
-            subSegment[columnIndexRef[i]] = r.value;
+            // This makes sure it only assigns values to valid columns
+            if (
+              Object.keys(columnIndexRef)
+                .map((c) => Number(c)) // Need to convert to number because Object.keys() makes strings
+                .includes(i)
+            ) {
+              subSegment[columnIndexRef[i]] = r.value;
+            }
           });
           return subSegment;
         });
@@ -284,7 +293,7 @@ Meteor.methods({
       }
     );
   },
-  'chartOfAccounts.templates.insert': function (id, template) {
+  "chartOfAccounts.templates.insert": function (id, template) {
     check(id, String);
     check(template, {
       name: String,
@@ -295,21 +304,21 @@ Meteor.methods({
           category: String,
           description: String,
           segmentId: Match.OneOf(String, Number),
-          typicalBalance: String
+          typicalBalance: Match.Optional(String),
         },
-        typicalBalance: String
+        typicalBalance: String,
       },
       otherSegments: Match.Maybe([String]),
       subGLCode: {
         subGLSegment: {
           allocations: {
             description: String,
-            segmentId: Match.OneOf(String, Number)
+            segmentId: Match.OneOf(String, Number),
           },
           balance: {
             description: String,
-            segmentId: Match.OneOf(String, Number)
-          }
+            segmentId: Match.OneOf(String, Number),
+          },
         },
         selectedSubGLOption: String,
         showSubGLSegment: Boolean,
@@ -331,11 +340,11 @@ Meteor.methods({
         $push: {
           templates: {
             _id: templateId,
-            ...template
+            ...template,
           },
         },
       }
     );
     return { templateId, numberOfDocumentsUpdate };
-  }
+  },
 });
