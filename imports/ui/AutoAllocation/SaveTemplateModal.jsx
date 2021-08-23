@@ -57,7 +57,10 @@ export const SaveTemplateModal = ({
             className="journalFormInput"
           />
           <button
-            onClick={() => handleCloseComplete(templateName)}
+            onClick={() => {
+              setTemplateName("");
+              handleCloseComplete(templateName);
+            }}
             className="allocationSaveButton allocationSaveButtonActive"
           >
             Save

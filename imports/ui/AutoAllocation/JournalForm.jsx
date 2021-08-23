@@ -95,6 +95,9 @@ const JournalForm = ({ user, chartOfAccounts }) => {
   const [nestingAllocation, setNestingAllocation] = useState(false);
   const [showSubGLSegment, setShowSubGLSegment] = useState(false);
   const [selectedSubGLOption, setSelectedSubGLOption] = useState("balance");
+  const [selectedSubGLSegment, setSelectedSubGLSegment] = useState(
+    subGLCodeSegment.subSegments.find((s) => Number(s.segmentId) === 0)
+  );
   const [selectedTemplateId, setSelectedTemplateId] = useState("0");
 
   const metricSegments = segments
@@ -113,6 +116,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
       selectedSubSegment: bas.subSegments[0],
     })),
     selectedAllocationSegment: glCodeSegment.subSegments[0],
+    // selectedSubGLSegment
     subGLSegment: {
       balance: subGLCodeSegment.subSegments.find(
         (s) => Number(s.segmentId) === 0
@@ -149,6 +153,9 @@ const JournalForm = ({ user, chartOfAccounts }) => {
 
   const templateReady =
     selectedAllocation && formData.journalDescription.length > 0;
+
+  const templateEdit =
+    templateReady && selectedTemplateId !== "0" && selectedTemplate;
 
   useEffect(() => {
     setSelectedMetric(
@@ -240,6 +247,43 @@ const JournalForm = ({ user, chartOfAccounts }) => {
       console.log("New Selected Template", selectedTemplate);
     }
   }, [selectedTemplate]);
+
+  useEffect(() => {
+    if (selectedTemplateId !== "0" && selectedTemplate) {
+      console.log("selectedTemplate", selectedTemplate);
+      // Apply template to form
+      setSelectedMetric(
+        metrics.find((m) => m._id === selectedTemplate.metricToAllocate)
+      );
+      setSelectedAllocation(
+        allocations.find((a) => a._id === selectedTemplate.allocationTechinque)
+      );
+      setNestingAllocation(selectedTemplate.nestThisAllocation);
+
+      setFormData((formData) => ({
+        ...formData,
+        journalDescription: selectedTemplate.description,
+        selectedBalanceSegments: formData.selectedBalanceSegments.map(
+          (sbs, index) => ({
+            ...sbs,
+            selectedSubSegment: selectedTemplate.balancingAccount[index],
+          })
+        ),
+        selectedAllocationSegment:
+          selectedTemplate.glCodeToAllocate.allocationSegment,
+        typicalBalance: selectedTemplate.glCodeToAllocate.typicalBalance,
+        otherSegments: formData.otherSegments.map((os, index) => ({
+          ...os,
+          selectedSubSegment: selectedTemplate.otherSegments[index], // TODO: TEST THIS!
+        })),
+        subGLSegment: selectedTemplate.subGLCode.subGLSegment,
+      }));
+
+      setSelectedSubGLSegment(selectedTemplate.subGLCode.selectedSubGLSegment);
+      setShowSubGLSegment(selectedTemplate.subGLCode.showSubGLSegment);
+      setSelectedSubGLOption(selectedTemplate.subGLCode.selectedSubGLOption);
+    }
+  }, [selectedTemplateId]);
 
   const handleChangeFormData = (field, value) => {
     setFormData((formData) => ({
@@ -372,42 +416,76 @@ const JournalForm = ({ user, chartOfAccounts }) => {
     }
   };
 
-  const saveTemplate = (name) => {
-    const template = {
+  const createTemplateObject = (name) => {
+    return {
       name,
       description: formData.journalDescription,
-      balancingAccount: formData.selectedBalanceSegments.map((bs) => bs._id),
+      balancingAccount: formData.selectedBalanceSegments.map(
+        (sbs) => sbs.selectedSubSegment
+      ),
       glCodeToAllocate: {
         allocationSegment: formData.selectedAllocationSegment,
         typicalBalance: formData.typicalBalance,
       },
-      otherSegments: formData.otherSegments.map((os) => os._id),
+      otherSegments: formData.otherSegments.map((os) => os.selectedSubSegment), // TODO: TEST THIS!
       subGLCode: {
         subGLSegment: formData.subGLSegment,
         showSubGLSegment,
         selectedSubGLOption,
+        selectedSubGLSegment,
       },
       metricToAllocate: selectedMetric._id,
       allocationTechinque: selectedAllocation._id,
       nestThisAllocation: nestingAllocation,
     };
+  };
 
-    Meteor.call(
-      "chartOfAccounts.templates.insert",
-      selectedChartOfAccountsId,
-      template,
-      (err, res) => {
-        if (err) {
-          console.log(err);
-          alert("Unable to save template", err);
-        } else {
-          // TODO: Decide if the modal should still close if the save failed
-          console.log(res);
-          closeSaveTemplateModal();
-        }
-      }
-    );
+  const saveTemplate = (name) => {
+    const template = createTemplateObject(name);
+
     console.log("template", template);
+
+    if (templateEdit) {
+      Meteor.call(
+        "chartOfAccounts.templates.update",
+        selectedChartOfAccountsId,
+        selectedTemplateId,
+        template,
+        (err, res) => {
+          if (err) {
+            console.log(err);
+            alert("Unable to save template", err);
+          } else {
+            // TODO: Decide if the modal should still close if the save failed
+            // TODO: Loading indicator
+            console.log(res);
+            if (res.numberOfDocumentsUpdate > 0) {
+              closeSaveTemplateModal();
+            }
+          }
+        }
+      );
+    } else {
+      Meteor.call(
+        "chartOfAccounts.templates.insert",
+        selectedChartOfAccountsId,
+        template,
+        (err, res) => {
+          if (err) {
+            console.log(err);
+            alert("Unable to save template", err);
+          } else {
+            // TODO: Decide if the modal should still close if the save failed
+            // TODO: Loading indicator
+            console.log(res);
+            if (res.numberOfDocumentsUpdate > 0) {
+              closeSaveTemplateModal();
+              setSelectedTemplateId(res.templateId);
+            }
+          }
+        }
+      );
+    }
   };
 
   const createJournalEntry = () => {
@@ -455,6 +533,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
           open={saveTemplateOpen}
           handleClose={closeSaveTemplateModal}
           handleCloseComplete={saveTemplate}
+          templateEdit={templateEdit}
         />
         <div className="journalFormContainer">
           <div className="journalFormAccountsContainer">
@@ -470,6 +549,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                     }
                     style={{ width: "20em", height: "1.5em" }}
                     className="journalFormInputLarge"
+                    value={formData.journalDescription}
                   />
                 </div>
                 <div className="formColumn">
@@ -507,12 +587,21 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                   </div>
                 </div>
                 {templateReady ? (
-                  <button
-                    className="journalFormSaveTemplateButton"
-                    onClick={() => openSaveTemplateModal()}
-                  >
-                    Save New Template
-                  </button>
+                  templateEdit ? (
+                    <button
+                      className="journalFormSaveTemplateButton"
+                      onClick={() => openSaveTemplateModal()}
+                    >
+                      Edit Template
+                    </button>
+                  ) : (
+                    <button
+                      className="journalFormSaveTemplateButton"
+                      onClick={() => openSaveTemplateModal()}
+                    >
+                      Save New Template
+                    </button>
+                  )
                 ) : null}
               </div>
             </div>
@@ -551,6 +640,8 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                   subGLCodeSegment={subGLCodeSegment}
                   formData={formData}
                   handleChangeFormData={handleChangeFormData}
+                  selectedSegment={selectedSubGLSegment}
+                  setSelectedSegment={setSelectedSubGLSegment}
                   showSubGLSegment={showSubGLSegment}
                   setShowSubGLSegment={setShowSubGLSegment}
                   selectedOption={selectedSubGLOption}

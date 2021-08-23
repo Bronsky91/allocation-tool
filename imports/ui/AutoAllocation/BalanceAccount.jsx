@@ -32,7 +32,7 @@ export const BalanceAccount = ({ handleChangeFormData, formData }) => {
           justifyContent: "space-evenly",
         }}
       >
-        <div className="formRow">
+        <div className="formRow" style={{ justifyContent: "flex-start" }}>
           {formData.selectedBalanceSegments.map((segment, index) => {
             return (
               <div className="formColumn" key={index}>

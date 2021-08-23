@@ -67,8 +67,6 @@ Meteor.methods({
         {}
       );
 
-      console.log("columnIndexRef", columnIndexRef);
-
       const subSegments = sheet.rows
         .filter((row) => row.length > 1)
         .map((row) => {
@@ -298,18 +296,28 @@ Meteor.methods({
     check(template, {
       name: String,
       description: String,
-      balancingAccount: [String],
+      balancingAccount: [
+        {
+          description: String,
+          segmentId: Match.OneOf(String, Number),
+          category: Match.Optional(String),
+        },
+      ],
       glCodeToAllocate: {
         allocationSegment: {
-          category: String,
           description: String,
           segmentId: Match.OneOf(String, Number),
           typicalBalance: Match.Optional(String),
+          category: Match.Optional(String),
         },
         typicalBalance: String,
       },
       otherSegments: Match.Maybe([String]),
       subGLCode: {
+        selectedSubGLSegment: {
+          description: String,
+          segmentId: Match.OneOf(String, Number),
+        },
         subGLSegment: {
           allocations: {
             description: String,
@@ -343,6 +351,73 @@ Meteor.methods({
             ...template,
           },
         },
+      }
+    );
+    return { templateId, numberOfDocumentsUpdate };
+  },
+  "chartOfAccounts.templates.update": function (id, templateId, template) {
+    check(id, String);
+    check(templateId, String);
+    check(template, {
+      name: String,
+      description: String,
+      balancingAccount: [
+        {
+          description: String,
+          segmentId: Match.OneOf(String, Number),
+          category: Match.Optional(String),
+        },
+      ],
+      glCodeToAllocate: {
+        allocationSegment: {
+          description: String,
+          segmentId: Match.OneOf(String, Number),
+          typicalBalance: Match.Optional(String),
+          category: Match.Optional(String),
+        },
+        typicalBalance: String,
+      },
+      otherSegments: Match.Maybe([String]),
+      subGLCode: {
+        selectedSubGLSegment: {
+          description: String,
+          segmentId: Match.OneOf(String, Number),
+        },
+        subGLSegment: {
+          allocations: {
+            description: String,
+            segmentId: Match.OneOf(String, Number),
+          },
+          balance: {
+            description: String,
+            segmentId: Match.OneOf(String, Number),
+          },
+        },
+        selectedSubGLOption: String,
+        showSubGLSegment: Boolean,
+      },
+      metricToAllocate: String,
+      allocationTechinque: String,
+      nestThisAllocation: Boolean,
+    });
+
+    if (!this.userId) {
+      // TODO: Add proper permissions
+      throw new Meteor.Error("Not authorized.");
+    }
+
+    const numberOfDocumentsUpdate = ChartOfAccountsCollection.update(
+      { _id: id },
+      {
+        $set: {
+          "templates.$[t]": {
+            _id: templateId,
+            ...template,
+          },
+        },
+      },
+      {
+        arrayFilters: [{ "t._id": templateId }],
       }
     );
     return { templateId, numberOfDocumentsUpdate };

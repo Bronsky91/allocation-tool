@@ -9,15 +9,13 @@ export const SubGLSegment = ({
   subGLCodeSegment,
   formData,
   handleChangeFormData,
+  selectedSegment,
+  setSelectedSegment,
   showSubGLSegment,
   setShowSubGLSegment,
   selectedOption,
   setSelectedOption,
 }) => {
-  const [selectedSegment, setSelectedSegment] = useState(
-    subGLCodeSegment.subSegments[0]
-  );
-
   const noSubGL = subGLCodeSegment.subSegments.find(
     (s) => Number(s.segmentId) === 0
   );
@@ -47,6 +45,7 @@ export const SubGLSegment = ({
         allocations: noSubGL,
       });
     } else if (selectedOption === "both") {
+      console.log("time to change in both");
       handleChangeFormData("subGLSegment", {
         balance: selectedSegment,
         allocations: selectedSegment,
