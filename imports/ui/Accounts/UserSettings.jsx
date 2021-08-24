@@ -7,20 +7,34 @@ import { useTracker } from "meteor/react-meteor-data";
 import { ChartOfAccountsCollection } from "../../db/ChartOfAccountsCollection";
 // Components
 import { Header } from "../Header";
+import { AddUserModal } from "./AddUserModal";
 
 export const UserSettings = () => {
+  const [addUserMoalOpen, setAddUserModalOpen] = useState(false);
+
   // Subscriptions
   Meteor.subscribe("chartOfAccounts");
-  Meteor.subscribe("Meteor.user.redskyAdmin");
+  Meteor.subscribe("userList");
 
   const user = useTracker(() => Meteor.user());
-  const logout = () => Meteor.logout();
+  const allUsers = useTracker(() =>
+    Meteor.users.find({ adminId: user._id }, {}).fetch()
+  );
+  console.log("allUsers", allUsers);
 
   const history = useHistory();
 
   const chartOfAccounts = useTracker(() =>
     ChartOfAccountsCollection.find({}).fetch()
   );
+
+  const openAddUserModal = () => {
+    setAddUserModalOpen(true);
+  };
+
+  const closeAddUserModal = () => {
+    setAddUserModalOpen(false);
+  };
 
   const handleRemoveAllData = () => {
     Meteor.call("chartOfAccounts.removeAll", {}, (err, res) => {
@@ -48,9 +62,12 @@ export const UserSettings = () => {
           alignItems: "center",
         }}
       >
+        <AddUserModal open={addUserMoalOpen} handleClose={closeAddUserModal} />
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div style={{ marginTop: 10 }}>
-            <div style={{ fontWeight: "bold" }}>Chart of Accounts:</div>
+            {chartOfAccounts.length > 0 ? (
+              <div style={{ fontWeight: "bold" }}>Chart of Accounts:</div>
+            ) : null}
 
             {chartOfAccounts.map((coa, index) => (
               <ul key={index}>
@@ -73,8 +90,26 @@ export const UserSettings = () => {
             ))}
           </div>
 
+          {user.admin ? (
+            <div>
+              <div style={{ fontWeight: "bold" }}>Users:</div>
+              {allUsers.map((user) => (
+                <ul>
+                  <li>Name - {user.name}</li>
+                  <ul>
+                    <li>TODO: Update Permissions</li>
+                  </ul>
+                </ul>
+              ))}
+            </div>
+          ) : null}
+
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <button style={{ margin: 10 }}>Add User</button>
+            {user.admin ? (
+              <button style={{ margin: 10 }} onClick={openAddUserModal}>
+                Add User
+              </button>
+            ) : null}
             <button
               style={{ margin: 10 }}
               onClick={handleRemoveAllData}

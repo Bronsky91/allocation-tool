@@ -39,6 +39,16 @@ Accounts.onCreateUser((options, user) => {
   user.redskyAdmin = options.redskyAdmin;
   // Admins are Client Admins that pay for the tool
   user.admin = options.admin;
+  // Flag that shows if the user as an admin or not
+  user.hasAdmin = !!options?.adminId // If the field exists then show boolean as true
+  
+  if (user.hasAdmin) {
+    // Users created by admin's have adminId that ties them together
+    user.adminId = options?.adminId || "";
+    // Users that aren't admins need permissions
+    user.permissions = options?.permissions || []
+  }
+
 
   return user;
 });

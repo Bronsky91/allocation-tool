@@ -7,10 +7,11 @@ import { useTracker } from "meteor/react-meteor-data";
 import { Header } from "../Header";
 
 export const RedskyAdmin = () => {
-  Meteor.subscribe("userList");
+  Meteor.subscribe("userListRedsky");
 
   const user = useTracker(() => Meteor.user());
   const allUsers = useTracker(() => Meteor.users.find({}, {}).fetch());
+  // TODO: Probably should filter out users that don't have adminIds (meaning that their admin created)
   console.log("allUsers", allUsers);
   const history = useHistory();
 

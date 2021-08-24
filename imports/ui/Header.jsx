@@ -34,7 +34,7 @@ export const Header = ({
   };
 
   const headerButtonContainerWidth =
-    location.pathname === "/" ? "21.5em" : "90px";
+    location.pathname === "/" && chartOfAccounts.length > 0 ? "21.5em" : "90px";
 
   return (
     <div className="headerContainer">
@@ -59,7 +59,7 @@ export const Header = ({
         className="headerButtonContainer"
         style={{ width: headerButtonContainerWidth }}
       >
-        {location.pathname === "/" ? (
+        {location.pathname === "/" && chartOfAccounts.length > 0 ? (
           <select
             value={selectedChartOfAccountsId}
             onChange={(e) => setSelectChartOfAccountsId(e.target.value)}

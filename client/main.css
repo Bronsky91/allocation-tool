@@ -147,6 +147,7 @@ tr:nth-child(even) {
   flex-direction: column;
   justify-content: space-evenly;
   align-items: center;
+  overflow: scroll;
 }
 
 .registerInnerContainer {
@@ -694,6 +695,16 @@ input[type="file"] {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+}
+
+/* User Settings */
+
+.registerFormContainerModal {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+  overflow: scroll;
 }
 
 /* Start of old Styles */

@@ -40,12 +40,13 @@ Meteor.methods({
     }
     Accounts.createUser({
       username: data.username,
-      password: data.email,
+      password: data.password,
       name: data.name,
       email: data.email,
       redskyAdmin: false,
       admin: false,
-      adminId: this.userId,
+      adminId: this.userId, // The adminId ties the user to the admin that created them
+      permissions: []
     });
   },
   "user.redskyAdmin": function (data) {

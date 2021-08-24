@@ -48,7 +48,7 @@ export const App = ({ loggingIn }) => {
       {...rest}
       render={(props) => {
         const isLoggedIn = Meteor.userId() !== null;
-        const hasAccess = user ? user.admin : user?.adminId; // TODO: Admin ID lookup?
+        const hasAccess = user ? user.admin || user.hasAdmin : false;
 
         return rest.loggingIn ? (
           <Header />
