@@ -1,12 +1,10 @@
 import React, { useState } from "react";
-import { Redirect } from "react-router-dom";
+import { Redirect, useHistory } from "react-router-dom";
 
 import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
 
 export const RegisterForm = () => {
-  const user = useTracker(() => Meteor.user());
-
   const initialRegisterForm = {
     name: "",
     email: "",
@@ -17,6 +15,9 @@ export const RegisterForm = () => {
 
   const [registerForm, setRegisterForm] = useState(initialRegisterForm);
   const [registerError, setRegisterError] = useState("");
+  const [registerSuccess, setRegisterSuccess] = useState(false);
+
+  const history = useHistory();
 
   const passwordsMatch =
     registerForm.password === registerForm.confirmPassword ||
@@ -42,7 +43,6 @@ export const RegisterForm = () => {
     if (field === "email" || field === "username") {
       value = value.toLowerCase();
     }
-    console.log(`${field} - ${value}`);
     setRegisterForm((registerForm) => ({
       ...registerForm,
       [field]: value,
@@ -53,20 +53,14 @@ export const RegisterForm = () => {
     e.preventDefault();
     // TODO: Create user
     console.log("creating user");
-    // Meteor.loginWithPassword(username, password, (err) => {
-    //   if (err) {
-    //     setRegisterError(err.reason);
-    //   }
-    // });
+    Meteor.call("user.create", registerForm, (err, res) => {
+      if (err) {
+        setRegisterError(err.reason);
+      } else {
+        setRegisterSuccess(true);
+      }
+    });
   };
-
-  if (user) {
-    if ("paid?") {
-      // If the user has not paid yet, sent to walled garden
-      // return <Redirect to="/onboard" />;
-    }
-    // return <Redirect to="/onboard" />;
-  }
 
   return (
     <div className="loginContainer">
@@ -74,110 +68,125 @@ export const RegisterForm = () => {
         <div style={{ fontSize: 24, marginTop: 10 }}>
           RedSky Innovations Journal Entry Tool
         </div>
-        <div className="registerInnerContainer">
-          <div className="loginInputContainer">
-            <label className="loginText" htmlFor="name">
-              Name
-            </label>
-            <input
-              className="loginInput"
-              type="text"
-              placeholder="Name"
-              name="name"
-              required
-              value={registerForm.name}
-              onChange={(e) => handleRegisterFormChange("name", e.target.value)}
-            />
+        {registerSuccess ? (
+          <div className="registerInnerContainer">
+            <div>Thanks for signing up!</div>
+            <div>Once your account is approved, proceed to the login page</div>
+            <button onClick={() => history.push("/login")}>Login</button>
           </div>
-          <div className="loginInputContainer">
-            <label className="loginText" htmlFor="email">
-              Email Address
-            </label>
+        ) : (
+          <div className="registerInnerContainer">
+            <div className="loginInputContainer">
+              <label className="loginText" htmlFor="name">
+                Name
+              </label>
+              <input
+                className="loginInput"
+                type="text"
+                placeholder="Name"
+                name="name"
+                required
+                value={registerForm.name}
+                onChange={(e) =>
+                  handleRegisterFormChange("name", e.target.value)
+                }
+              />
+            </div>
+            <div className="loginInputContainer">
+              <label className="loginText" htmlFor="email">
+                Email Address
+              </label>
 
-            <input
-              className="loginInput"
-              type="text"
-              placeholder="Email Address"
-              name="email"
-              required
-              value={registerForm.email}
-              onChange={(e) =>
-                handleRegisterFormChange("email", e.target.value)
-              }
-            />
-          </div>
-          <div className="loginInputContainer">
-            <label className="loginText" htmlFor="username">
-              Username
-            </label>
+              <input
+                className="loginInput"
+                type="text"
+                placeholder="Email Address"
+                name="email"
+                required
+                value={registerForm.email}
+                onChange={(e) =>
+                  handleRegisterFormChange("email", e.target.value)
+                }
+              />
+            </div>
+            <div className="loginInputContainer">
+              <label className="loginText" htmlFor="username">
+                Username
+              </label>
 
-            <input
-              className="loginInput"
-              type="text"
-              placeholder="Username"
-              name="username"
-              required
-              value={registerForm.username}
-              onChange={(e) =>
-                handleRegisterFormChange("username", e.target.value)
-              }
-            />
-          </div>
-          <div className="loginInputContainer">
-            <label className="loginText" htmlFor="password">
-              Password
-            </label>
+              <input
+                className="loginInput"
+                type="text"
+                placeholder="Username"
+                name="username"
+                required
+                value={registerForm.username}
+                onChange={(e) =>
+                  handleRegisterFormChange("username", e.target.value)
+                }
+              />
+            </div>
+            <div className="loginInputContainer">
+              <label className="loginText" htmlFor="password">
+                Password
+              </label>
 
-            <input
-              className="loginInput"
-              type="password"
-              placeholder="Password"
-              name="password"
-              required
-              value={registerForm.password}
-              onChange={(e) =>
-                handleRegisterFormChange("password", e.target.value)
-              }
-            />
-          </div>
-          <div className="loginInputContainer">
-            <label className="loginText" htmlFor="confirmPassword">
-              Confirm Password
-            </label>
+              <input
+                className="loginInput"
+                type="password"
+                placeholder="Password"
+                name="password"
+                required
+                value={registerForm.password}
+                onChange={(e) =>
+                  handleRegisterFormChange("password", e.target.value)
+                }
+              />
+            </div>
+            <div className="loginInputContainer">
+              <label className="loginText" htmlFor="confirmPassword">
+                Confirm Password
+              </label>
 
-            <input
-              className="loginInput"
-              type="password"
-              placeholder="Confirm Password"
-              name="confirmPassword"
-              required
-              value={registerForm.confirmPassword}
-              onChange={(e) =>
-                handleRegisterFormChange("confirmPassword", e.target.value)
-              }
-            />
-            {!passwordsMatch ? (
-              <div
-                className="loginText"
-                style={{ padding: 5, color: "red", fontSize: 12, opacity: 0.8 }}
-              >
-                Passwords do not match
-              </div>
-            ) : null}
+              <input
+                className="loginInput"
+                type="password"
+                placeholder="Confirm Password"
+                name="confirmPassword"
+                required
+                value={registerForm.confirmPassword}
+                onChange={(e) =>
+                  handleRegisterFormChange("confirmPassword", e.target.value)
+                }
+              />
+              {!passwordsMatch ? (
+                <div
+                  className="loginText"
+                  style={{
+                    padding: 5,
+                    color: "red",
+                    fontSize: 12,
+                    opacity: 0.8,
+                  }}
+                >
+                  Passwords do not match
+                </div>
+              ) : null}
+            </div>
+            <button
+              type="submit"
+              className={`registerButton ${
+                formReady ? "registerButtonActive" : "registerButtonDisabled"
+              }`}
+              disabled={!formReady}
+            >
+              Register
+            </button>
+            <div style={{ color: registerError ? "red" : "#fff" }}>
+              {registerError ? registerError : "Error message placeholder"}
+            </div>
           </div>
-          <button
-            type="submit"
-            className={`registerButton ${
-              formReady ? "registerButtonActive" : "registerButtonDisabled"
-            }`}
-            disabled={!formReady}
-          >
-            Register
-          </button>
-          <div style={{ color: registerError ? "red" : "#fff" }}>
-            {registerError ? registerError : "Error message placeholder"}
-          </div>
-        </div>
+        )}
       </form>
     </div>
   );

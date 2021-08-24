@@ -64,7 +64,7 @@ Meteor.startup(() => {
       password: SECOND_SEE_PASSWORD,
       name: "Nate Curi",
       email: "nate@dci.com",
-      redskyAdmin: false,
+      redskyAdmin: true,
       admin: true,
     });
   }
