@@ -6,10 +6,10 @@ Meteor.publish("userList", function () {
   }
 });
 
-Meteor.publish("Meteor.user.redskyAdmin", function () {
+Meteor.publish("Meteor.user.admin", function () {
   // Only return one field, `redskyAdmin`
   const options = {
-    fields: { redskyAdmin: 1 },
+    fields: { redskyAdmin: 1, admin: 1 },
   };
 
   return Meteor.users.find({}, options);

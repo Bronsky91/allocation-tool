@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Redirect } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
 
 import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
@@ -8,7 +8,7 @@ import { ChartOfAccountsCollection } from "../../db/ChartOfAccountsCollection";
 export const LoginForm = () => {
   // Subscriptions
   Meteor.subscribe("chartOfAccounts");
-  Meteor.subscribe("Meteor.user.redskyAdmin");
+  Meteor.subscribe("Meteor.user.admin");
 
   const chartOfAccounts = useTracker(() =>
     ChartOfAccountsCollection.find({}).fetch()
@@ -25,6 +25,7 @@ export const LoginForm = () => {
 
     Meteor.loginWithPassword(username, password, (err) => {
       if (err) {
+        console.log(err);
         setLoginError(err.reason);
       }
     });
@@ -35,7 +36,7 @@ export const LoginForm = () => {
       // User is a RedskyAdmin
       return <Redirect to="/admin" />;
     }
-    if (chartOfAccounts.length === 0) {
+    if (chartOfAccounts.length === 0 && user.admin) {
       // If the user has no data yet, redirect to onboarding page
       return <Redirect to="/onboard" />;
     }
@@ -80,6 +81,17 @@ export const LoginForm = () => {
           <button type="submit" className="loginButton">
             Log In
           </button>
+          <Link
+            to="/register"
+            style={{
+              textDecoration: "inherit",
+              color: "#3597fe",
+              marginLeft: 10,
+              fontSize: 12,
+            }}
+          >
+            Register
+          </Link>
           <div style={{ color: loginError ? "red" : "#fff" }}>
             {loginError ? loginError : "Error message placeholder"}
           </div>

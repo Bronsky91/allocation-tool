@@ -74,6 +74,7 @@ export const UserSettings = () => {
           </div>
 
           <div style={{ display: "flex", flexDirection: "column" }}>
+            <button style={{ margin: 10 }}>Add User</button>
             <button
               style={{ margin: 10 }}
               onClick={handleRemoveAllData}

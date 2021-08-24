@@ -42,7 +42,7 @@ export const RedskyAdmin = () => {
                   <button
                     style={{ marginLeft: 5 }}
                     onClick={() =>
-                      Meteor.call("user.admin", {
+                      Meteor.call("user.admin.toggle", {
                         id: user._id,
                         admin: !user.admin,
                       })

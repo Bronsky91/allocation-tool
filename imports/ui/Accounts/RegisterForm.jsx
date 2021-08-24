@@ -51,9 +51,8 @@ export const RegisterForm = () => {
 
   const submit = (e) => {
     e.preventDefault();
-    // TODO: Create user
-    console.log("creating user");
-    Meteor.call("user.create", registerForm, (err, res) => {
+
+    Meteor.call("user.admin.create", registerForm, (err, res) => {
       if (err) {
         setRegisterError(err.reason);
       } else {
@@ -76,6 +75,7 @@ export const RegisterForm = () => {
           </div>
         ) : (
           <div className="registerInnerContainer">
+            <div style={{ fontWeight: "bold" }}>Account Owner Registration</div>
             <div className="loginInputContainer">
               <label className="loginText" htmlFor="name">
                 Name

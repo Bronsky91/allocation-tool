@@ -18,6 +18,7 @@ export const Header = ({
   const user = useTracker(() => Meteor.user());
   // Subscriptions
   Meteor.subscribe("chartOfAccounts");
+  Meteor.subscribe("Meteor.user.admin");
 
   const chartOfAccounts = useTracker(() =>
     ChartOfAccountsCollection.find({}).fetch()
@@ -44,7 +45,7 @@ export const Header = ({
       <div
         className="headerText"
         onClick={() => {
-          if (chartOfAccounts.length === 0) {
+          if (chartOfAccounts.length === 0 && user.admin) {
             handleNavigation("/onboard");
           } else {
             handleNavigation("/");

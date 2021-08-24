@@ -9,17 +9,17 @@ Meteor.users.deny({
 });
 
 Meteor.methods({
-  "user.create": function (data) {
+  "user.admin.create": function (data) {
     Accounts.createUser({
       username: data.username,
-      password: data.email,
+      password: data.password,
       name: data.name,
       email: data.email,
       redskyAdmin: false,
       admin: false,
     });
   },
-  "user.admin": function (data) {
+  "user.admin.toggle": function (data) {
     // Only redsky admins can adjust admin privileges
     if (!this.userId || !Meteor.user()?.redskyAdmin) {
       throw new Meteor.Error("Not authorized.");
@@ -32,6 +32,21 @@ Meteor.methods({
         },
       }
     );
+  },
+  "user.create": function (data) {
+    // Only admins can create users
+    if (!this.userId || !Meteor.user()?.admin) {
+      throw new Meteor.Error("Not authorized.");
+    }
+    Accounts.createUser({
+      username: data.username,
+      password: data.email,
+      name: data.name,
+      email: data.email,
+      redskyAdmin: false,
+      admin: false,
+      adminId: this.userId,
+    });
   },
   "user.redskyAdmin": function (data) {
     // Only other admins can adjust admin privileges

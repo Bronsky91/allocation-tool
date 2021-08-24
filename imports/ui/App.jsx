@@ -21,12 +21,12 @@ import { RegisterForm } from "./Accounts/RegisterForm.jsx";
 import { Header } from "./Header.jsx";
 
 export const App = ({ loggingIn }) => {
-  Meteor.subscribe("Meteor.user.redskyAdmin");
+  Meteor.subscribe("Meteor.user.admin");
 
   const user = useTracker(() => Meteor.user());
 
   // Must be logged in for this route... Briefly shows '...' while loading account data rather than redirecting...
-  const ProtectedRoute = ({ component: Component, ...rest }) => (
+  const LoggedInProtectedRoute = ({ component: Component, ...rest }) => (
     <Route
       {...rest}
       render={(props) => {
@@ -35,6 +35,27 @@ export const App = ({ loggingIn }) => {
           <Header />
         ) : isLoggedIn ? (
           <Component {...props} />
+        ) : (
+          <Redirect to={{ pathname: "/login" }} />
+        );
+      }}
+    />
+  );
+
+  // Must be logged in for this route... Briefly shows '...' while loading account data rather than redirecting...
+  const ProtectedRoute = ({ component: Component, ...rest }) => (
+    <Route
+      {...rest}
+      render={(props) => {
+        const isLoggedIn = Meteor.userId() !== null;
+        const hasAccess = user ? user.admin : user?.adminId; // TODO: Admin ID lookup?
+
+        return rest.loggingIn ? (
+          <Header />
+        ) : hasAccess ? (
+          <Component {...props} />
+        ) : isLoggedIn ? (
+          <NotFound />
         ) : (
           <Redirect to={{ pathname: "/login" }} />
         );
@@ -68,7 +89,7 @@ export const App = ({ loggingIn }) => {
       <Switch>
         <Route exact path="/login" component={LoginForm} />
         <Route exact path="/register" component={RegisterForm} />
-        <ProtectedRoute
+        <LoggedInProtectedRoute
           loggingIn={loggingIn}
           exact
           path="/account"
