@@ -2,6 +2,8 @@ import React, { useState } from "react";
 // Meteor
 import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
+// React Router
+import { Redirect, useHistory } from "react-router-dom";
 // Utils
 import { ReadWorkbook } from "../../utils/ReadWorkbook";
 import { isChartOfAccountWorkBookDataValid } from "../../utils/CheckWorkbookData";
@@ -9,12 +11,12 @@ import { isChartOfAccountWorkBookDataValid } from "../../utils/CheckWorkbookData
 import { ChartOfAccountsCollection } from "../../db/ChartOfAccountsCollection";
 // Constants
 import { GL_CODE, SUB_GL_CODE } from "../../../constants";
-import { Header } from "../Header";
-import { useHistory } from "react-router-dom";
 // Material UI
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+// Components
+import { Header } from "../Header";
 
 export const ImportData = () => {
   // Subscriptions
@@ -182,6 +184,10 @@ export const ImportData = () => {
 
   if (!user) {
     return <Redirect to="/login" />;
+  }
+
+  if (!user.admin) {
+    return <Redirect to="/" />;
   }
 
   return (
