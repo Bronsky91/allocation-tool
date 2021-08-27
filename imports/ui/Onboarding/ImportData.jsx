@@ -10,13 +10,14 @@ import { isChartOfAccountWorkBookDataValid } from "../../utils/CheckWorkbookData
 // DB
 import { ChartOfAccountsCollection } from "../../db/ChartOfAccountsCollection";
 // Constants
-import { GL_CODE, SUB_GL_CODE } from "../../../constants";
+import { BLUE, GL_CODE, SUB_GL_CODE } from "../../../constants";
 // Material UI
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 // Components
 import { Header } from "../Header";
+import BarLoader from "react-spinners/BarLoader";
 
 export const ImportData = () => {
   // Subscriptions
@@ -50,6 +51,7 @@ export const ImportData = () => {
   const [chartOfAccountsFileInputKey, setChartOfAccountsFileInputKey] =
     useState(new Date());
   const [metricFileInputKey, setMetricFileInputKey] = useState(new Date());
+  const [loading, setLoading] = useState(false);
 
   const currentChartOfAccounts =
     chartOfAccounts.find((coa) => coa._id === newChartOfAccountsId) ||
@@ -69,6 +71,7 @@ export const ImportData = () => {
     // Checks if the workbookData is valid
     const output = isChartOfAccountWorkBookDataValid(workbookData);
     if (output.valid) {
+      setLoading(true);
       // Create the Chart of Accounts from the Formatted Data
       Meteor.call("chartOfAccounts.insert", file.name, (error, result) => {
         if (result) {
@@ -79,10 +82,12 @@ export const ImportData = () => {
             workbookData,
             (err, res) => {
               setNewChartOfAccountsId(id);
+              setLoading(false);
             }
           );
         } else {
           console.log(error);
+          setLoading(false);
           alert(error);
         }
       });
@@ -169,11 +174,18 @@ export const ImportData = () => {
     const completedMetricData = metricData.find(
       (metric) => metric.name === metricName
     );
+    setLoading(true);
     // Saves the metric to the chart of accounts
     Meteor.call(
       "chartOfAccounts.metrics.insert",
       currentChartOfAccounts._id,
-      completedMetricData
+      completedMetricData,
+      (err, res) => {
+        if (err) {
+          alert("Unable to save metric", err.reason);
+        }
+        setLoading(false);
+      }
     );
     // Removes the saved metric from the react hook state
     setMetricData((metricData) =>
@@ -236,6 +248,7 @@ export const ImportData = () => {
                 onChange={handleChartOfAccountsFile}
                 key={chartOfAccountsFileInputKey}
               />
+              <BarLoader loading={loading} color={BLUE} />
               <div className="onboardFileName">{fileName}</div>
               {currentChartOfAccounts.segments.length > 0 ? (
                 <button
@@ -303,6 +316,7 @@ export const ImportData = () => {
                 onChange={handleMetricFile}
                 key={metricFileInputKey}
               />
+              <BarLoader loading={loading} color={BLUE} />
               <div className="onboardFileName">{metricFileName}</div>
               {currentChartOfAccounts.metrics.length > 0 ? (
                 <button

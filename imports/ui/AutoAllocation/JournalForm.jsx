@@ -11,6 +11,7 @@ import GetAppIcon from "@material-ui/icons/GetApp";
 import { Redirect } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import BarLoader from "react-spinners/BarLoader";
 // Components
 import { Header } from "../Header";
 import { BalanceAccount } from "./BalanceAccount";
@@ -25,7 +26,7 @@ import { ChartOfAccountsCollection } from "../../db/ChartOfAccountsCollection";
 // Utils
 import { CreateWorkbook } from "../../utils/CreateWorkbook";
 // Constants
-import { GL_CODE, SUB_GL_CODE } from "../../../constants";
+import { BLUE, GL_CODE, SUB_GL_CODE } from "../../../constants";
 
 export const JournalFormParent = () => {
   // Current user logged in
@@ -99,6 +100,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
     subGLCodeSegment.subSegments.find((s) => Number(s.segmentId) === 0)
   );
   const [selectedTemplateId, setSelectedTemplateId] = useState("0");
+  const [fileLoading, setFileLoading] = useState(false);
 
   const metricSegments = segments
     .filter((s) => selectedMetric.metricSegments.includes(s.description))
@@ -147,6 +149,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
   );
 
   const readyToAllocate =
+    selectedAllocation &&
     formData.toBalanceSegmentValue > 0 &&
     formData.journalDescription.length > 0 &&
     Object.keys(formData.allocationValueOfBalancePerChartField).length > 0;
@@ -236,11 +239,21 @@ const JournalForm = ({ user, chartOfAccounts }) => {
               "allocationValueOfBalancePerChartField",
               allocationData
             );
+            setFileLoading(true);
           }
         }
       );
     }
   }, [formData.toBalanceSegmentValue, selectedAllocation]);
+
+  useEffect(() => {
+    console.log("readyToAllocate", readyToAllocate);
+    if (readyToAllocate) {
+      setTimeout(() => {
+        setFileLoading(false);
+      }, 1500);
+    }
+  }, [readyToAllocate, formData.allocationValueOfBalancePerChartField]);
 
   useEffect(() => {
     if (selectedTemplate) {
@@ -714,13 +727,17 @@ const JournalForm = ({ user, chartOfAccounts }) => {
               </div>
             </div>
             <div className="journalFormDownloadContainer">
-              {!readyToAllocate ? (
-                <div className="journalFormText">
-                  When your journal entry file is ready it will be available for
-                  download here
+              {!readyToAllocate || fileLoading ? (
+                <div className="journalFormDownloadInnerContainer">
+                  <div className="journalFormText">
+                    When your journal entry file is ready it will be available
+                    for download here
+                  </div>
+                  <BarLoader loading={fileLoading} color={BLUE} />
+                  <div></div>
                 </div>
               ) : null}
-              {readyToAllocate ? (
+              {readyToAllocate && !fileLoading ? (
                 <div className="journalFormDownloadInnerContainer">
                   <div className="journalFormText">
                     Your file is ready, click download button below to download
