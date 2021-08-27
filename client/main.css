@@ -557,6 +557,11 @@ input[type="file"] {
 
 /* Allocation Modal */
 
+/* Adjusting CSS of multi select dropdown */
+.rmsc .dropdown-content {
+  padding-bottom: 15px !important;
+}
+
 .allocationHeaderContainer {
   display: flex;
   flex-direction: row;

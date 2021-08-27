@@ -28,7 +28,8 @@ const useStyles = makeStyles((theme) => ({
   paper: {
     position: "absolute",
     height: "80%",
-    width: "40%",
+    width: "30%",
+    minWidth: 500,
     backgroundColor: theme.palette.background.paper,
     boxShadow: theme.shadows[5],
     // padding: theme.spacing(2, 4, 3),
@@ -270,6 +271,7 @@ export const AllocateModal = ({
           </div>
           <div className="allocationText">Choose allocation by Segment</div>
           <MultiSelect
+            hasSelectAll={metricSegmentOptions.length > 1}
             options={metricSegmentOptions}
             value={selectedMetricSegments}
             onChange={setSelectedMetricSegments}

@@ -112,7 +112,7 @@ export const SubsegmentDropdown = ({
         Which {segment.description} to include?
       </div>
       <MultiSelect
-        hasSelectAll={isMultiSelect}
+        hasSelectAll={isMultiSelect && options.length > 1}
         options={options}
         value={selected}
         onChange={handleSelect}
