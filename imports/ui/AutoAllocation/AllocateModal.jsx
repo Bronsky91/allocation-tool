@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 // Meteor
 import { Meteor } from "meteor/meteor";
 // Material UI
@@ -53,6 +53,14 @@ export const AllocateModal = ({
   const classes = useStyles();
   // getModalStyle is not a pure function, we roll the style only on the first render
   const [modalStyle] = React.useState(getModalStyle);
+
+  const bottomOfModal = useRef(null);
+
+  const scrollToBottom = () => {
+    setTimeout(() => {
+      bottomOfModal.current?.scrollIntoView({ behavior: "smooth" });
+    }, 50);
+  };
 
   const metricSegmentOptions = metricSegments.map((m) => ({
     label: m.description,
@@ -270,14 +278,16 @@ export const AllocateModal = ({
             <ExpandLessIcon />
           </div>
           <div className="allocationText">Choose allocation by Segment</div>
-          <MultiSelect
-            hasSelectAll={metricSegmentOptions.length > 1}
-            options={metricSegmentOptions}
-            value={selectedMetricSegments}
-            onChange={setSelectedMetricSegments}
-            labelledBy="Select"
-            className="allocationSectionInput"
-          />
+          <div style={{ display: "inline-block" }} onClick={scrollToBottom}>
+            <MultiSelect
+              hasSelectAll={metricSegmentOptions.length > 1}
+              options={metricSegmentOptions}
+              value={selectedMetricSegments}
+              onChange={setSelectedMetricSegments}
+              labelledBy="Select"
+              className="allocationSectionInput"
+            />
+          </div>
         </div>
 
         <div className="allocationSectionContainer">
@@ -302,6 +312,7 @@ export const AllocateModal = ({
                       .includes(segment._id)}
                     subsegmentAllocationData={subsegmentAllocationData}
                     setSubsegmentAllocationData={setSubsegmentAllocationData} // Used to prepopulate the allocation data for editing
+                    scrollToBottom={scrollToBottom}
                   />
                 ) : (
                   // Subsegments dropdowns used for creating
@@ -313,6 +324,7 @@ export const AllocateModal = ({
                       .map((sm) => sm.value)
                       .includes(segment._id)}
                     setSubsegmentAllocationData={setSubsegmentAllocationData}
+                    scrollToBottom={scrollToBottom}
                   />
                 );
               })
@@ -334,14 +346,19 @@ export const AllocateModal = ({
                 <div className="allocationText">
                   Choose allocation by method:
                 </div>
-                <MultiSelect
-                  hasSelectAll={false}
-                  options={methodOptions}
-                  value={selectedMethods}
-                  onChange={handleSelectedMetrics}
-                  labelledBy="Select"
-                  className="allocationSectionInput"
-                />
+                <div
+                  style={{ display: "inline-block" }}
+                  onClick={scrollToBottom}
+                >
+                  <MultiSelect
+                    hasSelectAll={false}
+                    options={methodOptions}
+                    value={selectedMethods}
+                    onChange={handleSelectedMetrics}
+                    labelledBy="Select"
+                    className="allocationSectionInput"
+                  />
+                </div>
               </div>
             ) : null}
           </div>
@@ -359,6 +376,7 @@ export const AllocateModal = ({
             Save Allocation
           </button>
         </div>
+        <div ref={bottomOfModal}></div>
       </div>
     </Modal>
   );

@@ -9,6 +9,7 @@ export const SubsegmentDropdown = ({
   subsegmentAllocationData,
   setSubsegmentAllocationData,
   isMultiSelect,
+  scrollToBottom,
 }) => {
   // Creates the options object for the dropdown
   const initialOptions = segment?.subSegments
@@ -111,14 +112,16 @@ export const SubsegmentDropdown = ({
       <div className="allocationText">
         Which {segment.description} to include?
       </div>
-      <MultiSelect
-        hasSelectAll={isMultiSelect && options.length > 1}
-        options={options}
-        value={selected}
-        onChange={handleSelect}
-        labelledBy="Select"
-        className="allocationSectionInput"
-      />
+      <div style={{ display: "inline-block" }} onClick={scrollToBottom}>
+        <MultiSelect
+          hasSelectAll={isMultiSelect && options.length > 1}
+          options={options}
+          value={selected}
+          onChange={handleSelect}
+          labelledBy="Select"
+          className="allocationSectionInput"
+        />
+      </div>
     </div>
   );
 };
