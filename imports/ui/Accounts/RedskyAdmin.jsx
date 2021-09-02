@@ -34,27 +34,29 @@ export const RedskyAdmin = () => {
         Welcome to the super secret Redsky admin page
         <div style={{ marginTop: 10 }}>
           User List
-          {allUsers.map((user, index) => (
-            <ul>
-              <li>{user.name}</li>
-              <ul>
-                <li>
-                  Client Admin - {user.admin ? "Yes" : "No"}
-                  <button
-                    style={{ marginLeft: 5 }}
-                    onClick={() =>
-                      Meteor.call("user.admin.toggle", {
-                        id: user._id,
-                        admin: !user.admin,
-                      })
-                    }
-                  >
-                    Toggle
-                  </button>
-                </li>
+          {allUsers
+            .filter((user) => !user.adminId)
+            .map((user, index) => (
+              <ul key={index}>
+                <li>{user.name}</li>
+                <ul>
+                  <li>
+                    Client Admin - {user.admin ? "Yes" : "No"}
+                    <button
+                      style={{ marginLeft: 5 }}
+                      onClick={() =>
+                        Meteor.call("user.admin.toggle", {
+                          id: user._id,
+                          admin: !user.admin,
+                        })
+                      }
+                    >
+                      Toggle
+                    </button>
+                  </li>
+                </ul>
               </ul>
-            </ul>
-          ))}
+            ))}
         </div>
       </div>
     </div>

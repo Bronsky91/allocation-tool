@@ -283,6 +283,7 @@ export const ImportData = () => {
                           <ul style={{ paddingLeft: 18, paddingRight: 10 }}>
                             {segment.subSegments.map((subSegment, i) => (
                               <li key={i} className="onboardSubsegmentTitle">
+                                {subSegment.segmentId} -{" "}
                                 {subSegment.description}
                               </li>
                             ))}

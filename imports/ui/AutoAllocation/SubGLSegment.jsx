@@ -92,7 +92,7 @@ export const SubGLSegment = ({
                 {subGLCodeSegment.subSegments.map((subSegment, index) => {
                   return (
                     <option key={index} value={index}>
-                      {subSegment.description}
+                      {subSegment.segmentId} - {subSegment.description}
                     </option>
                   );
                 })}

@@ -618,7 +618,10 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                 ) : null}
               </div>
             </div>
-            <div className="journalFormBalanceContainer journalAccountContainer">
+            <div
+              className="journalFormBalanceContainer journalAccountContainer"
+              // style={{ border: "0.5px green solid" }}
+            >
               <BalanceAccount
                 handleChangeFormData={handleChangeFormData}
                 formData={formData}
@@ -642,7 +645,10 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                 </div>
               </div>
             ) : null}
-            <div className="journalAccountContainer">
+            <div
+              className="journalAccountContainer"
+              // style={{ border: "0.5px blue solid" }}
+            >
               <GLSegment
                 glCodeSegment={glCodeSegment}
                 formData={formData}

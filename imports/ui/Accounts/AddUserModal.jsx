@@ -17,13 +17,15 @@ const getModalStyle = () => {
 const useStyles = makeStyles((theme) => ({
   paper: {
     position: "absolute",
-    height: "80%",
-    width: "50%",
+    height: "65%",
+    width: "30%",
     minWidth: 500,
     backgroundColor: theme.palette.background.paper,
     boxShadow: theme.shadows[5],
     padding: theme.spacing(2, 4, 3),
-    overflow: "scroll",
+    overflow: "auto",
+    display: "flex",
+    justifyContent: "center",
   },
 }));
 

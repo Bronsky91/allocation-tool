@@ -76,13 +76,13 @@ export const UserSettings = () => {
                   <li>Segments:</li>
                   <ul>
                     {coa.segments.map((segment) => (
-                      <li>{segment.description}</li>
+                      <li key={segment._id}>{segment.description}</li>
                     ))}
                   </ul>
                   <li>Metrics:</li>
                   <ul>
                     {coa.metrics.map((metric) => (
-                      <li>{metric.description}</li>
+                      <li key={metric._id}>{metric.description}</li>
                     ))}
                   </ul>
                 </ul>
@@ -93,8 +93,8 @@ export const UserSettings = () => {
           {user.admin ? (
             <div>
               <div style={{ fontWeight: "bold" }}>Users:</div>
-              {allUsers.map((user) => (
-                <ul>
+              {allUsers.map((user, index) => (
+                <ul key={index}>
                   <li>Name - {user.name}</li>
                   <ul>
                     <li>TODO: Update Permissions</li>
