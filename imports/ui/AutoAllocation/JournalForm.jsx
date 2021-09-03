@@ -220,7 +220,11 @@ const JournalForm = ({ user, chartOfAccounts }) => {
   }, [allocations]);
 
   useEffect(() => {
-    if (selectedAllocation && formData.toBalanceSegmentValue > 0) {
+    if (
+      formData.journalDescription.length > 0 &&
+      selectedAllocation &&
+      formData.toBalanceSegmentValue > 0
+    ) {
       Meteor.call(
         "calculateAllocation",
         {
@@ -243,7 +247,11 @@ const JournalForm = ({ user, chartOfAccounts }) => {
         }
       );
     }
-  }, [formData.toBalanceSegmentValue, selectedAllocation]);
+  }, [
+    formData.toBalanceSegmentValue,
+    selectedAllocation,
+    formData.journalDescription,
+  ]);
 
   useEffect(() => {
     if (readyToAllocate) {
@@ -251,7 +259,11 @@ const JournalForm = ({ user, chartOfAccounts }) => {
         setFileLoading(false);
       }, 1500);
     }
-  }, [readyToAllocate, formData.allocationValueOfBalancePerChartField]);
+  }, [
+    readyToAllocate,
+    formData.allocationValueOfBalancePerChartField,
+    formData.toBalanceSegmentValue,
+  ]);
 
   useEffect(() => {
     if (selectedTemplate) {
@@ -585,7 +597,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                   </select>
                 </div>
               </div>
-              <div className="formRow" style={{ alignItems: "center" }}>
+              <div className="row" style={{ alignItems: "center" }}>
                 <div className="formColumn">
                   <label className="journalFormText">Entry Date:</label>
                   <div>

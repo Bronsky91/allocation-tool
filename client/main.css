@@ -418,11 +418,13 @@ input[type="file"] {
   height: 90%;
   width: 90%;
   overflow-y: auto;
+  border: white 15px solid;
 }
 
 .journalFormTitle {
   font-family: RobotoSlab;
   font-size: 20px;
+  font-weight: bold;
   color: #373737;
 }
 
@@ -470,7 +472,11 @@ input[type="file"] {
 }
 
 .journalSubGLContainer {
-  padding: 1em;
+  margin-top: 1em;
+  padding: 0.5em;
+  background-color: white;
+  border-radius: 8px;
+  border: solid 1px #eaeaea;
   /* width: 60%; */
 }
 

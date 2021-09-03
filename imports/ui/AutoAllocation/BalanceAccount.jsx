@@ -2,6 +2,8 @@ import React from "react";
 // Utils
 import { createBalanceAccountString } from "../../utils/CreateAccountStrings";
 import { SegmentSelect } from "./SegmentSelect";
+// Packages
+import NumberFormat from "react-number-format";
 
 export const BalanceAccount = ({ handleChangeFormData, formData }) => {
   const handleChangeSegment = (selected, index) => {
@@ -58,14 +60,18 @@ export const BalanceAccount = ({ handleChangeFormData, formData }) => {
           </div>
           <div className="formColumn" style={{ marginLeft: "1em" }}>
             <label className="journalFormText">Value:</label>
-            <input
-              type="number"
-              onChange={(e) =>
-                handleChangeFormData("toBalanceSegmentValue", e.target.value)
-              }
-              className="journalFormInput"
-              style={{ width: "15em", height: "1.5em" }}
+            <NumberFormat
               value={formData.toBalanceSegmentValue}
+              thousandSeparator={true}
+              prefix="$"
+              className="journalFormInput"
+              inputMode="numeric"
+              style={{ width: "15em", height: "1.5em" }}
+              fixedDecimalScale={true}
+              decimalScale={2}
+              onValueChange={(v) =>
+                handleChangeFormData("toBalanceSegmentValue", v.floatValue)
+              }
             />
           </div>
         </div>
