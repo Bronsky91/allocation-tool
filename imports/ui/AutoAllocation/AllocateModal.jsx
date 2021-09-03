@@ -9,7 +9,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 // Packages
-import MultiSelect from "react-multi-select-component";
+import Select from "react-select";
 // Components
 import { SubsegmentDropdown } from "./SubsegmentDropdown";
 
@@ -279,13 +279,16 @@ export const AllocateModal = ({
           </div>
           <div className="allocationText">Choose allocation by Segment</div>
           <div style={{ display: "inline-block" }} onClick={scrollToBottom}>
-            <MultiSelect
-              hasSelectAll={metricSegmentOptions.length > 1}
-              options={metricSegmentOptions}
+            <Select
               value={selectedMetricSegments}
               onChange={setSelectedMetricSegments}
-              labelledBy="Select"
+              options={metricSegmentOptions}
               className="allocationSectionInput"
+              isMulti={true}
+              isSearchable={true}
+              placeholder={`Select Segment${
+                metricSegmentOptions.length > 1 ? "s" : ""
+              }...`}
             />
           </div>
         </div>
@@ -350,12 +353,10 @@ export const AllocateModal = ({
                   style={{ display: "inline-block" }}
                   onClick={scrollToBottom}
                 >
-                  <MultiSelect
-                    hasSelectAll={false}
+                  <Select
                     options={methodOptions}
                     value={selectedMethods}
                     onChange={handleSelectedMetrics}
-                    labelledBy="Select"
                     className="allocationSectionInput"
                   />
                 </div>
