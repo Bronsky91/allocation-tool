@@ -27,7 +27,10 @@ export const OtherSegment = ({
   };
 
   return (
-    <div>
+    <div
+      className="formRow"
+      style={{ justifyContent: "flex-start", flexWrap: "wrap" }}
+    >
       <div className="formColumn">
         <label className="journalFormText">{description}</label>
         {formDataOtherSegment ? (
@@ -42,7 +45,7 @@ export const OtherSegment = ({
           />
         ) : null}
       </div>
-      <div className="formColumn">
+      <div className="formColumn" style={{ marginLeft: "1em" }}>
         <label className="journalFormText">Segment ID:</label>
         <div>{selectedSegment.segmentId}</div>
       </div>

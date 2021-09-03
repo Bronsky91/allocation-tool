@@ -301,6 +301,7 @@ Meteor.methods({
           description: String,
           segmentId: Match.OneOf(String, Number),
           category: Match.Optional(String),
+          typicalBalance: Match.Optional(String),
         },
       ],
       glCodeToAllocate: {
@@ -312,7 +313,12 @@ Meteor.methods({
         },
         typicalBalance: String,
       },
-      otherSegments: Match.Maybe([String]),
+      otherSegments: Match.Maybe([
+        {
+          description: String,
+          segmentId: Match.OneOf(String, Number),
+        },
+      ]),
       subGLCode: {
         selectedSubGLSegment: {
           description: String,
@@ -366,6 +372,7 @@ Meteor.methods({
           description: String,
           segmentId: Match.OneOf(String, Number),
           category: Match.Optional(String),
+          typicalBalance: Match.Optional(String),
         },
       ],
       glCodeToAllocate: {
