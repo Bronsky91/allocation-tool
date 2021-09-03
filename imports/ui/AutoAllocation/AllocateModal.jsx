@@ -8,10 +8,11 @@ import { IconButton } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-// Packages
-import MultiSelect from "react-multi-select-component";
 // Components
 import { SubsegmentDropdown } from "./SubsegmentDropdown";
+import { SASelect } from "./SASelect";
+// Packages
+import Select from "react-select";
 
 const getModalStyle = () => {
   const top = 50;
@@ -97,14 +98,11 @@ export const AllocateModal = ({
     : {};
   // Populates method for editing
   const initialSelectedMethod = currentAllocation
-    ? [
-        {
-          label: currentAllocation.method,
-          value: currentAllocation.method,
-          disabled: false,
-        },
-      ]
-    : [];
+    ? {
+        label: currentAllocation.method,
+        value: currentAllocation.method,
+      }
+    : undefined;
 
   // Name of Allocation
   const [allocationName, setAllocationName] = useState(initialAllocationName);
@@ -120,7 +118,7 @@ export const AllocateModal = ({
   // The options for the metric dropdown
   const [methodOptions, setMethodOptions] = useState(initialMethodOptions);
   // The selected metric from the metric dropdown
-  const [selectedMethods, setSelectedMethods] = useState(initialSelectedMethod);
+  const [selectedMethod, setSelectedMethod] = useState(initialSelectedMethod);
 
   useEffect(() => {
     // If the modal is closed and is the edit modal
@@ -130,7 +128,7 @@ export const AllocateModal = ({
       setSelectedMetricSegments(initialSelectedMetricSegments);
       setSubsegmentAllocationData(intialSubsegmentAllocationData);
       setMethodOptions(initialMethodOptions);
-      setSelectedMethods(initialSelectedMethod);
+      setSelectedMethod(initialSelectedMethod);
     }
     // Only reset when the modal closes or the currentAllocation updates
   }, [open, currentAllocation]);
@@ -160,35 +158,11 @@ export const AllocateModal = ({
   };
 
   const readyToSaveAllocate =
-    showMetricDropdown() &&
-    selectedMethods.length !== 0 &&
-    allocationName.length !== 0;
-
-  // Makes Metric Dropdown single select
-  const handleSelectedMetrics = (selectedOptions) => {
-    // If not multi select dropdown after selection disable all other selections
-    if (selectedOptions.length === 1) {
-      // One option was selected, make all others disabled
-      setMethodOptions((options) =>
-        options.map((option) => {
-          if (option.value !== selectedOptions[0].value) {
-            return { ...option, disabled: true };
-          }
-          return option;
-        })
-      );
-    } else if (selectedOptions.length === 0) {
-      // The one option was deselected, make all options enabled
-      setMethodOptions((options) =>
-        options.map((option) => ({ ...option, disabled: false }))
-      );
-    }
-    setSelectedMethods(selectedOptions);
-  };
+    showMetricDropdown() && selectedMethod && allocationName.length !== 0;
 
   const saveAllocation = () => {
     const name = allocationName;
-    const method = selectedMethods[0].value;
+    const method = selectedMethod.value;
     const subSegments = [];
     for (const segmentName in subsegmentAllocationData) {
       subSegments.push({
@@ -245,6 +219,21 @@ export const AllocateModal = ({
     handleClose();
   };
 
+  const customSelectStyles = {
+    menu: (provided, state) => ({
+      ...provided,
+      paddingBottom: 15,
+      borderRadius: null,
+      boxShadow: null,
+    }),
+    menuList: (provided, state) => ({
+      ...provided,
+      borderRadius: "4px",
+      boxShadow:
+        "0 0 0 1px hsl(0deg 0% 0% / 10%), 0 4px 11px hsl(0deg 0% 0% / 10%)",
+    }),
+  };
+
   return (
     <Modal
       open={open}
@@ -279,13 +268,16 @@ export const AllocateModal = ({
           </div>
           <div className="allocationText">Choose allocation by Segment</div>
           <div style={{ display: "inline-block" }} onClick={scrollToBottom}>
-            <MultiSelect
-              hasSelectAll={metricSegmentOptions.length > 1}
-              options={metricSegmentOptions}
+            <SASelect
               value={selectedMetricSegments}
               onChange={setSelectedMetricSegments}
-              labelledBy="Select"
+              options={metricSegmentOptions}
               className="allocationSectionInput"
+              isMulti={true}
+              isSearchable={true}
+              placeholder={`Select Segment${
+                metricSegmentOptions.length > 1 ? "s" : ""
+              }...`}
             />
           </div>
         </div>
@@ -350,13 +342,13 @@ export const AllocateModal = ({
                   style={{ display: "inline-block" }}
                   onClick={scrollToBottom}
                 >
-                  <MultiSelect
-                    hasSelectAll={false}
+                  <Select
                     options={methodOptions}
-                    value={selectedMethods}
-                    onChange={handleSelectedMetrics}
-                    labelledBy="Select"
+                    value={selectedMethod}
+                    onChange={setSelectedMethod}
                     className="allocationSectionInput"
+                    styles={customSelectStyles}
+                    isSearchable={true}
                   />
                 </div>
               </div>

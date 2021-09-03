@@ -108,6 +108,15 @@ export const ImportData = () => {
 
     if (data && "sheets" in data && data.sheets.length > 0) {
       const rawMetricData = data.sheets[0];
+      if (
+        rawMetricData.columns.filter((column) =>
+          possibleAllocationSegmentNames.includes(column)
+        ).length === 0
+      ) {
+        // Clear metric upload file input
+        setMetricFileInputKey(new Date());
+        return alert("No segments are detected, check file and upload again");
+      }
       setMetricData((metricData) => {
         // If the metric data uploaded is already being worked with replace it with new file
         if (metricData.map((m) => m.name).includes(rawMetricData.name)) {

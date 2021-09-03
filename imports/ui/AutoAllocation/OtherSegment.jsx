@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { SegmentSelect } from "./SegmentSelect";
 
 export const OtherSegment = ({
   segment,
@@ -14,8 +15,8 @@ export const OtherSegment = ({
     (os) => os._id === segment._id
   );
 
-  const handleChangeSegment = (e) => {
-    const newSelectedSegment = segment.subSegments[e.target.value];
+  const handleChangeSegment = (selected) => {
+    const newSelectedSegment = segment.subSegments[selected.value];
     setSelectedSegment(newSelectedSegment);
 
     handleChangeOtherSegments(
@@ -30,24 +31,15 @@ export const OtherSegment = ({
       <div className="formColumn">
         <label className="journalFormText">{description}</label>
         {formDataOtherSegment ? (
-          <select
+          <SegmentSelect
             value={segment.subSegments.findIndex(
               (subSegment) =>
                 subSegment.segmentId ===
                 formDataOtherSegment.selectedSubSegment.segmentId
             )}
             onChange={handleChangeSegment}
-            className="journalFormInput"
-            style={{ width: "10em" }}
-          >
-            {segment.subSegments.map((subSegment, index) => {
-              return (
-                <option key={index} value={index}>
-                  {subSegment.segmentId} - {subSegment.description}
-                </option>
-              );
-            })}
-          </select>
+            subSegments={segment.subSegments}
+          />
         ) : null}
       </div>
       <div className="formColumn">

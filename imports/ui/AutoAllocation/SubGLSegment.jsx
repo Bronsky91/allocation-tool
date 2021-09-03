@@ -4,6 +4,7 @@ import Radio from "@material-ui/core/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import FormControl from "@material-ui/core/FormControl";
+import { SegmentSelect } from "./SegmentSelect";
 
 export const SubGLSegment = ({
   subGLCodeSegment,
@@ -25,8 +26,8 @@ export const SubGLSegment = ({
       ? formData.subGLSegment[selectedOption]
       : formData.subGLSegment["balance"];
 
-  const handleChangeSegment = (e) => {
-    const newSelectedSegment = subGLCodeSegment.subSegments[e.target.value];
+  const handleChangeSegment = (selected) => {
+    const newSelectedSegment = subGLCodeSegment.subSegments[selected.value];
     setSelectedSegment(newSelectedSegment);
   };
 
@@ -81,22 +82,15 @@ export const SubGLSegment = ({
           <div className="formRow" style={{ justifyContent: "flex-start" }}>
             <div className="formColumn">
               <label className="journalFormText">Description:</label>
-              <select
+              <SegmentSelect
                 value={subGLCodeSegment.subSegments.findIndex(
                   (subSegment) =>
                     subSegment.segmentId === formSelectedSubSegment.segmentId
                 )}
                 onChange={handleChangeSegment}
-                className="journalFormInput"
-              >
-                {subGLCodeSegment.subSegments.map((subSegment, index) => {
-                  return (
-                    <option key={index} value={index}>
-                      {subSegment.segmentId} - {subSegment.description}
-                    </option>
-                  );
-                })}
-              </select>
+                subSegments={subGLCodeSegment.subSegments}
+                menuPlacement="top"
+              />
             </div>
             <div className="formColumn">
               <label className="journalFormText">Segment ID:</label>

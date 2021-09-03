@@ -192,7 +192,6 @@ const JournalForm = ({ user, chartOfAccounts }) => {
 
   useEffect(() => {
     // After a new allocation is created, make it the currently selected allocation in the dropdown
-    //
     if (
       newestAllocationId &&
       selectedAllocation &&
@@ -247,7 +246,6 @@ const JournalForm = ({ user, chartOfAccounts }) => {
   }, [formData.toBalanceSegmentValue, selectedAllocation]);
 
   useEffect(() => {
-    console.log("readyToAllocate", readyToAllocate);
     if (readyToAllocate) {
       setTimeout(() => {
         setFileLoading(false);
@@ -257,6 +255,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
 
   useEffect(() => {
     if (selectedTemplate) {
+      // TODO: WTF is this?
       console.log("New Selected Template", selectedTemplate);
     }
   }, [selectedTemplate]);
@@ -694,44 +693,51 @@ const JournalForm = ({ user, chartOfAccounts }) => {
             >
               Create new Allocation Technique
             </button>
-            <div className="formColumn">
-              <label className="journalFormText">
-                Select Allocation Technique:
-              </label>
-              <div className="formRow" style={{ justifyContent: "flex-start" }}>
-                <select
-                  value={allocations.findIndex(
-                    (allocation) => allocation._id === selectedAllocation?._id
-                  )}
-                  onChange={handleAllocationChange}
-                  className="journalFormInput"
+            {allocations.length > 0 ? (
+              <div className="formColumn">
+                <label className="journalFormText">
+                  Select Allocation Technique:
+                </label>
+                <div
+                  className="formRow"
+                  style={{ justifyContent: "flex-start" }}
                 >
-                  {allocations.map((allocation, index) => {
-                    return (
-                      <option key={index} value={index}>
-                        {allocation.name}
-                      </option>
-                    );
-                  })}
-                </select>
-                <IconButton
-                  color="inherit"
-                  onClick={openEditAllocationModal}
-                  disabled={!selectedAllocation}
-                  style={{ color: "#60cead" }}
-                >
-                  <EditIcon fontSize="small" />
-                </IconButton>
-                <IconButton
-                  color="inherit"
-                  onClick={handleDeleteAllocation}
-                  disabled={!selectedAllocation}
-                  style={{ color: "#f54747" }}
-                >
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
+                  <select
+                    value={allocations.findIndex(
+                      (allocation) => allocation._id === selectedAllocation?._id
+                    )}
+                    onChange={handleAllocationChange}
+                    className="journalFormInput"
+                  >
+                    {allocations.map((allocation, index) => {
+                      return (
+                        <option key={index} value={index}>
+                          {allocation.name}
+                        </option>
+                      );
+                    })}
+                  </select>
+                  <IconButton
+                    color="inherit"
+                    onClick={openEditAllocationModal}
+                    disabled={!selectedAllocation}
+                    style={{ color: "#60cead" }}
+                  >
+                    <EditIcon fontSize="small" />
+                  </IconButton>
+                  <IconButton
+                    color="inherit"
+                    onClick={handleDeleteAllocation}
+                    disabled={!selectedAllocation}
+                    style={{ color: "#f54747" }}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="formColumn"></div>
+            )}
             <div className="journalFormDownloadContainer">
               {!readyToAllocate || fileLoading ? (
                 <div className="journalFormDownloadInnerContainer">
