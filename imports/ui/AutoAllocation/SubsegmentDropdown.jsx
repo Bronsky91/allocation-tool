@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useState } from "react";
-// Packages
-import Select from "react-select";
+// Components
+import { SASelect } from "./SASelect";
 
 export const SubsegmentDropdown = ({
   segment,
@@ -42,29 +42,13 @@ export const SubsegmentDropdown = ({
     : [];
 
   const [selected, setSelected] = useState(initialSelected);
-  const [selectAllOption, setSelectAllOption] = useState({
-    label: "Select All",
-    value: "*",
-  });
 
   const handleSelect = (selectedOption) => {
     const selectedOptionArray = isMultiSelect
       ? [...selectedOption]
       : [selectedOption];
-    if (
-      selectedOptionArray !== null &&
-      selectedOptionArray.length > 0 &&
-      selectedOptionArray[selectedOptionArray.length - 1].value ===
-        selectAllOption.value
-    ) {
-      if (selectedOptionArray.length - 1 === options.length) {
-        setSelected([]);
-      } else {
-        setSelected(options);
-      }
-    } else {
-      setSelected(selectedOptionArray);
-    }
+
+    setSelected(selectedOptionArray);
   };
 
   useEffect(() => {
@@ -72,11 +56,6 @@ export const SubsegmentDropdown = ({
       ...data,
       [segment.description]: selected.map((s) => s.value),
     }));
-
-    setSelectAllOption({
-      ...selectAllOption,
-      label: selected.length !== options.length ? "Select All" : "Unselect All",
-    });
   }, [selected]);
 
   useEffect(() => {
@@ -101,10 +80,6 @@ export const SubsegmentDropdown = ({
       boxShadow:
         "0 0 0 1px hsl(0deg 0% 0% / 10%), 0 4px 11px hsl(0deg 0% 0% / 10%)",
     }),
-    multiValue: (provided, state) => ({
-      ...provided,
-      // backgroundColor: "blue",
-    }),
   };
 
   const multiValueContainer = ({ selectProps, data }) => {
@@ -113,9 +88,9 @@ export const SubsegmentDropdown = ({
     const index = allSelected.findIndex((selected) => selected.label === label);
     const isLastSelected = index === allSelected.length - 1 || index >= 5;
     const count =
-      allSelected.length > 5 ? allSelected.length - 5 : allSelected.length;
+      allSelected.length > 5 ? allSelected.length - 5 : allSelected.length - 1;
     const labelSuffix = isLastSelected ? ` and ${count} more...` : ", ";
-    const val = index > 5 ? `` : `${label}${labelSuffix}`;
+    const val = index > 5 ? `` : `${index >= 5 ? "" : label}${labelSuffix}`;
     return val;
   };
 
@@ -125,8 +100,8 @@ export const SubsegmentDropdown = ({
         Which {segment.description} to include?
       </div>
       <div style={{ display: "inline-block" }} onClick={scrollToBottom}>
-        <Select
-          options={isMultiSelect ? [selectAllOption, ...options] : options}
+        <SASelect
+          options={options}
           value={selected}
           onChange={handleSelect}
           isSearchable={true}

@@ -1,13 +1,13 @@
-import React, { useState } from "react";
-import { useEffect } from "react";
+import React from "react";
+import { SegmentSelect } from "./SegmentSelect";
 
 export const GLSegment = ({
   glCodeSegment,
   formData,
   handleChangeFormData,
 }) => {
-  const handleChangeSegment = (e) => {
-    const newSelectedSegment = glCodeSegment.subSegments[e.target.value];
+  const handleChangeSegment = (selected) => {
+    const newSelectedSegment = glCodeSegment.subSegments[selected.value];
     if (newSelectedSegment.typicalBalance) {
       // If there's a typical balance assigned to the new subsegment, auto choose it as default
       handleChangeFormData(
@@ -29,23 +29,16 @@ export const GLSegment = ({
       <div className="formRow">
         <div className="formColumn">
           <label className="journalFormText">Description:</label>
-          <select
+          <SegmentSelect
             value={glCodeSegment.subSegments.findIndex(
               (subSegment) =>
                 subSegment.segmentId ===
                 formData.selectedAllocationSegment.segmentId
             )}
             onChange={handleChangeSegment}
-            className="journalFormInput"
-          >
-            {glCodeSegment.subSegments.map((subSegment, index) => {
-              return (
-                <option key={index} value={index}>
-                  {subSegment.segmentId} - {subSegment.description}
-                </option>
-              );
-            })}
-          </select>
+            subSegments={glCodeSegment.subSegments}
+            menuPlacement="top"
+          />
         </div>
         <div className="formColumn">
           <label className="journalFormText">Segment ID:</label>

@@ -1,11 +1,11 @@
-import React, { useState } from "react";
-import { useEffect } from "react";
+import React from "react";
 // Utils
 import { createBalanceAccountString } from "../../utils/CreateAccountStrings";
+import { SegmentSelect } from "./SegmentSelect";
 
 export const BalanceAccount = ({ handleChangeFormData, formData }) => {
-  const handleChangeSegment = (e, index) => {
-    const newSelectedSubsegmentIndex = e.target.value;
+  const handleChangeSegment = (selected, index) => {
+    const newSelectedSubsegmentIndex = selected.value;
 
     handleChangeFormData(
       "selectedBalanceSegments",
@@ -37,25 +37,16 @@ export const BalanceAccount = ({ handleChangeFormData, formData }) => {
             return (
               <div className="formColumn" key={index}>
                 <label className="journalFormText">{segment.description}</label>
-                <select
-                  style={{ maxWidth: "10em", marginTop: ".5em" }}
+                <SegmentSelect
                   value={segment.subSegments.findIndex(
                     (subSegment) =>
                       subSegment.segmentId ===
                       formData.selectedBalanceSegments[index].selectedSubSegment
                         .segmentId
                   )}
-                  onChange={(e) => handleChangeSegment(e, index)}
-                  className="journalFormInput"
-                >
-                  {segment.subSegments.map((subSegment, index) => {
-                    return (
-                      <option key={index} value={index}>
-                        {subSegment.segmentId} - {subSegment.description}
-                      </option>
-                    );
-                  })}
-                </select>
+                  onChange={(selected) => handleChangeSegment(selected, index)}
+                  subSegments={segment.subSegments}
+                />
               </div>
             );
           })}

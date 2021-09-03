@@ -9,6 +9,8 @@ import { ChartOfAccountsCollection } from "../db/ChartOfAccountsCollection";
 // Material UI
 import SettingsIcon from "@material-ui/icons/Settings";
 import PersonIcon from "@material-ui/icons/Person";
+// Packages
+import Select from "react-select";
 
 export const Header = ({
   selectedChartOfAccountsId,
