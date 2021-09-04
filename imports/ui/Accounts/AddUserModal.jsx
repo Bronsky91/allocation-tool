@@ -56,8 +56,8 @@ export const AddUserModal = ({ open, handleClose }) => {
       if (registerForm[field] === "") {
         return false;
       }
-      return true;
     }
+    return true;
   };
 
   const formReady = passwordsMatch && formIsFilled();
@@ -199,9 +199,7 @@ export const AddUserModal = ({ open, handleClose }) => {
             </div>
             <button
               type="submit"
-              className={`registerButton ${
-                formReady ? "registerButtonActive" : "registerButtonDisabled"
-              }`}
+              className={`registerButton ${!formReady ? "buttonDisabled" : ""}`}
               disabled={!formReady}
             >
               Register

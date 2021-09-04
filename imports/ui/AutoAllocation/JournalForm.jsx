@@ -158,8 +158,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
   const templateReady =
     selectedAllocation && formData.journalDescription.length > 0;
 
-  const templateEdit =
-    templateReady && selectedTemplateId !== "0" && selectedTemplate;
+  const templateEdit = selectedTemplateId !== "0" && selectedTemplate;
 
   useEffect(() => {
     setSelectedMetric(
@@ -624,23 +623,15 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                     />
                   </div>
                 </div>
-                {templateReady ? (
-                  templateEdit ? (
-                    <button
-                      className="journalFormSaveTemplateButton"
-                      onClick={() => openSaveTemplateModal()}
-                    >
-                      Update Template
-                    </button>
-                  ) : (
-                    <button
-                      className="journalFormSaveTemplateButton"
-                      onClick={() => openSaveTemplateModal()}
-                    >
-                      Save New Template
-                    </button>
-                  )
-                ) : null}
+                <button
+                  className={`journalFormSaveTemplateButton ${
+                    !templateReady ? "buttonDisabled" : ""
+                  }`}
+                  onClick={() => openSaveTemplateModal()}
+                  disabled={!templateReady}
+                >
+                  {templateEdit ? "Update Template" : "Save new Template"}
+                </button>
               </div>
             </div>
             <div

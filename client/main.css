@@ -165,16 +165,11 @@ tr:nth-child(even) {
   border-width: 0px;
   color: white;
   margin-left: 10px;
+  background-color: #3597fe;
 }
 
 .registerButton:hover {
   cursor: pointer;
-}
-.registerButtonDisabled {
-  background-color: #37b1ff;
-}
-.registerButtonActive {
-  background-color: #3597fe;
 }
 
 /* Onboarding Page */
@@ -514,6 +509,10 @@ input[type="file"] {
   color: white;
 }
 
+.journalFormAllocationButton:hover {
+  cursor: pointer;
+}
+
 .journalFormSaveTemplateButton {
   /* width: 250px; */
   height: 40px;
@@ -522,6 +521,10 @@ input[type="file"] {
   background-color: #3597fe;
   border-width: 0;
   color: white;
+}
+
+.journalFormSaveTemplateButton:hover {
+  cursor: pointer;
 }
 
 .journalFormEditButtonContainer {
@@ -655,15 +658,10 @@ input[type="file"] {
   color: white;
   margin: 1em;
   border-width: 0;
+  background-color: #3597fe;
 }
 .allocationSaveButton:hover {
   cursor: pointer;
-}
-.allocationSaveButtonDisabled {
-  background-color: #37b1ff;
-}
-.allocationSaveButtonActive {
-  background-color: #3597fe;
 }
 
 /* User Account */
@@ -726,6 +724,16 @@ input[type="file"] {
   align-items: center;
   overflow: auto;
   padding: 1em;
+}
+
+/* Util Styles */
+
+.buttonDisabled {
+  opacity: 0.5;
+}
+
+.buttonDisabled:hover {
+  cursor: default;
 }
 
 /* Start of old Styles */

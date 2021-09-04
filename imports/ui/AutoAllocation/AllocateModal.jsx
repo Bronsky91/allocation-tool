@@ -358,9 +358,7 @@ export const AllocateModal = ({
         <div className="center">
           <button
             className={`allocationSaveButton ${
-              !readyToSaveAllocate
-                ? "allocationSaveButtonDisabled"
-                : "allocationSaveButtonActive"
+              !readyToSaveAllocate ? "buttonDisabled" : ""
             }`}
             onClick={saveAllocation}
             disabled={!readyToSaveAllocate}
