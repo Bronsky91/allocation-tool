@@ -341,6 +341,7 @@ input[type="file"] {
   background-color: white;
   box-shadow: 0 3px 12px 0 rgba(0, 0, 0, 0.08);
   background-color: #fff;
+  overflow: auto;
 }
 
 .onboardMetricOnboardHeaderContainer {
@@ -358,6 +359,7 @@ input[type="file"] {
   font-size: 20px;
   color: #373737;
   margin-top: 20px;
+  font-weight: bold;
 }
 
 .onboardMetricOnboardText {

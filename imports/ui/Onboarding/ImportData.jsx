@@ -18,6 +18,7 @@ import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 // Components
 import { Header } from "../Header";
 import BarLoader from "react-spinners/BarLoader";
+import { useEffect } from "react";
 
 export const ImportData = () => {
   // Subscriptions
@@ -150,6 +151,32 @@ export const ImportData = () => {
     setMetricFileInputKey(new Date());
     // Show Metric Onboarding Page
     setShowMetricOnboard(true);
+  };
+
+  const handleSelectAll = (metricName) => {
+    setMetricData((metricData) =>
+      metricData.map((metric) => {
+        if (metric.name === metricName) {
+          if (metric.validMethods.length < metric.columns.length) {
+            // Add the metric name to the validMethods array if the name was checked
+            return {
+              ...metric,
+              validMethods: [
+                ...metric.columns.filter(
+                  (column) => !metric.metricSegments.includes(column)
+                ),
+              ],
+            };
+          }
+          // Remove the metric name from the validMethods array if the name was unchecked
+          return {
+            ...metric,
+            validMethods: [],
+          };
+        }
+        return metric;
+      })
+    );
   };
 
   const handleMetricChecked = (e, metricName, metricColumn) => {
@@ -386,6 +413,7 @@ export const ImportData = () => {
                   Auto Allocation
                 </button>
               ) : null}
+
               {/* Metrics Onboard Panel */}
               {showMetricOnboard ? (
                 <div className="onboardMetricOnboardContainer">
@@ -422,6 +450,24 @@ export const ImportData = () => {
                         Select methods that will be used for allocations
                       </div>
                       <div className="onboardMetricOnboardSelectionContainer">
+                        <div className="onboardMetricOnboardSelection">
+                          <div
+                            style={{
+                              // borderBottom: "1px solid black",
+                              width: "10em",
+                              marginBottom: "1em",
+                            }}
+                          >
+                            <button onClick={(e) => handleSelectAll(data.name)}>
+                              <label style={{ fontWeight: "bold" }}>
+                                {data.validMethods.length ===
+                                data.columns.length
+                                  ? "Unselect All"
+                                  : "Select All"}
+                              </label>
+                            </button>
+                          </div>
+                        </div>
                         {data.columns.map((column, i) => {
                           // Exclude any columns that match possible allocation segment names
                           if (
@@ -438,6 +484,7 @@ export const ImportData = () => {
                                     handleMetricChecked(e, data.name, column)
                                   }
                                   value={column}
+                                  checked={data.validMethods.includes(column)}
                                 />
                                 <label style={{ fontWeight: "bold" }}>
                                   {column}
@@ -447,15 +494,23 @@ export const ImportData = () => {
                           }
                         })}
                       </div>
-                      {metricData[metricData.length - 1].validMethods.length >
-                      0 ? (
+                      <div>
                         <button
                           onClick={() => handleSaveMetric(data.name)}
-                          className="onboardMetricOnboardButton"
+                          className={`onboardMetricOnboardButton ${
+                            metricData[metricData.length - 1].validMethods
+                              .length === 0
+                              ? "buttonDisabled"
+                              : ""
+                          }`}
+                          disabled={
+                            metricData[metricData.length - 1].validMethods
+                              .length === 0
+                          }
                         >
                           Save Metric
                         </button>
-                      ) : null}
+                      </div>
                     </div>
                   ))}
                 </div>
