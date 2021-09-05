@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 // Meteor
 import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
@@ -15,10 +15,12 @@ import { BLUE, GL_CODE, SUB_GL_CODE } from "../../../constants";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import { IconButton } from "@material-ui/core";
+import CloseIcon from "@material-ui/icons/Close";
 // Components
 import { Header } from "../Header";
+// Packages
 import BarLoader from "react-spinners/BarLoader";
-import { useEffect } from "react";
 
 export const ImportData = () => {
   // Subscriptions
@@ -62,6 +64,14 @@ export const ImportData = () => {
   const possibleAllocationSegmentNames = currentChartOfAccounts.segments
     .filter((segment) => ![GL_CODE, SUB_GL_CODE].includes(segment.description))
     .map((segment) => segment.description);
+
+  useEffect(() => {
+    if (metricData.length === 0) {
+      setShowMetricOnboard(false);
+    } else {
+      setShowMetricOnboard(true);
+    }
+  }, [metricData]);
 
   const handleChartOfAccountsFile = async (e) => {
     // Excel File
@@ -149,23 +159,23 @@ export const ImportData = () => {
     }
     // Clear metric upload file input
     setMetricFileInputKey(new Date());
-    // Show Metric Onboarding Page
-    setShowMetricOnboard(true);
+    // Show onboarding panel
+    // setShowMetricOnboard(true);
   };
 
   const handleSelectAll = (metricName) => {
     setMetricData((metricData) =>
       metricData.map((metric) => {
+        const allValidMethods = metric.columns.filter(
+          (column) => !metric.metricSegments.includes(column)
+        );
+
         if (metric.name === metricName) {
-          if (metric.validMethods.length < metric.columns.length) {
+          if (metric.validMethods.length < allValidMethods.length) {
             // Add the metric name to the validMethods array if the name was checked
             return {
               ...metric,
-              validMethods: [
-                ...metric.columns.filter(
-                  (column) => !metric.metricSegments.includes(column)
-                ),
-              ],
+              validMethods: [...allValidMethods],
             };
           }
           // Remove the metric name from the validMethods array if the name was unchecked
@@ -205,6 +215,18 @@ export const ImportData = () => {
     );
   };
 
+  const handleCancelMetric = (metricName) => {
+    // Removes the saved metric from the react hook state
+    setMetricData((metricData) =>
+      metricData.filter((metric) => metric.name !== metricName)
+    );
+  };
+
+  const handleCloseOnboardingPanel = () => {
+    // Removes all working metric data
+    setMetricData([]);
+  };
+
   const handleSaveMetric = (metricName) => {
     // Find the completed metric from the working data
     const completedMetricData = metricData.find(
@@ -227,7 +249,6 @@ export const ImportData = () => {
     setMetricData((metricData) =>
       metricData.filter((metric) => metric.name !== metricName)
     );
-    setShowMetricOnboard(false);
   };
 
   if (!user) {
@@ -418,7 +439,15 @@ export const ImportData = () => {
               {showMetricOnboard ? (
                 <div className="onboardMetricOnboardContainer">
                   <div className="onboardMetricOnboardHeaderContainer">
-                    <div className="onboardTitle">Metric Onboarding</div>
+                    <div className="onboardTitle" style={{ marginTop: 0 }}>
+                      Metric Onboarding
+                    </div>
+                    <IconButton
+                      onClick={handleCloseOnboardingPanel}
+                      color="inherit"
+                    >
+                      <CloseIcon />
+                    </IconButton>
                   </div>
                   {metricData.map((data, index) => (
                     <div
@@ -461,7 +490,10 @@ export const ImportData = () => {
                             <button onClick={(e) => handleSelectAll(data.name)}>
                               <label style={{ fontWeight: "bold" }}>
                                 {data.validMethods.length ===
-                                data.columns.length
+                                data.columns.filter(
+                                  (column) =>
+                                    !data.metricSegments.includes(column)
+                                ).length
                                   ? "Unselect All"
                                   : "Select All"}
                               </label>
@@ -509,6 +541,16 @@ export const ImportData = () => {
                           }
                         >
                           Save Metric
+                        </button>
+                        <button
+                          className="onboardMetricOnboardButton"
+                          style={{
+                            backgroundColor: "#f54747",
+                            marginLeft: "2em",
+                          }}
+                          onClick={() => handleCancelMetric(data.name)}
+                        >
+                          Cancel
                         </button>
                       </div>
                     </div>
