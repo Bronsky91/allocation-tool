@@ -10,7 +10,13 @@ import { isChartOfAccountWorkBookDataValid } from "../../utils/CheckWorkbookData
 // DB
 import { ChartOfAccountsCollection } from "../../db/ChartOfAccountsCollection";
 // Constants
-import { BLUE, GL_CODE, SUB_GL_CODE } from "../../../constants";
+import {
+  BLUE,
+  CHART_OF_ACCOUNT_COLUMNS,
+  GL_CODE,
+  SUB_GL_CODE,
+  VALID_COLUMN_NAMES,
+} from "../../../constants";
 // Material UI
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
@@ -31,22 +37,11 @@ export const ImportData = () => {
 
   const history = useHistory();
 
-  const chartOfAccounts = useTracker(() =>
-    ChartOfAccountsCollection.find({}).fetch()
-  );
-
-  const initalChartOfAccounts = {
-    name: "",
-    userId: "", // Client Admin's User ID
-    segments: [],
-    templates: [],
-    metrics: [],
-  };
   // metricData is uploaded metrics sheets and worked data before saving
-  const [newChartOfAccountsId, setNewChartOfAccountsId] = useState("");
   const [fileName, setFileName] = useState("");
   const [metricFileName, setMetricFileName] = useState("");
   const [importPage, setImportPage] = useState("segments");
+  const [segments, setSegments] = useState([]);
   const [metricData, setMetricData] = useState([]);
   const [showSegments, setShowSegments] = useState(false);
   const [showMetrics, setShowMetrics] = useState(false);
@@ -56,12 +51,8 @@ export const ImportData = () => {
   const [metricFileInputKey, setMetricFileInputKey] = useState(new Date());
   const [loading, setLoading] = useState(false);
 
-  const currentChartOfAccounts =
-    chartOfAccounts.find((coa) => coa._id === newChartOfAccountsId) ||
-    initalChartOfAccounts;
-
   // Segments possible for allocation
-  const possibleAllocationSegmentNames = currentChartOfAccounts.segments
+  const possibleAllocationSegmentNames = segments
     .filter((segment) => ![GL_CODE, SUB_GL_CODE].includes(segment.description))
     .map((segment) => segment.description);
 
@@ -73,6 +64,8 @@ export const ImportData = () => {
     }
   }, [metricData]);
 
+  console.log("segments", segments);
+
   const handleChartOfAccountsFile = async (e) => {
     // Excel File
     const file = e.target.files[0];
@@ -82,26 +75,48 @@ export const ImportData = () => {
     // Checks if the workbookData is valid
     const output = isChartOfAccountWorkBookDataValid(workbookData);
     if (output.valid) {
-      setLoading(true);
-      // Create the Chart of Accounts from the Formatted Data
-      Meteor.call("chartOfAccounts.insert", file.name, (error, result) => {
-        if (result) {
-          const id = result;
-          Meteor.call(
-            "chartOfAccounts.segments.insert",
-            id,
-            workbookData,
-            (err, res) => {
-              setNewChartOfAccountsId(id);
-              setLoading(false);
+      // Create the Segments from the Formatted Data
+      for (const [index, sheet] of workbookData.sheets.entries()) {
+        const description = sheet.name;
+        const chartFieldOrder = index;
+        // Columns object that matches the columns to it's index in the sheet to be inserted properly in the rows map
+        const columnIndexRef = sheet.columns.reduce(
+          (columnIndexRefObj, columnName, i) => {
+            // If the column in the sheet is valid for processing, add it to the object
+            if (VALID_COLUMN_NAMES.includes(columnName)) {
+              return {
+                ...columnIndexRefObj,
+                [i]: CHART_OF_ACCOUNT_COLUMNS[columnName],
+              };
             }
-          );
-        } else {
-          console.log(error);
-          setLoading(false);
-          alert(error);
-        }
-      });
+            // Otherwise return the object as-is and continue
+            return columnIndexRefObj;
+          },
+          {}
+        );
+
+        const subSegments = sheet.rows
+          .filter((row) => row.length > 1)
+          .map((row) => {
+            const subSegment = {};
+            row.map((r, i) => {
+              // This makes sure it only assigns values to valid columns
+              if (
+                Object.keys(columnIndexRef)
+                  .map((c) => Number(c)) // Need to convert to number because Object.keys() makes strings
+                  .includes(i)
+              ) {
+                subSegment[columnIndexRef[i]] = r.value;
+              }
+            });
+            return subSegment;
+          });
+
+        setSegments((segments) => [
+          ...segments,
+          { description, subSegments, chartFieldOrder },
+        ]);
+      }
       // Clears the Input field, in case the user wanted to upload a new file right away
       setChartOfAccountsFileInputKey(new Date());
     } else {
@@ -228,6 +243,7 @@ export const ImportData = () => {
   };
 
   const handleSaveMetric = (metricName) => {
+    // TODO: Figure out logic for what "save metric" does and don't show the show metrics button until it's "saved"
     // Find the completed metric from the working data
     const completedMetricData = metricData.find(
       (metric) => metric.name === metricName
@@ -250,6 +266,8 @@ export const ImportData = () => {
       metricData.filter((metric) => metric.name !== metricName)
     );
   };
+
+  // TODO: Create function that create the chart of accounts in DB using the segments and metrics when the final button is click
 
   if (!user) {
     return <Redirect to="/login" />;
@@ -284,7 +302,7 @@ export const ImportData = () => {
                     : "onboardHeaderActive"
                 }
                 onClick={() =>
-                  currentChartOfAccounts._id ? setImportPage("metrics") : null
+                  segments.length > 0 ? setImportPage("metrics") : null
                 }
               >
                 Import Metrics
@@ -307,7 +325,7 @@ export const ImportData = () => {
               />
               <BarLoader loading={loading} color={BLUE} />
               <div className="onboardFileName">{fileName}</div>
-              {currentChartOfAccounts.segments.length > 0 ? (
+              {segments.length > 0 ? (
                 <button
                   onClick={() =>
                     setShowSegments((showSegments) => !showSegments)
@@ -327,11 +345,11 @@ export const ImportData = () => {
                   </div>
                 </button>
               ) : null}
-              {showSegments && currentChartOfAccounts.segments.length > 0 ? (
+              {showSegments && segments.length > 0 ? (
                 <div className="onboardSegmentsContainer">
                   <div className="onboardTitle">Segments:</div>
                   <div className="onboardSegmentsInnerContainer">
-                    {currentChartOfAccounts.segments.map((segment, index) => {
+                    {segments.map((segment, index) => {
                       return (
                         <div key={index}>
                           <div className="segmentTitle">
@@ -351,7 +369,7 @@ export const ImportData = () => {
                   </div>
                 </div>
               ) : null}
-              {currentChartOfAccounts.segments.length > 0 ? (
+              {segments.length > 0 ? (
                 <button
                   className="onboardNextButton"
                   onClick={() => setImportPage("metrics")}
@@ -376,7 +394,7 @@ export const ImportData = () => {
               />
               <BarLoader loading={loading} color={BLUE} />
               <div className="onboardFileName">{metricFileName}</div>
-              {currentChartOfAccounts.metrics.length > 0 ? (
+              {metricData.length > 0 ? (
                 <button
                   onClick={() => setShowMetrics((showMetrics) => !showMetrics)}
                   className="onboardShowSegmentsButton"
@@ -395,11 +413,11 @@ export const ImportData = () => {
                 </button>
               ) : null}
 
-              {showMetrics && currentChartOfAccounts.metrics.length > 0 ? (
+              {showMetrics && metricData.length > 0 ? (
                 <div className="onboardSegmentsContainer">
                   <div className="onboardTitle">Metrics:</div>
                   <div className="onboardSegmentsInnerContainer">
-                    {currentChartOfAccounts.metrics.map((metric, index) => {
+                    {metricData.map((metric, index) => {
                       return (
                         <div key={index} style={{ marginLeft: 20 }}>
                           <div className="segmentTitle">
@@ -426,7 +444,7 @@ export const ImportData = () => {
                   </div>
                 </div>
               ) : null}
-              {currentChartOfAccounts.metrics.length > 0 ? (
+              {metricData.length > 0 ? (
                 <button
                   className="onboardNextButton"
                   onClick={() => history.push("/")}

@@ -31,6 +31,7 @@ Meteor.methods({
     return ChartOfAccountsCollection.remove({});
   },
   "chartOfAccounts.segments.insert": function (id, workbookData) {
+    // TODO: Refactor to take just segments instead of workbookData
     check(id, String);
     check(workbookData, {
       sheets: [
