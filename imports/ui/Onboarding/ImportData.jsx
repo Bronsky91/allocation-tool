@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 // Meteor
 import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
@@ -10,13 +10,22 @@ import { isChartOfAccountWorkBookDataValid } from "../../utils/CheckWorkbookData
 // DB
 import { ChartOfAccountsCollection } from "../../db/ChartOfAccountsCollection";
 // Constants
-import { BLUE, GL_CODE, SUB_GL_CODE } from "../../../constants";
+import {
+  BLUE,
+  CHART_OF_ACCOUNT_COLUMNS,
+  GL_CODE,
+  SUB_GL_CODE,
+  VALID_COLUMN_NAMES,
+} from "../../../constants";
 // Material UI
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import { IconButton } from "@material-ui/core";
+import CloseIcon from "@material-ui/icons/Close";
 // Components
 import { Header } from "../Header";
+// Packages
 import BarLoader from "react-spinners/BarLoader";
 
 export const ImportData = () => {
@@ -28,23 +37,14 @@ export const ImportData = () => {
 
   const history = useHistory();
 
-  const chartOfAccounts = useTracker(() =>
-    ChartOfAccountsCollection.find({}).fetch()
-  );
-
-  const initalChartOfAccounts = {
-    name: "",
-    userId: "", // Client Admin's User ID
-    segments: [],
-    templates: [],
-    metrics: [],
-  };
   // metricData is uploaded metrics sheets and worked data before saving
-  const [newChartOfAccountsId, setNewChartOfAccountsId] = useState("");
   const [fileName, setFileName] = useState("");
+  const [coaName, setCoaName] = useState("");
   const [metricFileName, setMetricFileName] = useState("");
   const [importPage, setImportPage] = useState("segments");
+  const [segments, setSegments] = useState([]);
   const [metricData, setMetricData] = useState([]);
+  const [confirmedMetricData, setConfirmedMetricData] = useState([]);
   const [showSegments, setShowSegments] = useState(false);
   const [showMetrics, setShowMetrics] = useState(false);
   const [showMetricOnboard, setShowMetricOnboard] = useState(false);
@@ -52,47 +52,81 @@ export const ImportData = () => {
     useState(new Date());
   const [metricFileInputKey, setMetricFileInputKey] = useState(new Date());
   const [loading, setLoading] = useState(false);
-
-  const currentChartOfAccounts =
-    chartOfAccounts.find((coa) => coa._id === newChartOfAccountsId) ||
-    initalChartOfAccounts;
+  const [completeLoading, setCompleteLoading] = useState(false);
 
   // Segments possible for allocation
-  const possibleAllocationSegmentNames = currentChartOfAccounts.segments
+  const possibleAllocationSegmentNames = segments
     .filter((segment) => ![GL_CODE, SUB_GL_CODE].includes(segment.description))
     .map((segment) => segment.description);
 
+  const barLoaderCSS = `
+    margin-top: 2em;
+  `;
+
+  useEffect(() => {
+    if (metricData.length === 0) {
+      setShowMetricOnboard(false);
+    } else {
+      setShowMetricOnboard(true);
+    }
+  }, [metricData]);
+
   const handleChartOfAccountsFile = async (e) => {
+    setLoading(true);
     // Excel File
     const file = e.target.files[0];
     setFileName(file.name);
+
     // Formatted Data
     const workbookData = await ReadWorkbook(file);
     // Checks if the workbookData is valid
     const output = isChartOfAccountWorkBookDataValid(workbookData);
     if (output.valid) {
-      setLoading(true);
-      // Create the Chart of Accounts from the Formatted Data
-      Meteor.call("chartOfAccounts.insert", file.name, (error, result) => {
-        if (result) {
-          const id = result;
-          Meteor.call(
-            "chartOfAccounts.segments.insert",
-            id,
-            workbookData,
-            (err, res) => {
-              setNewChartOfAccountsId(id);
-              setLoading(false);
+      // Create the Segments from the Formatted Data
+      for (const [index, sheet] of workbookData.sheets.entries()) {
+        const description = sheet.name;
+        const chartFieldOrder = index;
+        // Columns object that matches the columns to it's index in the sheet to be inserted properly in the rows map
+        const columnIndexRef = sheet.columns.reduce(
+          (columnIndexRefObj, columnName, i) => {
+            // If the column in the sheet is valid for processing, add it to the object
+            if (VALID_COLUMN_NAMES.includes(columnName)) {
+              return {
+                ...columnIndexRefObj,
+                [i]: CHART_OF_ACCOUNT_COLUMNS[columnName],
+              };
             }
-          );
-        } else {
-          console.log(error);
-          setLoading(false);
-          alert(error);
-        }
-      });
+            // Otherwise return the object as-is and continue
+            return columnIndexRefObj;
+          },
+          {}
+        );
+
+        const subSegments = sheet.rows
+          .filter((row) => row.length > 1)
+          .map((row) => {
+            const subSegment = {};
+            row.map((r, i) => {
+              // This makes sure it only assigns values to valid columns
+              if (
+                Object.keys(columnIndexRef)
+                  .map((c) => Number(c)) // Need to convert to number because Object.keys() makes strings
+                  .includes(i)
+              ) {
+                subSegment[columnIndexRef[i]] = r.value;
+              }
+            });
+            return subSegment;
+          });
+
+        setSegments((segments) => [
+          ...segments,
+          { description, subSegments, chartFieldOrder },
+        ]);
+      }
       // Clears the Input field, in case the user wanted to upload a new file right away
       setChartOfAccountsFileInputKey(new Date());
+      setLoading(false);
     } else {
       // Displays an alert to the user and an error message why the chart of the accounts isn't valid
       alert(output.err);
@@ -100,6 +134,7 @@ export const ImportData = () => {
   };
 
   const handleMetricFile = async (e) => {
+    setLoading(true);
     // Excel File
     const file = e.target.files[0];
     setMetricFileName(file.name);
@@ -148,8 +183,33 @@ export const ImportData = () => {
     }
     // Clear metric upload file input
     setMetricFileInputKey(new Date());
-    // Show Metric Onboarding Page
-    setShowMetricOnboard(true);
+    setLoading(false);
+  };
+
+  const handleSelectAll = (metricName) => {
+    setMetricData((metricData) =>
+      metricData.map((metric) => {
+        const allValidMethods = metric.columns.filter(
+          (column) => !metric.metricSegments.includes(column)
+        );
+
+        if (metric.name === metricName) {
+          if (metric.validMethods.length < allValidMethods.length) {
+            // Add the metric name to the validMethods array if the name was checked
+            return {
+              ...metric,
+              validMethods: [...allValidMethods],
+            };
+          }
+          // Remove the metric name from the validMethods array if the name was unchecked
+          return {
+            ...metric,
+            validMethods: [],
+          };
+        }
+        return metric;
+      })
+    );
   };
 
   const handleMetricChecked = (e, metricName, metricColumn) => {
@@ -178,30 +238,78 @@ export const ImportData = () => {
     );
   };
 
+  const handleCancelMetric = (metricName) => {
+    // Removes the saved metric from the react hook state
+    setMetricData((metricData) =>
+      metricData.filter((metric) => metric.name !== metricName)
+    );
+  };
+
+  const handleCloseOnboardingPanel = () => {
+    // Removes all working metric data
+    setMetricData([]);
+  };
+
   const handleSaveMetric = (metricName) => {
     // Find the completed metric from the working data
     const completedMetricData = metricData.find(
       (metric) => metric.name === metricName
     );
-    setLoading(true);
-    // Saves the metric to the chart of accounts
-    Meteor.call(
-      "chartOfAccounts.metrics.insert",
-      currentChartOfAccounts._id,
+
+    // Sets the confirmed metric data into state
+    setConfirmedMetricData((confirmedMetricData) => [
+      ...confirmedMetricData,
       completedMetricData,
-      (err, res) => {
-        if (err) {
-          alert("Unable to save metric", err.reason);
-        }
-        setLoading(false);
-      }
-    );
-    // Removes the saved metric from the react hook state
+    ]);
+
+    // Removes the in progress metric data from state
     setMetricData((metricData) =>
       metricData.filter((metric) => metric.name !== metricName)
     );
-    setShowMetricOnboard(false);
   };
+
+  const handleCompleteOnboard = () => {
+    setCompleteLoading(true);
+
+    Meteor.call("chartOfAccounts.insert", coaName, (error, result) => {
+      if (result) {
+        const id = result;
+        Meteor.call(
+          "chartOfAccounts.segments.insert",
+          id,
+          segments,
+          (err, res) => {
+            if (err) {
+              alert(`Unable to save chart of accounts: ${err.reason}`);
+              setCompleteLoading(false);
+            } else {
+              // Saves the metric to the chart of accounts
+              Meteor.call(
+                "chartOfAccounts.metrics.insert",
+                id,
+                confirmedMetricData,
+                (err, res) => {
+                  if (err) {
+                    alert(`Unable to save metrics: ${err.reason}`);
+                    setCompleteLoading(false);
+                  } else {
+                    setCompleteLoading(false);
+                    history.push("/");
+                  }
+                }
+              );
+            }
+          }
+        );
+      } else {
+        console.log(error);
+        setCompleteLoading(false);
+        alert(error.reason);
+      }
+    });
+  };
+
+  // TODO: Create function that create the chart of accounts in DB using the segments and metrics when the final button is click
 
   if (!user) {
     return <Redirect to="/login" />;
@@ -236,7 +344,7 @@ export const ImportData = () => {
                     : "onboardHeaderActive"
                 }
                 onClick={() =>
-                  currentChartOfAccounts._id ? setImportPage("metrics") : null
+                  segments.length > 0 ? setImportPage("metrics") : null
                 }
               >
                 Import Metrics
@@ -246,8 +354,27 @@ export const ImportData = () => {
           {importPage === "segments" ? (
             // ### SEGMENT PAGE ###
             <div className="onboardInnerContainer">
-              <div className="onboardTitle">Upload a Chart of Accounts</div>
-              <label htmlFor="file-upload" className="onboardFileInput">
+              <div>
+                <label>Chart of Accounts Name:</label>
+                <input
+                  type="text"
+                  className="journalFormInput"
+                  style={{ marginLeft: 5 }}
+                  onChange={(e) => setCoaName(e.target.value)}
+                />
+              </div>
+              <div
+                className="onboardTitle"
+                style={{ display: coaName ? "block" : "none" }}
+              >
+                Upload a Chart of Accounts
+              </div>
+
+              <label
+                htmlFor="file-upload"
+                className="onboardFileInput"
+                style={{ display: coaName ? "block" : "none" }}
+              >
                 <span>Choose File</span>
               </label>
               <input
@@ -257,9 +384,10 @@ export const ImportData = () => {
                 onChange={handleChartOfAccountsFile}
                 key={chartOfAccountsFileInputKey}
               />
-              <BarLoader loading={loading} color={BLUE} />
+
+              <BarLoader loading={loading} color={BLUE} css={barLoaderCSS} />
               <div className="onboardFileName">{fileName}</div>
-              {currentChartOfAccounts.segments.length > 0 ? (
+              {segments.length > 0 ? (
                 <button
                   onClick={() =>
                     setShowSegments((showSegments) => !showSegments)
@@ -279,11 +407,11 @@ export const ImportData = () => {
                   </div>
                 </button>
               ) : null}
-              {showSegments && currentChartOfAccounts.segments.length > 0 ? (
+              {showSegments && segments.length > 0 ? (
                 <div className="onboardSegmentsContainer">
                   <div className="onboardTitle">Segments:</div>
                   <div className="onboardSegmentsInnerContainer">
-                    {currentChartOfAccounts.segments.map((segment, index) => {
+                    {segments.map((segment, index) => {
                       return (
                         <div key={index}>
                           <div className="segmentTitle">
@@ -303,7 +431,7 @@ export const ImportData = () => {
                   </div>
                 </div>
               ) : null}
-              {currentChartOfAccounts.segments.length > 0 ? (
+              {segments.length > 0 ? (
                 <button
                   className="onboardNextButton"
                   onClick={() => setImportPage("metrics")}
@@ -326,9 +454,9 @@ export const ImportData = () => {
                 onChange={handleMetricFile}
                 key={metricFileInputKey}
               />
-              <BarLoader loading={loading} color={BLUE} />
+              <BarLoader loading={loading} color={BLUE} css={barLoaderCSS} />
               <div className="onboardFileName">{metricFileName}</div>
-              {currentChartOfAccounts.metrics.length > 0 ? (
+              {confirmedMetricData.length > 0 ? (
                 <button
                   onClick={() => setShowMetrics((showMetrics) => !showMetrics)}
                   className="onboardShowSegmentsButton"
@@ -347,15 +475,18 @@ export const ImportData = () => {
                 </button>
               ) : null}
 
-              {showMetrics && currentChartOfAccounts.metrics.length > 0 ? (
+              {showMetrics && confirmedMetricData.length > 0 ? (
                 <div className="onboardSegmentsContainer">
                   <div className="onboardTitle">Metrics:</div>
                   <div className="onboardSegmentsInnerContainer">
-                    {currentChartOfAccounts.metrics.map((metric, index) => {
+                    {confirmedMetricData.map((metric, index) => {
                       return (
                         <div key={index} style={{ marginLeft: 20 }}>
-                          <div className="segmentTitle">
-                            {metric.description}
+                          <div
+                            className="segmentTitle"
+                            style={{ fontWeight: "bold" }}
+                          >
+                            {metric.name}
                           </div>
                           <ul style={{ paddingLeft: 18, paddingRight: 10 }}>
                             {metric.metricSegments.map((segment, i) => (
@@ -378,19 +509,36 @@ export const ImportData = () => {
                   </div>
                 </div>
               ) : null}
-              {currentChartOfAccounts.metrics.length > 0 ? (
+              {confirmedMetricData.length > 0 &&
+              metricData.length === 0 &&
+              !completeLoading ? (
                 <button
                   className="onboardNextButton"
-                  onClick={() => history.push("/")}
+                  onClick={handleCompleteOnboard}
                 >
-                  Auto Allocation
+                  Complete Onboard
                 </button>
               ) : null}
+
+              <BarLoader
+                loading={completeLoading}
+                color={BLUE}
+                css={barLoaderCSS}
+              />
+
               {/* Metrics Onboard Panel */}
               {showMetricOnboard ? (
                 <div className="onboardMetricOnboardContainer">
                   <div className="onboardMetricOnboardHeaderContainer">
-                    <div className="onboardTitle">Metric Onboarding</div>
+                    <div className="onboardTitle" style={{ marginTop: 0 }}>
+                      Metric Onboarding
+                    </div>
+                    <IconButton
+                      onClick={handleCloseOnboardingPanel}
+                      color="inherit"
+                    >
+                      <CloseIcon />
+                    </IconButton>
                   </div>
                   {metricData.map((data, index) => (
                     <div
@@ -422,6 +570,27 @@ export const ImportData = () => {
                         Select methods that will be used for allocations
                       </div>
                       <div className="onboardMetricOnboardSelectionContainer">
+                        <div className="onboardMetricOnboardSelection">
+                          <div
+                            style={{
+                              // borderBottom: "1px solid black",
+                              width: "10em",
+                              marginBottom: "1em",
+                            }}
+                          >
+                            <button onClick={(e) => handleSelectAll(data.name)}>
+                              <label style={{ fontWeight: "bold" }}>
+                                {data.validMethods.length ===
+                                data.columns.filter(
+                                  (column) =>
+                                    !data.metricSegments.includes(column)
+                                ).length
+                                  ? "Unselect All"
+                                  : "Select All"}
+                              </label>
+                            </button>
+                          </div>
+                        </div>
                         {data.columns.map((column, i) => {
                           // Exclude any columns that match possible allocation segment names
                           if (
@@ -438,6 +607,7 @@ export const ImportData = () => {
                                     handleMetricChecked(e, data.name, column)
                                   }
                                   value={column}
+                                  checked={data.validMethods.includes(column)}
                                 />
                                 <label style={{ fontWeight: "bold" }}>
                                   {column}
@@ -447,15 +617,35 @@ export const ImportData = () => {
                           }
                         })}
                       </div>
-                      {metricData[metricData.length - 1].validMethods.length >
-                      0 ? (
+                      <div>
                         <button
                           onClick={() => handleSaveMetric(data.name)}
-                          className="onboardMetricOnboardButton"
+                          className={`onboardMetricOnboardButton ${
+                            metricData.find(
+                              (metric) => metric.name === data.name
+                            ).validMethods.length === 0
+                              ? "buttonDisabled"
+                              : ""
+                          }`}
+                          disabled={
+                            metricData.find(
+                              (metric) => metric.name === data.name
+                            ).validMethods.length === 0
+                          }
                         >
                           Save Metric
                         </button>
-                      ) : null}
+                        <button
+                          className="onboardMetricOnboardButton"
+                          style={{
+                            backgroundColor: "#f54747",
+                            marginLeft: "2em",
+                          }}
+                          onClick={() => handleCancelMetric(data.name)}
+                        >
+                          Cancel
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>

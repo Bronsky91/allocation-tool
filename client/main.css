@@ -165,16 +165,11 @@ tr:nth-child(even) {
   border-width: 0px;
   color: white;
   margin-left: 10px;
+  background-color: #3597fe;
 }
 
 .registerButton:hover {
   cursor: pointer;
-}
-.registerButtonDisabled {
-  background-color: #37b1ff;
-}
-.registerButtonActive {
-  background-color: #3597fe;
 }
 
 /* Onboarding Page */
@@ -346,16 +341,25 @@ input[type="file"] {
   background-color: white;
   box-shadow: 0 3px 12px 0 rgba(0, 0, 0, 0.08);
   background-color: #fff;
+  overflow: auto;
 }
 
 .onboardMetricOnboardHeaderContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
   box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.06);
-  padding: 0px 10px 10px 20px;
+  padding: 10px 10px 10px 20px;
 }
 
 .onboardMetricOnboardInnerContainer {
   padding-left: 20px;
-  overflow-y: scroll;
+  padding-bottom: 20px;
+}
+
+.onboardMetricOnboardMetricContainer {
+  overflow: auto;
 }
 
 .onboardMetricOnboardTitle {
@@ -363,6 +367,7 @@ input[type="file"] {
   font-size: 20px;
   color: #373737;
   margin-top: 20px;
+  font-weight: bold;
 }
 
 .onboardMetricOnboardText {
@@ -418,11 +423,13 @@ input[type="file"] {
   height: 90%;
   width: 90%;
   overflow-y: auto;
+  border: white 15px solid;
 }
 
 .journalFormTitle {
   font-family: RobotoSlab;
   font-size: 20px;
+  font-weight: bold;
   color: #373737;
 }
 
@@ -470,7 +477,11 @@ input[type="file"] {
 }
 
 .journalSubGLContainer {
-  padding: 1em;
+  margin-top: 1em;
+  padding: 0.5em;
+  background-color: white;
+  border-radius: 8px;
+  border: solid 1px #eaeaea;
   /* width: 60%; */
 }
 
@@ -508,6 +519,10 @@ input[type="file"] {
   color: white;
 }
 
+.journalFormAllocationButton:hover {
+  cursor: pointer;
+}
+
 .journalFormSaveTemplateButton {
   /* width: 250px; */
   height: 40px;
@@ -516,6 +531,10 @@ input[type="file"] {
   background-color: #3597fe;
   border-width: 0;
   color: white;
+}
+
+.journalFormSaveTemplateButton:hover {
+  cursor: pointer;
 }
 
 .journalFormEditButtonContainer {
@@ -649,15 +668,10 @@ input[type="file"] {
   color: white;
   margin: 1em;
   border-width: 0;
+  background-color: #3597fe;
 }
 .allocationSaveButton:hover {
   cursor: pointer;
-}
-.allocationSaveButtonDisabled {
-  background-color: #37b1ff;
-}
-.allocationSaveButtonActive {
-  background-color: #3597fe;
 }
 
 /* User Account */
@@ -720,6 +734,16 @@ input[type="file"] {
   align-items: center;
   overflow: auto;
   padding: 1em;
+}
+
+/* Util Styles */
+
+.buttonDisabled {
+  opacity: 0.5;
+}
+
+.buttonDisabled:hover {
+  cursor: default;
 }
 
 /* Start of old Styles */

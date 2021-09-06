@@ -12,6 +12,7 @@ import { Redirect } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import BarLoader from "react-spinners/BarLoader";
+import Select from "react-select";
 // Components
 import { Header } from "../Header";
 import { BalanceAccount } from "./BalanceAccount";
@@ -157,8 +158,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
   const templateReady =
     selectedAllocation && formData.journalDescription.length > 0;
 
-  const templateEdit =
-    templateReady && selectedTemplateId !== "0" && selectedTemplate;
+  const templateEdit = selectedTemplateId !== "0" && selectedTemplate;
 
   useEffect(() => {
     setSelectedMetric(
@@ -220,7 +220,11 @@ const JournalForm = ({ user, chartOfAccounts }) => {
   }, [allocations]);
 
   useEffect(() => {
-    if (selectedAllocation && formData.toBalanceSegmentValue > 0) {
+    if (
+      formData.journalDescription.length > 0 &&
+      selectedAllocation &&
+      formData.toBalanceSegmentValue > 0
+    ) {
       Meteor.call(
         "calculateAllocation",
         {
@@ -243,7 +247,11 @@ const JournalForm = ({ user, chartOfAccounts }) => {
         }
       );
     }
-  }, [formData.toBalanceSegmentValue, selectedAllocation]);
+  }, [
+    formData.toBalanceSegmentValue,
+    selectedAllocation,
+    formData.journalDescription,
+  ]);
 
   useEffect(() => {
     if (readyToAllocate) {
@@ -251,7 +259,11 @@ const JournalForm = ({ user, chartOfAccounts }) => {
         setFileLoading(false);
       }, 1500);
     }
-  }, [readyToAllocate, formData.allocationValueOfBalancePerChartField]);
+  }, [
+    readyToAllocate,
+    formData.allocationValueOfBalancePerChartField,
+    formData.toBalanceSegmentValue,
+  ]);
 
   useEffect(() => {
     if (selectedTemplate) {
@@ -344,13 +356,17 @@ const JournalForm = ({ user, chartOfAccounts }) => {
     setSelectedAllocation(allocations[nextIndex]);
   };
 
-  const handleMetricChange = (e) => {
-    const newMetricSelected = metrics[e.target.value];
+  const handleMetricChange = (selected) => {
+    const newMetricSelected = metrics.find(
+      (metric) => metric._id === selected.value
+    );
     setSelectedMetric(newMetricSelected);
   };
 
-  const handleAllocationChange = (e) => {
-    const newAllocationSelected = allocations[e.target.value];
+  const handleAllocationChange = (selected) => {
+    const newAllocationSelected = allocations.find(
+      (allocation) => allocation._id === selected.value
+    );
     setSelectedAllocation(newAllocationSelected);
   };
 
@@ -568,24 +584,33 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                   <label className="journalFormText">
                     Select Saved Template
                   </label>
-                  <select
-                    className="journalFormInput"
-                    value={selectedTemplateId || "0"}
-                    onChange={(e) => setSelectedTemplateId(e.target.value)}
-                  >
-                    <option value="0">No Template Selected</option>
-                    {selectedChartOfAccounts &&
-                      selectedChartOfAccounts.templates.map(
-                        (template, index) => (
-                          <option value={template._id} key={index}>
-                            {template.name}
-                          </option>
-                        )
-                      )}
-                  </select>
+                  <Select
+                    className="journalFormInputSelect"
+                    value={
+                      selectedChartOfAccounts.templates
+                        .map((template) => ({
+                          label: template.name,
+                          value: template._id,
+                        }))
+                        .find(
+                          (template) => template.value === selectedTemplateId
+                        ) || { value: "0", label: "No Template" }
+                    }
+                    onChange={(selected) =>
+                      setSelectedTemplateId(selected.value)
+                    }
+                    options={[
+                      { value: "0", label: "No Template" },
+                      ...selectedChartOfAccounts.templates.map((template) => ({
+                        label: template.name,
+                        value: template._id,
+                      })),
+                    ]}
+                    defaultValue={{ value: "0", label: "No Template" }}
+                  />
                 </div>
               </div>
-              <div className="formRow" style={{ alignItems: "center" }}>
+              <div className="row" style={{ alignItems: "center" }}>
                 <div className="formColumn">
                   <label className="journalFormText">Entry Date:</label>
                   <div>
@@ -598,23 +623,15 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                     />
                   </div>
                 </div>
-                {templateReady ? (
-                  templateEdit ? (
-                    <button
-                      className="journalFormSaveTemplateButton"
-                      onClick={() => openSaveTemplateModal()}
-                    >
-                      Update Template
-                    </button>
-                  ) : (
-                    <button
-                      className="journalFormSaveTemplateButton"
-                      onClick={() => openSaveTemplateModal()}
-                    >
-                      Save New Template
-                    </button>
-                  )
-                ) : null}
+                <button
+                  className={`journalFormSaveTemplateButton ${
+                    !templateReady ? "buttonDisabled" : ""
+                  }`}
+                  onClick={() => openSaveTemplateModal()}
+                  disabled={!templateReady}
+                >
+                  {templateEdit ? "Update Template" : "Save new Template"}
+                </button>
               </div>
             </div>
             <div
@@ -629,19 +646,14 @@ const JournalForm = ({ user, chartOfAccounts }) => {
             {nonMetricSegments.length > 0 ? (
               <div className="journalAccountContainer">
                 <div className="journalFormTitle">Unused Allocation Fields</div>
-                <div
-                  className="formRow"
-                  style={{ justifyContent: "flex-start", flexWrap: "wrap" }}
-                >
-                  {nonMetricSegments.map((segment, index) => (
-                    <OtherSegment
-                      key={index}
-                      segment={segment}
-                      formData={formData}
-                      handleChangeOtherSegments={handleChangeOtherSegments}
-                    />
-                  ))}
-                </div>
+                {nonMetricSegments.map((segment, index) => (
+                  <OtherSegment
+                    key={index}
+                    segment={segment}
+                    formData={formData}
+                    handleChangeOtherSegments={handleChangeOtherSegments}
+                  />
+                ))}
               </div>
             ) : null}
             <div
@@ -673,19 +685,20 @@ const JournalForm = ({ user, chartOfAccounts }) => {
               <label className="journalFormText">
                 Select Metric to Allocate with:
               </label>
-              <select
-                value={metrics.findIndex(
-                  (metric) => metric._id === selectedMetric?._id
-                )}
+              <Select
+                value={metrics
+                  .map((metric) => ({
+                    value: metric._id,
+                    label: metric.description,
+                  }))
+                  .find((metric) => metric.value === selectedMetric._id)}
                 onChange={handleMetricChange}
-                className="journalFormInput"
-              >
-                {metrics.map((metric, index) => (
-                  <option key={index} value={index}>
-                    {metric.description}
-                  </option>
-                ))}
-              </select>
+                className="journalFormInputSelect"
+                options={metrics.map((metric) => ({
+                  value: metric._id,
+                  label: metric.description,
+                }))}
+              />
             </div>
             <button
               onClick={openAllocationModal}
@@ -702,21 +715,23 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                   className="formRow"
                   style={{ justifyContent: "flex-start" }}
                 >
-                  <select
-                    value={allocations.findIndex(
-                      (allocation) => allocation._id === selectedAllocation?._id
-                    )}
+                  <Select
+                    value={allocations
+                      .map((allocation) => ({
+                        value: allocation._id,
+                        label: allocation.name,
+                      }))
+                      .find(
+                        (allocation) =>
+                          allocation.value === selectedAllocation?._id
+                      )}
                     onChange={handleAllocationChange}
-                    className="journalFormInput"
-                  >
-                    {allocations.map((allocation, index) => {
-                      return (
-                        <option key={index} value={index}>
-                          {allocation.name}
-                        </option>
-                      );
-                    })}
-                  </select>
+                    className="journalFormInputSelect"
+                    options={allocations.map((allocation) => ({
+                      value: allocation._id,
+                      label: allocation.name,
+                    }))}
+                  />
                   <IconButton
                     color="inherit"
                     onClick={openEditAllocationModal}

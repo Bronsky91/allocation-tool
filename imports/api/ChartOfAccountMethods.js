@@ -30,69 +30,38 @@ Meteor.methods({
     }
     return ChartOfAccountsCollection.remove({});
   },
-  "chartOfAccounts.segments.insert": function (id, workbookData) {
+  "chartOfAccounts.segments.insert": function (id, segments) {
     check(id, String);
-    check(workbookData, {
-      sheets: [
-        {
-          columns: [String],
-          id: Number,
-          name: String,
-          rows: [[{ rowNumber: Number, value: Match.OneOf(String, Number) }]],
-        },
-      ],
-    });
+    check(segments, [
+      {
+        chartFieldOrder: Number,
+        description: String,
+        subSegments: [
+          {
+            description: String,
+            segmentId: Match.OneOf(String, Number),
+            category: Match.Optional(String),
+            typicalBalance: Match.Optional(String),
+          },
+        ],
+      },
+    ]);
 
     // If a user not logged in or the user is not an admin
     if (!this.userId && !Meteor.user()?.admin) {
       throw new Meteor.Error("Not authorized.");
     }
 
-    for (const [index, sheet] of workbookData.sheets.entries()) {
-      const description = sheet.name;
-      const chartFieldOrder = index;
-      // Columns object that matches the columns to it's index in the sheet to be inserted properly in the rows map
-      const columnIndexRef = sheet.columns.reduce(
-        (columnIndexRefObj, columnName, i) => {
-          // If the column in the sheet is valid for processing, add it to the object
-          if (VALID_COLUMN_NAMES.includes(columnName)) {
-            return {
-              ...columnIndexRefObj,
-              [i]: CHART_OF_ACCOUNT_COLUMNS[columnName],
-            };
-          }
-          // Otherwise return the object as-is and continue
-          return columnIndexRefObj;
-        },
-        {}
-      );
-
-      const subSegments = sheet.rows
-        .filter((row) => row.length > 1)
-        .map((row) => {
-          const subSegment = {};
-          row.map((r, i) => {
-            // This makes sure it only assigns values to valid columns
-            if (
-              Object.keys(columnIndexRef)
-                .map((c) => Number(c)) // Need to convert to number because Object.keys() makes strings
-                .includes(i)
-            ) {
-              subSegment[columnIndexRef[i]] = r.value;
-            }
-          });
-          return subSegment;
-        });
-
+    for (const segment of segments) {
       ChartOfAccountsCollection.update(
         { _id: id },
         {
           $push: {
             segments: {
               _id: new Mongo.ObjectID()._str,
-              description,
-              subSegments,
-              chartFieldOrder,
+              description: segment.description,
+              subSegments: segment.subSegments,
+              chartFieldOrder: segment.chartFieldOrder,
               userId: this.userId,
               createdAt: new Date(),
             },
@@ -115,50 +84,54 @@ Meteor.methods({
       }
     );
   },
-  "chartOfAccounts.metrics.insert": function (id, data) {
+  "chartOfAccounts.metrics.insert": function (id, metrics) {
     check(id, String);
-    check(data, {
-      columns: [String],
-      id: Number,
-      name: String,
-      metricSegments: [String], // metricSegments - Array of column names that are linked to Segments
-      validMethods: [String], // validMethods - Array of column names that are used for allocation
-      rows: [[{ rowNumber: Number, value: Match.OneOf(String, Number) }]],
-    });
+    check(metrics, [
+      {
+        columns: [String],
+        id: Number,
+        name: String,
+        metricSegments: [String], // metricSegments - Array of column names that are linked to Segments
+        validMethods: [String], // validMethods - Array of column names that are used for allocation
+        rows: [[{ rowNumber: Number, value: Match.OneOf(String, Number) }]],
+      },
+    ]);
 
     // If a user not logged in or the user is not an admin
     if (!this.userId && !Meteor.user()?.admin) {
       throw new Meteor.Error("Not authorized.");
     }
 
-    const description = data.name;
-    const columnNames = data.columns;
-    const validMethods = data.validMethods;
-    const metricSegments = data.metricSegments;
-    const columns = columnNames.map((cn, index) => ({
-      title: cn,
-      rows: data.rows.map((row) => {
-        return row[index];
-      }),
-    }));
+    for (const metric of metrics) {
+      const description = metric.name;
+      const columnNames = metric.columns;
+      const validMethods = metric.validMethods;
+      const metricSegments = metric.metricSegments;
+      const columns = columnNames.map((cn, index) => ({
+        title: cn,
+        rows: metric.rows.map((row) => {
+          return row[index];
+        }),
+      }));
 
-    ChartOfAccountsCollection.update(
-      { _id: id },
-      {
-        $push: {
-          metrics: {
-            _id: new Mongo.ObjectID()._str,
-            description,
-            columns,
-            validMethods,
-            metricSegments,
-            userId: this.userId,
-            createdAt: new Date(),
-            allocations: [],
+      ChartOfAccountsCollection.update(
+        { _id: id },
+        {
+          $push: {
+            metrics: {
+              _id: new Mongo.ObjectID()._str,
+              description,
+              columns,
+              validMethods,
+              metricSegments,
+              userId: this.userId,
+              createdAt: new Date(),
+              allocations: [],
+            },
           },
-        },
-      }
-    );
+        }
+      );
+    }
   },
   "chartOfAccounts.metrics.removeAll": function (id) {
     // If a user not logged in or the user is not an admin
@@ -301,6 +274,7 @@ Meteor.methods({
           description: String,
           segmentId: Match.OneOf(String, Number),
           category: Match.Optional(String),
+          typicalBalance: Match.Optional(String),
         },
       ],
       glCodeToAllocate: {
@@ -312,7 +286,12 @@ Meteor.methods({
         },
         typicalBalance: String,
       },
-      otherSegments: Match.Maybe([String]),
+      otherSegments: Match.Maybe([
+        {
+          description: String,
+          segmentId: Match.OneOf(String, Number),
+        },
+      ]),
       subGLCode: {
         selectedSubGLSegment: {
           description: String,
@@ -366,6 +345,7 @@ Meteor.methods({
           description: String,
           segmentId: Match.OneOf(String, Number),
           category: Match.Optional(String),
+          typicalBalance: Match.Optional(String),
         },
       ],
       glCodeToAllocate: {
