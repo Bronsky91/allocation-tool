@@ -43,6 +43,7 @@ export const ImportData = () => {
   const [importPage, setImportPage] = useState("segments");
   const [segments, setSegments] = useState([]);
   const [metricData, setMetricData] = useState([]);
+  const [confirmedMetricData, setConfirmedMetricData] = useState([]);
   const [showSegments, setShowSegments] = useState(false);
   const [showMetrics, setShowMetrics] = useState(false);
   const [showMetricOnboard, setShowMetricOnboard] = useState(false);
@@ -50,11 +51,16 @@ export const ImportData = () => {
     useState(new Date());
   const [metricFileInputKey, setMetricFileInputKey] = useState(new Date());
   const [loading, setLoading] = useState(false);
+  const [completeLoading, setCompleteLoading] = useState(false);
 
   // Segments possible for allocation
   const possibleAllocationSegmentNames = segments
     .filter((segment) => ![GL_CODE, SUB_GL_CODE].includes(segment.description))
     .map((segment) => segment.description);
+
+  const barLoaderCSS = `
+    margin-top: 2em;
+  `;
 
   useEffect(() => {
     if (metricData.length === 0) {
@@ -64,12 +70,12 @@ export const ImportData = () => {
     }
   }, [metricData]);
 
-  console.log("segments", segments);
-
   const handleChartOfAccountsFile = async (e) => {
+    setLoading(true);
     // Excel File
     const file = e.target.files[0];
     setFileName(file.name);
+
     // Formatted Data
     const workbookData = await ReadWorkbook(file);
     // Checks if the workbookData is valid
@@ -119,6 +125,7 @@ export const ImportData = () => {
       }
       // Clears the Input field, in case the user wanted to upload a new file right away
       setChartOfAccountsFileInputKey(new Date());
+      setLoading(false);
     } else {
       // Displays an alert to the user and an error message why the chart of the accounts isn't valid
       alert(output.err);
@@ -126,6 +133,7 @@ export const ImportData = () => {
   };
 
   const handleMetricFile = async (e) => {
+    setLoading(true);
     // Excel File
     const file = e.target.files[0];
     setMetricFileName(file.name);
@@ -174,8 +182,7 @@ export const ImportData = () => {
     }
     // Clear metric upload file input
     setMetricFileInputKey(new Date());
-    // Show onboarding panel
-    // setShowMetricOnboard(true);
+    setLoading(false);
   };
 
   const handleSelectAll = (metricName) => {
@@ -243,28 +250,62 @@ export const ImportData = () => {
   };
 
   const handleSaveMetric = (metricName) => {
-    // TODO: Figure out logic for what "save metric" does and don't show the show metrics button until it's "saved"
     // Find the completed metric from the working data
     const completedMetricData = metricData.find(
       (metric) => metric.name === metricName
     );
-    setLoading(true);
-    // Saves the metric to the chart of accounts
-    Meteor.call(
-      "chartOfAccounts.metrics.insert",
-      currentChartOfAccounts._id,
+
+    // Sets the confirmed metric data into state
+    setConfirmedMetricData((confirmedMetricData) => [
+      ...confirmedMetricData,
       completedMetricData,
-      (err, res) => {
-        if (err) {
-          alert("Unable to save metric", err.reason);
-        }
-        setLoading(false);
-      }
-    );
-    // Removes the saved metric from the react hook state
+    ]);
+
+    // Removes the in progress metric data from state
     setMetricData((metricData) =>
       metricData.filter((metric) => metric.name !== metricName)
     );
+  };
+
+  const handleCompleteOnboard = () => {
+    setCompleteLoading(true);
+
+    Meteor.call("chartOfAccounts.insert", fileName, (error, result) => {
+      if (result) {
+        const id = result;
+        Meteor.call(
+          "chartOfAccounts.segments.insert",
+          id,
+          segments,
+          (err, res) => {
+            if (err) {
+              alert(`Unable to save chart of accounts: ${err.reason}`);
+              setCompleteLoading(false);
+            } else {
+              // Saves the metric to the chart of accounts
+              Meteor.call(
+                "chartOfAccounts.metrics.insert",
+                id,
+                confirmedMetricData,
+                (err, res) => {
+                  if (err) {
+                    alert(`Unable to save metrics: ${err.reason}`);
+                    setCompleteLoading(false);
+                  } else {
+                    setCompleteLoading(false);
+                    history.push("/");
+                  }
+                }
+              );
+            }
+          }
+        );
+      } else {
+        console.log(error);
+        setCompleteLoading(false);
+        alert(error.reason);
+      }
+    });
   };
 
   // TODO: Create function that create the chart of accounts in DB using the segments and metrics when the final button is click
@@ -323,7 +364,7 @@ export const ImportData = () => {
                 onChange={handleChartOfAccountsFile}
                 key={chartOfAccountsFileInputKey}
               />
-              <BarLoader loading={loading} color={BLUE} />
+              <BarLoader loading={loading} color={BLUE} css={barLoaderCSS} />
               <div className="onboardFileName">{fileName}</div>
               {segments.length > 0 ? (
                 <button
@@ -392,9 +433,9 @@ export const ImportData = () => {
                 onChange={handleMetricFile}
                 key={metricFileInputKey}
               />
-              <BarLoader loading={loading} color={BLUE} />
+              <BarLoader loading={loading} color={BLUE} css={barLoaderCSS} />
               <div className="onboardFileName">{metricFileName}</div>
-              {metricData.length > 0 ? (
+              {confirmedMetricData.length > 0 ? (
                 <button
                   onClick={() => setShowMetrics((showMetrics) => !showMetrics)}
                   className="onboardShowSegmentsButton"
@@ -413,15 +454,18 @@ export const ImportData = () => {
                 </button>
               ) : null}
 
-              {showMetrics && metricData.length > 0 ? (
+              {showMetrics && confirmedMetricData.length > 0 ? (
                 <div className="onboardSegmentsContainer">
                   <div className="onboardTitle">Metrics:</div>
                   <div className="onboardSegmentsInnerContainer">
-                    {metricData.map((metric, index) => {
+                    {confirmedMetricData.map((metric, index) => {
                       return (
                         <div key={index} style={{ marginLeft: 20 }}>
-                          <div className="segmentTitle">
-                            {metric.description}
+                          <div
+                            className="segmentTitle"
+                            style={{ fontWeight: "bold" }}
+                          >
+                            {metric.name}
                           </div>
                           <ul style={{ paddingLeft: 18, paddingRight: 10 }}>
                             {metric.metricSegments.map((segment, i) => (
@@ -444,14 +488,22 @@ export const ImportData = () => {
                   </div>
                 </div>
               ) : null}
-              {metricData.length > 0 ? (
+              {confirmedMetricData.length > 0 &&
+              metricData.length === 0 &&
+              !completeLoading ? (
                 <button
                   className="onboardNextButton"
-                  onClick={() => history.push("/")}
+                  onClick={handleCompleteOnboard}
                 >
-                  Auto Allocation
+                  Complete Onboard
                 </button>
               ) : null}
+
+              <BarLoader
+                loading={completeLoading}
+                color={BLUE}
+                css={barLoaderCSS}
+              />
 
               {/* Metrics Onboard Panel */}
               {showMetricOnboard ? (
@@ -548,14 +600,16 @@ export const ImportData = () => {
                         <button
                           onClick={() => handleSaveMetric(data.name)}
                           className={`onboardMetricOnboardButton ${
-                            metricData[metricData.length - 1].validMethods
-                              .length === 0
+                            metricData.find(
+                              (metric) => metric.name === data.name
+                            ).validMethods.length === 0
                               ? "buttonDisabled"
                               : ""
                           }`}
                           disabled={
-                            metricData[metricData.length - 1].validMethods
-                              .length === 0
+                            metricData.find(
+                              (metric) => metric.name === data.name
+                            ).validMethods.length === 0
                           }
                         >
                           Save Metric
