@@ -39,6 +39,7 @@ export const ImportData = () => {
 
   // metricData is uploaded metrics sheets and worked data before saving
   const [fileName, setFileName] = useState("");
+  const [coaName, setCoaName] = useState("");
   const [metricFileName, setMetricFileName] = useState("");
   const [importPage, setImportPage] = useState("segments");
   const [segments, setSegments] = useState([]);
@@ -270,7 +271,7 @@ export const ImportData = () => {
   const handleCompleteOnboard = () => {
     setCompleteLoading(true);
 
-    Meteor.call("chartOfAccounts.insert", fileName, (error, result) => {
+    Meteor.call("chartOfAccounts.insert", coaName, (error, result) => {
       if (result) {
         const id = result;
         Meteor.call(
@@ -353,8 +354,27 @@ export const ImportData = () => {
           {importPage === "segments" ? (
             // ### SEGMENT PAGE ###
             <div className="onboardInnerContainer">
-              <div className="onboardTitle">Upload a Chart of Accounts</div>
-              <label htmlFor="file-upload" className="onboardFileInput">
+              <div>
+                <label>Chart of Accounts Name:</label>
+                <input
+                  type="text"
+                  className="journalFormInput"
+                  style={{ marginLeft: 5 }}
+                  onChange={(e) => setCoaName(e.target.value)}
+                />
+              </div>
+              <div
+                className="onboardTitle"
+                style={{ display: coaName ? "block" : "none" }}
+              >
+                Upload a Chart of Accounts
+              </div>
+
+              <label
+                htmlFor="file-upload"
+                className="onboardFileInput"
+                style={{ display: coaName ? "block" : "none" }}
+              >
                 <span>Choose File</span>
               </label>
               <input
@@ -364,6 +384,7 @@ export const ImportData = () => {
                 onChange={handleChartOfAccountsFile}
                 key={chartOfAccountsFileInputKey}
               />
+
               <BarLoader loading={loading} color={BLUE} css={barLoaderCSS} />
               <div className="onboardFileName">{fileName}</div>
               {segments.length > 0 ? (
