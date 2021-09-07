@@ -55,7 +55,7 @@ export const Header = ({
         }}
       >
         <span className="headerTextLeft">RedSky Innovations</span>{" "}
-        <span className="headerTextRight">Journal Entry Tool</span>
+        <span className="headerTextRight">Allocation Tool</span>
       </div>
       <div
         className="headerButtonContainer"

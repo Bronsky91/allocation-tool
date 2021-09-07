@@ -255,9 +255,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
 
   useEffect(() => {
     if (readyToAllocate) {
-      setTimeout(() => {
-        setFileLoading(false);
-      }, 1500);
+      setFileLoading(false);
     }
   }, [
     readyToAllocate,
@@ -566,8 +564,8 @@ const JournalForm = ({ user, chartOfAccounts }) => {
         <div className="journalFormContainer">
           <div className="journalFormAccountsContainer">
             <div className="journalFormMetaContainer">
-              <div className="journalFormTitle">Journal Entry Meta Data</div>
-              <div className="row">
+              <div className="journalFormTitle">Journal Entry Information</div>
+              <div className="formRow">
                 <div className="formColumn">
                   <label className="journalFormText">Description</label>
                   <input
@@ -610,7 +608,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                   />
                 </div>
               </div>
-              <div className="row" style={{ alignItems: "center" }}>
+              <div className="formRow" style={{ alignItems: "center" }}>
                 <div className="formColumn">
                   <label className="journalFormText">Entry Date:</label>
                   <div>

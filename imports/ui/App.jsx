@@ -21,6 +21,8 @@ import { RegisterForm } from "./Accounts/RegisterForm.jsx";
 import { Header } from "./Header.jsx";
 
 export const App = ({ loggingIn }) => {
+  document.title = "RedSky Allocation Tool";
+
   Meteor.subscribe("Meteor.user.admin");
 
   const user = useTracker(() => Meteor.user());
@@ -116,7 +118,6 @@ export const App = ({ loggingIn }) => {
         {/* ### USE FOR REDSKY ADMIN ### */}
         <AdminRoute
           loggingIn={loggingIn}
-          user={user}
           exact
           path="/admin"
           component={RedskyAdmin}
