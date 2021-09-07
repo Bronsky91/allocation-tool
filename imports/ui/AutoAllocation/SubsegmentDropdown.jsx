@@ -26,7 +26,7 @@ export const SubsegmentDropdown = ({
       return availableSubSegments.includes(subSegment.segmentId.toString());
     })
     .map((s) => ({
-      label: s.description,
+      label: `${s.segmentId} - ${s.description}`,
       value: s.segmentId,
     }));
 

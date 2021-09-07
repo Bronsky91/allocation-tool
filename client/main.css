@@ -79,7 +79,7 @@ tr:nth-child(even) {
 }
 
 .loginText {
-  font-family: Nunito;
+  /* font-family: Nunito; */
   font-size: 15px;
   font-weight: bold;
   color: #343a40;
@@ -119,7 +119,7 @@ tr:nth-child(even) {
 }
 
 .headerText {
-  font-family: OpenSans;
+  /* font-family: OpenSans; */
   font-size: 22px;
   font-weight: bold;
 }
@@ -204,7 +204,7 @@ tr:nth-child(even) {
 }
 
 .onboardHeaderText {
-  font-family: Nunito;
+  /* font-family: Nunito; */
   font-size: 20px;
   color: #3597fe;
   display: flex;
@@ -238,7 +238,7 @@ tr:nth-child(even) {
 }
 
 .onboardTitle {
-  font-family: RobotoSlab;
+  /* font-family: RobotoSlab; */
   font-size: 20px;
   font-weight: bold;
   color: #373737;
@@ -262,7 +262,7 @@ input[type="file"] {
 }
 .onboardFileName {
   margin: 10px;
-  font-family: Nunito;
+  /* font-family: Nunito; */
   font-size: 15px;
   font-weight: 600;
   font-stretch: normal;
@@ -281,7 +281,7 @@ input[type="file"] {
   border-radius: 8px;
   border: solid 1px #3597fe;
   background-color: #fff;
-  font-family: Nunito;
+  /* font-family: Nunito; */
   font-size: 15px;
   color: #3597fe;
 }
@@ -306,14 +306,14 @@ input[type="file"] {
 }
 
 .onboardSegmentTitle {
-  font-family: Nunito;
+  /* font-family: Nunito; */
   font-size: 16px;
   font-weight: 600;
   color: #373737;
 }
 
 .onboardSubsegmentTitle {
-  font-family: Nunito;
+  /* font-family: Nunito; */
   font-size: 14px;
   font-weight: 600;
   color: #373737;
@@ -363,7 +363,7 @@ input[type="file"] {
 }
 
 .onboardMetricOnboardTitle {
-  font-family: RobotoSlab;
+  /* font-family: RobotoSlab; */
   font-size: 20px;
   color: #373737;
   margin-top: 20px;
@@ -371,7 +371,7 @@ input[type="file"] {
 }
 
 .onboardMetricOnboardText {
-  font-family: Nunito;
+  /* font-family: Nunito; */
   font-size: 16px;
   color: #373737;
   margin-top: 20px;
@@ -383,7 +383,7 @@ input[type="file"] {
 
 .onboardMetricOnboardSelection {
   margin-top: 5px;
-  font-family: Nunito;
+  /* font-family: Nunito; */
   font-size: 16px;
   color: #373737;
 }
@@ -403,6 +403,7 @@ input[type="file"] {
 
 .journalFormParent {
   background-color: #f1f5f7;
+  /* background-color: #ebf4ff; */
   height: 100vh;
 }
 
@@ -427,14 +428,14 @@ input[type="file"] {
 }
 
 .journalFormTitle {
-  font-family: RobotoSlab;
+  /* font-family: RobotoSlab; */
   font-size: 20px;
   font-weight: bold;
   color: #373737;
 }
 
 .journalFormText {
-  font-family: Nunito;
+  /* font-family: Nunito; */
   font-size: 15px;
   color: #343a40;
 }
@@ -571,7 +572,7 @@ input[type="file"] {
   border-width: 0;
   background-color: #43bf9a;
   color: white;
-  font-family: Nunito;
+  /* font-family: Nunito; */
   font-size: 20px;
   font-weight: 600;
   display: flex;
@@ -599,7 +600,7 @@ input[type="file"] {
 }
 
 .allocationTitle {
-  font-family: RobotoSlab;
+  /* font-family: RobotoSlab; */
   font-size: 20px;
   font-weight: 500;
   color: #373737;
@@ -607,7 +608,7 @@ input[type="file"] {
 }
 
 .allocationText {
-  font-family: Nunito;
+  /* font-family: Nunito; */
   font-size: 18px;
   color: #373737;
   margin: 0.5em;
@@ -648,7 +649,7 @@ input[type="file"] {
 }
 
 .allocationSectionTitle {
-  font-family: Nunito;
+  /* font-family: Nunito; */
   font-size: 16px;
   color: #728495;
 }
@@ -657,7 +658,7 @@ input[type="file"] {
   border-radius: 8px;
   border: solid 0.8px #d4d9de;
   background-color: #fff;
-  font-family: Nunito;
+  /* font-family: Nunito; */
   font-size: 15px;
   width: 400px;
 }

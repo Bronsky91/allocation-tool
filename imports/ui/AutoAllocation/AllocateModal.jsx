@@ -206,6 +206,7 @@ export const AllocateModal = ({
           if (err) {
             console.log("err", err);
           } else {
+            // TODO: Set loading bar here, it takes forever sometimes...
             console.log("result", result);
             if (result.numberOfDocumentsUpdate > 0 && result.allocationId) {
               // Once the allocation is saved, make it the selected the allocation in the dropdown
