@@ -1,11 +1,18 @@
 import React from "react";
 import { SegmentSelect } from "./SegmentSelect";
+import Select from "react-select";
+import { customSelectStyles } from "../../../constants";
 
 export const GLSegment = ({
   glCodeSegment,
   formData,
   handleChangeFormData,
 }) => {
+  const typicalBalanceOptions = [
+    { label: "Credit", value: "credit" },
+    { label: "Debit", value: "debit" },
+  ];
+
   const handleChangeSegment = (selected) => {
     const newSelectedSegment = glCodeSegment.subSegments[selected.value];
     if (newSelectedSegment.typicalBalance) {
@@ -18,8 +25,8 @@ export const GLSegment = ({
     handleChangeFormData("selectedAllocationSegment", newSelectedSegment);
   };
 
-  const handleChangeTypicalBalance = (e) => {
-    handleChangeFormData("typicalBalance", e.target.value);
+  const handleChangeTypicalBalance = (selected) => {
+    handleChangeFormData("typicalBalance", selected.value);
   };
 
   return (
@@ -46,14 +53,15 @@ export const GLSegment = ({
         </div>
         <div className="formColumn">
           <label className="journalFormText">Typical Balance:</label>
-          <select
-            className="journalFormInput"
+          <Select
+            className="journalFormInputSelect"
             onChange={handleChangeTypicalBalance}
-            value={formData.typicalBalance}
-          >
-            <option value="debit">Debit</option>
-            <option value="credit">Credit</option>
-          </select>
+            value={typicalBalanceOptions.find(
+              (tb) => tb.value === formData.typicalBalance
+            )}
+            options={typicalBalanceOptions}
+            styles={customSelectStyles}
+          />
         </div>
       </div>
     </div>

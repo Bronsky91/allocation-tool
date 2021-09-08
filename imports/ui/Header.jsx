@@ -11,6 +11,7 @@ import SettingsIcon from "@material-ui/icons/Settings";
 import PersonIcon from "@material-ui/icons/Person";
 // Packages
 import Select from "react-select";
+import { customSelectStyles } from "../../constants";
 
 export const Header = ({
   selectedChartOfAccountsId,
@@ -35,8 +36,12 @@ export const Header = ({
     }
   };
 
+  const handleChartOfAccountChange = (selected) => {
+    setSelectChartOfAccountsId(selected.value);
+  };
+
   const headerButtonContainerWidth =
-    location.pathname === "/" && chartOfAccounts.length > 0 ? "21.5em" : "90px";
+    location.pathname === "/" && chartOfAccounts.length > 0 ? "26em" : "90px";
 
   return (
     <div className="headerContainer">
@@ -62,17 +67,30 @@ export const Header = ({
         style={{ width: headerButtonContainerWidth }}
       >
         {location.pathname === "/" && chartOfAccounts.length > 0 ? (
-          <select
-            value={selectedChartOfAccountsId}
-            onChange={(e) => setSelectChartOfAccountsId(e.target.value)}
-            style={{ width: "224px" }}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+            }}
           >
-            {chartOfAccounts.map((coa, index) => (
-              <option key={index} value={coa._id}>
-                {coa.name}
-              </option>
-            ))}
-          </select>
+            <label style={{ marginRight: 5 }}>Chart of Accounts:</label>
+            <Select
+              className="journalFormInputSelect"
+              value={chartOfAccounts
+                .map((coa) => ({
+                  label: coa.name,
+                  value: coa._id,
+                }))
+                .find((coa) => coa.value === selectedChartOfAccountsId)}
+              onChange={handleChartOfAccountChange}
+              options={chartOfAccounts.map((coa) => ({
+                label: coa.name,
+                value: coa._id,
+              }))}
+              styles={customSelectStyles}
+            />
+          </div>
         ) : null}
         <button
           className="headerButton"

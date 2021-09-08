@@ -416,8 +416,8 @@ input[type="file"] {
 
 .journalFormContainer {
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
+  flex-direction: column;
+  /* justify-content: space-between; */
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 3px 5px 0 rgba(0, 0, 0, 0.04);
@@ -425,6 +425,13 @@ input[type="file"] {
   width: 90%;
   overflow-y: auto;
   border: white 15px solid;
+}
+
+.journalFormContainerRow {
+  display: flex;
+  flex-direction: row;
+  padding: 0.5em 2em 0em 2em;
+  justify-content: space-between;
 }
 
 .journalFormTitle {
@@ -438,12 +445,12 @@ input[type="file"] {
   /* font-family: Nunito; */
   font-size: 15px;
   color: #343a40;
+  margin-bottom: 0.5em;
 }
 
 .journalFormInput {
   border-radius: 8px;
   border: solid 0.8px #d4d9de;
-  margin-top: 0.5em;
   max-width: 15em;
   min-width: 10em;
   padding: 6px;
@@ -452,7 +459,6 @@ input[type="file"] {
 .journalFormInputSelect {
   border-radius: 8px;
   border: solid 0.8px #d4d9de;
-  margin-top: 0.5em;
   max-width: 15em;
   min-width: 10em;
 }
@@ -463,13 +469,6 @@ input[type="file"] {
   margin-top: 0.5em;
   max-width: 20em;
   padding: 6px;
-}
-
-.journalFormAccountsContainer {
-  display: flex;
-  flex-direction: column;
-  padding: 2em;
-  width: 45%;
 }
 
 .journalGLContainer {
@@ -487,7 +486,12 @@ input[type="file"] {
 }
 
 .journalFormMetaContainer {
+  width: 45%;
   padding: 23px 35px 26px 25px;
+}
+
+.journalAccountParentContainer {
+  width: 50%;
 }
 
 .journalAccountContainer {
@@ -495,19 +499,12 @@ input[type="file"] {
   border-radius: 8px;
   background-color: #f0f4f9;
   /* border: 0.5px green solid; */
-  margin-top: 12px;
 }
 
-.journalFormBalanceContainer {
-}
-
-.journalFormAllocationContainer {
+.journalFormMetricAllocationContainer {
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
-  padding: 2em;
   width: 45%;
-  align-items: center;
 }
 
 .journalFormAllocationButton {
@@ -549,12 +546,11 @@ input[type="file"] {
 .journalFormDownloadContainer {
   display: flex;
   justify-content: center;
-  width: 80%;
-  height: 30%;
+  width: 45%;
+  height: 17em;
   border-radius: 8px;
   border: dashed 2px #eaeaea;
   background-color: #fff;
-  padding: 2em;
 }
 
 .journalFormDownloadInnerContainer {
@@ -562,7 +558,7 @@ input[type="file"] {
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  height: 100%;
+  padding: 2em;
 }
 
 .journalFormDownloadButton {
@@ -806,6 +802,11 @@ input[type="file"] {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  padding: 5px;
+}
+.column {
+  display: flex;
+  flex-direction: column;
   padding: 5px;
 }
 

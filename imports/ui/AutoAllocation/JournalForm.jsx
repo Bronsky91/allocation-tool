@@ -4,6 +4,7 @@ import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
 // Material UI
 import { IconButton } from "@material-ui/core";
+import AddIcon from "@material-ui/icons/Add";
 import EditIcon from "@material-ui/icons/Edit";
 import DeleteIcon from "@material-ui/icons/Delete";
 import GetAppIcon from "@material-ui/icons/GetApp";
@@ -27,7 +28,12 @@ import { ChartOfAccountsCollection } from "../../db/ChartOfAccountsCollection";
 // Utils
 import { CreateWorkbook } from "../../utils/CreateWorkbook";
 // Constants
-import { BLUE, GL_CODE, SUB_GL_CODE } from "../../../constants";
+import {
+  BLUE,
+  customSelectStyles,
+  GL_CODE,
+  SUB_GL_CODE,
+} from "../../../constants";
 
 export const JournalFormParent = () => {
   // Current user logged in
@@ -562,7 +568,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
           selectedTemplate={selectedTemplate}
         />
         <div className="journalFormContainer">
-          <div className="journalFormAccountsContainer">
+          <div className="journalFormContainerRow">
             <div className="journalFormMetaContainer">
               <div className="journalFormTitle">Journal Entry Information</div>
               <div className="formRow">
@@ -578,10 +584,28 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                     value={formData.journalDescription}
                   />
                 </div>
+              </div>
+              <div className="formRow" style={{ alignItems: "center" }}>
                 <div className="formColumn">
-                  <label className="journalFormText">
-                    Select Saved Template
-                  </label>
+                  <label className="journalFormText">Entry Date:</label>
+                  <div>
+                    <DatePicker
+                      selected={formData.entryDate}
+                      onChange={(date) =>
+                        handleChangeFormData("entryDate", date)
+                      }
+                      className="journalFormInput"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="formRow">
+              <div className="column">
+                <label className="journalFormText">
+                  Select Saved Template:
+                </label>
+                <div className="formRow" style={{ alignItems: "center" }}>
                   <Select
                     className="journalFormInputSelect"
                     value={
@@ -605,152 +629,154 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                       })),
                     ]}
                     defaultValue={{ value: "0", label: "No Template" }}
+                    styles={customSelectStyles}
                   />
+                  <IconButton
+                    color="inherit"
+                    onClick={openSaveTemplateModal}
+                    style={{ color: "#3597fe" }}
+                  >
+                    <AddIcon fontSize="default" />
+                  </IconButton>
+                  {/* <button
+                    className={`journalFormSaveTemplateButton ${
+                      !templateReady ? "buttonDisabled" : ""
+                    }`}
+                    onClick={() => openSaveTemplateModal()}
+                    disabled={!templateReady}
+                  >
+                    {templateEdit ? "Update Template" : "Save new Template"}
+                  </button> */}
                 </div>
               </div>
-              <div className="formRow" style={{ alignItems: "center" }}>
-                <div className="formColumn">
-                  <label className="journalFormText">Entry Date:</label>
-                  <div>
-                    <DatePicker
-                      selected={formData.entryDate}
-                      onChange={(date) =>
-                        handleChangeFormData("entryDate", date)
-                      }
-                      className="journalFormInput"
-                    />
-                  </div>
-                </div>
-                <button
-                  className={`journalFormSaveTemplateButton ${
-                    !templateReady ? "buttonDisabled" : ""
-                  }`}
-                  onClick={() => openSaveTemplateModal()}
-                  disabled={!templateReady}
-                >
-                  {templateEdit ? "Update Template" : "Save new Template"}
-                </button>
-              </div>
-            </div>
-            <div
-              className="journalFormBalanceContainer journalAccountContainer"
-              // style={{ border: "0.5px green solid" }}
-            >
-              <BalanceAccount
-                handleChangeFormData={handleChangeFormData}
-                formData={formData}
-              />
-            </div>
-            {nonMetricSegments.length > 0 ? (
-              <div className="journalAccountContainer">
-                <div className="journalFormTitle">Unused Allocation Fields</div>
-                {nonMetricSegments.map((segment, index) => (
-                  <OtherSegment
-                    key={index}
-                    segment={segment}
-                    formData={formData}
-                    handleChangeOtherSegments={handleChangeOtherSegments}
-                  />
-                ))}
-              </div>
-            ) : null}
-            <div
-              className="journalAccountContainer"
-              // style={{ border: "0.5px blue solid" }}
-            >
-              <GLSegment
-                glCodeSegment={glCodeSegment}
-                formData={formData}
-                handleChangeFormData={handleChangeFormData}
-              />
-              {subGLCodeSegment ? (
-                <SubGLSegment
-                  subGLCodeSegment={subGLCodeSegment}
-                  formData={formData}
-                  handleChangeFormData={handleChangeFormData}
-                  selectedSegment={selectedSubGLSegment}
-                  setSelectedSegment={setSelectedSubGLSegment}
-                  showSubGLSegment={showSubGLSegment}
-                  setShowSubGLSegment={setShowSubGLSegment}
-                  selectedOption={selectedSubGLOption}
-                  setSelectedOption={setSelectedSubGLOption}
-                />
-              ) : null}
             </div>
           </div>
-          <div className="journalFormAllocationContainer">
-            <div className="formColumn">
-              <label className="journalFormText">
-                Select Metric to Allocate with:
-              </label>
-              <Select
-                value={metrics
-                  .map((metric) => ({
-                    value: metric._id,
-                    label: metric.description,
-                  }))
-                  .find((metric) => metric.value === selectedMetric._id)}
-                onChange={handleMetricChange}
-                className="journalFormInputSelect"
-                options={metrics.map((metric) => ({
-                  value: metric._id,
-                  label: metric.description,
-                }))}
-              />
+          <div className="journalFormContainerRow">
+            <div className="journalAccountParentContainer">
+              <div
+                className="journalFormBalanceContainer journalAccountContainer"
+                // style={{ border: "0.5px green solid" }}
+              >
+                <BalanceAccount
+                  handleChangeFormData={handleChangeFormData}
+                  formData={formData}
+                />
+              </div>
             </div>
-            <button
-              onClick={openAllocationModal}
-              className="journalFormAllocationButton"
-            >
-              Create new Allocation Technique
-            </button>
-            {allocations.length > 0 ? (
+            <div className="journalFormMetricAllocationContainer">
               <div className="formColumn">
                 <label className="journalFormText">
-                  Select Allocation Technique:
+                  Select Metric to Allocate with:
                 </label>
-                <div
-                  className="formRow"
-                  style={{ justifyContent: "flex-start" }}
-                >
-                  <Select
-                    value={allocations
-                      .map((allocation) => ({
+                <Select
+                  value={metrics
+                    .map((metric) => ({
+                      value: metric._id,
+                      label: metric.description,
+                    }))
+                    .find((metric) => metric.value === selectedMetric._id)}
+                  onChange={handleMetricChange}
+                  className="journalFormInputSelect"
+                  options={metrics.map((metric) => ({
+                    value: metric._id,
+                    label: metric.description,
+                  }))}
+                  styles={customSelectStyles}
+                />
+              </div>
+
+              {allocations.length > 0 ? (
+                <div className="formColumn" style={{ marginTop: "12px" }}>
+                  <label className="journalFormText">
+                    Select Allocation Technique:
+                  </label>
+                  <div
+                    className="formRow"
+                    style={{
+                      justifyContent: "flex-start",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Select
+                      value={allocations
+                        .map((allocation) => ({
+                          value: allocation._id,
+                          label: allocation.name,
+                        }))
+                        .find(
+                          (allocation) =>
+                            allocation.value === selectedAllocation?._id
+                        )}
+                      onChange={handleAllocationChange}
+                      className="journalFormInputSelect"
+                      options={allocations.map((allocation) => ({
                         value: allocation._id,
                         label: allocation.name,
-                      }))
-                      .find(
-                        (allocation) =>
-                          allocation.value === selectedAllocation?._id
-                      )}
-                    onChange={handleAllocationChange}
-                    className="journalFormInputSelect"
-                    options={allocations.map((allocation) => ({
-                      value: allocation._id,
-                      label: allocation.name,
-                    }))}
-                  />
-                  <IconButton
-                    color="inherit"
-                    onClick={openEditAllocationModal}
-                    disabled={!selectedAllocation}
-                    style={{ color: "#60cead" }}
-                  >
-                    <EditIcon fontSize="small" />
-                  </IconButton>
-                  <IconButton
-                    color="inherit"
-                    onClick={handleDeleteAllocation}
-                    disabled={!selectedAllocation}
-                    style={{ color: "#f54747" }}
-                  >
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
+                      }))}
+                      styles={customSelectStyles}
+                    />
+                    <IconButton
+                      color="inherit"
+                      onClick={openAllocationModal}
+                      style={{ color: "#3597fe" }}
+                    >
+                      <AddIcon fontSize="default" />
+                    </IconButton>
+                    <IconButton
+                      color="inherit"
+                      onClick={openEditAllocationModal}
+                      disabled={!selectedAllocation}
+                      style={{ color: "#60cead" }}
+                    >
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton
+                      color="inherit"
+                      onClick={handleDeleteAllocation}
+                      disabled={!selectedAllocation}
+                      style={{ color: "#f54747" }}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </div>
                 </div>
+              ) : (
+                <button
+                  onClick={openAllocationModal}
+                  className="journalFormAllocationButton"
+                >
+                  Create new Allocation Technique
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="journalFormContainerRow">
+            <div className="journalAccountParentContainer">
+              <div
+                className="journalAccountContainer"
+                // style={{ border: "0.5px blue solid" }}
+              >
+                <GLSegment
+                  glCodeSegment={glCodeSegment}
+                  formData={formData}
+                  handleChangeFormData={handleChangeFormData}
+                />
+                {subGLCodeSegment ? (
+                  <SubGLSegment
+                    subGLCodeSegment={subGLCodeSegment}
+                    formData={formData}
+                    handleChangeFormData={handleChangeFormData}
+                    selectedSegment={selectedSubGLSegment}
+                    setSelectedSegment={setSelectedSubGLSegment}
+                    showSubGLSegment={showSubGLSegment}
+                    setShowSubGLSegment={setShowSubGLSegment}
+                    selectedOption={selectedSubGLOption}
+                    setSelectedOption={setSelectedSubGLOption}
+                  />
+                ) : null}
               </div>
-            ) : (
-              <div className="formColumn"></div>
-            )}
+            </div>
             <div className="journalFormDownloadContainer">
               {!readyToAllocate || fileLoading ? (
                 <div className="journalFormDownloadInnerContainer">
@@ -792,6 +818,22 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                 </div>
               ) : null}
             </div>
+          </div>
+
+          <div className="journalFormContainerRow">
+            {nonMetricSegments.length > 0 ? (
+              <div className="journalAccountContainer">
+                <div className="journalFormTitle">Unused Allocation Fields</div>
+                {nonMetricSegments.map((segment, index) => (
+                  <OtherSegment
+                    key={index}
+                    segment={segment}
+                    formData={formData}
+                    handleChangeOtherSegments={handleChangeOtherSegments}
+                  />
+                ))}
+              </div>
+            ) : null}
           </div>
         </div>
       </div>

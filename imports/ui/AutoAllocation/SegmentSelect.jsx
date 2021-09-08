@@ -1,5 +1,6 @@
 import React from "react";
 import Select from "react-select";
+import { customSelectStyles } from "../../../constants";
 
 export const SegmentSelect = ({
   value,
@@ -11,17 +12,6 @@ export const SegmentSelect = ({
     value: index,
     label: `${subSegment.segmentId} - ${subSegment.description}`,
   }));
-
-  const customSelectStyles = {
-    valueContainer: (provided, state) => ({
-      ...provided,
-      fontSize: 12,
-    }),
-    menuList: (provided, state) => ({
-      ...provided,
-      fontSize: 12,
-    }),
-  };
 
   return (
     <Select
