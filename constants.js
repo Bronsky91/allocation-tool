@@ -13,3 +13,14 @@ export const VALID_COLUMN_NAMES = Object.keys(CHART_OF_ACCOUNT_COLUMNS);
 export const CURRENCY_FORMAT = "$#,##0.00;[Red]-$#,##0.00";
 
 export const BLUE = "#3597fe";
+
+export const customSelectStyles = {
+  valueContainer: (provided, state) => ({
+    ...provided,
+    fontSize: 12,
+  }),
+  menuList: (provided, state) => ({
+    ...provided,
+    fontSize: 12,
+  }),
+};
