@@ -601,7 +601,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
               </div>
             </div>
             <div className="formRow">
-              <div className="formColumn">
+              <div className="column">
                 <label className="journalFormText">
                   Select Saved Template:
                 </label>
@@ -636,7 +636,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                     onClick={openSaveTemplateModal}
                     style={{ color: "#3597fe" }}
                   >
-                    <AddIcon fontSize="medium" />
+                    <AddIcon fontSize="default" />
                   </IconButton>
                   {/* <button
                     className={`journalFormSaveTemplateButton ${
@@ -720,7 +720,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                       onClick={openAllocationModal}
                       style={{ color: "#3597fe" }}
                     >
-                      <AddIcon fontSize="medium" />
+                      <AddIcon fontSize="default" />
                     </IconButton>
                     <IconButton
                       color="inherit"

@@ -445,12 +445,12 @@ input[type="file"] {
   /* font-family: Nunito; */
   font-size: 15px;
   color: #343a40;
+  margin-bottom: 0.5em;
 }
 
 .journalFormInput {
   border-radius: 8px;
   border: solid 0.8px #d4d9de;
-  margin-top: 0.5em;
   max-width: 15em;
   min-width: 10em;
   padding: 6px;
@@ -459,7 +459,6 @@ input[type="file"] {
 .journalFormInputSelect {
   border-radius: 8px;
   border: solid 0.8px #d4d9de;
-  margin-top: 0.5em;
   max-width: 15em;
   min-width: 10em;
 }
@@ -803,6 +802,11 @@ input[type="file"] {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  padding: 5px;
+}
+.column {
+  display: flex;
+  flex-direction: column;
   padding: 5px;
 }
 

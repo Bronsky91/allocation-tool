@@ -54,7 +54,7 @@ export const GLSegment = ({
         <div className="formColumn">
           <label className="journalFormText">Typical Balance:</label>
           <Select
-            className="journalFormInput"
+            className="journalFormInputSelect"
             onChange={handleChangeTypicalBalance}
             value={typicalBalanceOptions.find(
               (tb) => tb.value === formData.typicalBalance
