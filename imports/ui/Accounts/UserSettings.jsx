@@ -20,7 +20,6 @@ export const UserSettings = () => {
   const allUsers = useTracker(() =>
     Meteor.users.find({ adminId: user._id }, {}).fetch()
   );
-  console.log("allUsers", allUsers);
 
   const history = useHistory();
 

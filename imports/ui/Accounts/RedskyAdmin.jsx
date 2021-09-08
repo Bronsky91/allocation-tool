@@ -12,7 +12,6 @@ export const RedskyAdmin = () => {
   const user = useTracker(() => Meteor.user());
   const allUsers = useTracker(() => Meteor.users.find({}, {}).fetch());
   // TODO: Probably should filter out users that don't have adminIds (meaning that their admin created)
-  console.log("allUsers", allUsers);
   const history = useHistory();
 
   if (!user) {

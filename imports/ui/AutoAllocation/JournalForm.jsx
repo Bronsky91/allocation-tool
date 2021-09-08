@@ -262,11 +262,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
     if (readyToAllocate) {
       setFileLoading(false);
     }
-  }, [
-    readyToAllocate,
-    formData.allocationValueOfBalancePerChartField,
-    formData.toBalanceSegmentValue,
-  ]);
+  }, [readyToAllocate]);
 
   useEffect(() => {
     if (selectedTemplate) {
