@@ -402,4 +402,23 @@ Meteor.methods({
     );
     return { templateId, numberOfDocumentsUpdate };
   },
+  "chartOfAccounts.templates.remove": function (chartOfAccountId, templateId) {
+    check(chartOfAccountId, String);
+    check(templateId, String);
+
+    if (!this.userId) {
+      throw new Meteor.Error("Not authorized.");
+    }
+
+    return ChartOfAccountsCollection.update(
+      { _id: chartOfAccountId },
+      {
+        $pull: {
+          templates: {
+            _id: templateId,
+          },
+        },
+      }
+    );
+  },
 });

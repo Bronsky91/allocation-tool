@@ -97,6 +97,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
   const [editAllocationModalOpen, setEditAllocationModalOpen] = useState(false);
   const [nestedAllocationOpen, setNestedAllocationOpen] = useState(false);
   const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
+  const [editTemplateOpen, setEditTemplateOpen] = useState(false);
   const [selectedAllocation, setSelectedAllocation] = useState(allocations[0]);
   const [newestAllocationId, setNewestAllocationId] = useState();
   const [editedCurrentAllocation, setEditedCurrentAllocation] = useState();
@@ -109,6 +110,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
   const [selectedTemplateId, setSelectedTemplateId] = useState("0");
   const [fileLoading, setFileLoading] = useState(false);
   const [allocationLoading, setAllocationLoading] = useState(false);
+  const [templateLoading, setTemplateLoading] = useState(false);
 
   const metricSegments = segments
     .filter((s) => selectedMetric.metricSegments.includes(s.description))
@@ -164,8 +166,6 @@ const JournalForm = ({ user, chartOfAccounts }) => {
 
   const templateReady =
     selectedAllocation && formData.journalDescription.length > 0;
-
-  const templateEdit = selectedTemplateId !== "0" && selectedTemplate;
 
   useEffect(() => {
     setSelectedMetric(
@@ -357,6 +357,32 @@ const JournalForm = ({ user, chartOfAccounts }) => {
     setSelectedAllocation(allocations[nextIndex]);
   };
 
+  const handleDeleteTemplate = () => {
+    // Gets current index of selected template in the template array
+    const currentIndex = templates.findIndex(
+      (t) => t._id === selectedTemplate._id
+    );
+    setTemplateLoading(true);
+    // Removes the selected Template from the database
+    Meteor.call(
+      "chartOfAccounts.templates.remove",
+      selectedChartOfAccountsId,
+      selectedTemplate._id,
+      (err, res) => {
+        if (err) {
+          console.log("Error Deleting Template", err.reason);
+          alert(err.reason);
+        } else {
+          console.log("Deleted Template", res);
+        }
+        setTemplateLoading(false);
+      }
+    );
+    // Moves the next selectedTemplate down one index, unless it's already 0 then keep it 0
+    const nextIndex = currentIndex > 0 ? currentIndex - 1 : 0;
+    setSelectedTemplateId(templates[nextIndex]?._id || "0");
+  };
+
   const handleMetricChange = (selected) => {
     const newMetricSelected = metrics.find(
       (metric) => metric._id === selected.value
@@ -407,6 +433,14 @@ const JournalForm = ({ user, chartOfAccounts }) => {
 
   const closeSaveTemplateModal = () => {
     setSaveTemplateOpen(false);
+  };
+
+  const openEditTemplateModal = () => {
+    setEditTemplateOpen(true);
+  };
+
+  const closeEditTemplateModal = () => {
+    setEditTemplateOpen(false);
   };
 
   const closeNestedAllocationWithSelection = (selectionData) => {
@@ -469,52 +503,53 @@ const JournalForm = ({ user, chartOfAccounts }) => {
     };
   };
 
-  const saveTemplate = (name) => {
+  const createTemplate = (name) => {
     const template = createTemplateObject(name);
+    setTemplateLoading(true);
 
-    console.log("template", template);
-
-    if (templateEdit) {
-      Meteor.call(
-        "chartOfAccounts.templates.update",
-        selectedChartOfAccountsId,
-        selectedTemplateId,
-        template,
-        (err, res) => {
-          if (err) {
-            console.log(err);
-            alert("Unable to save template", err);
-          } else {
-            // TODO: Decide if the modal should still close if the save failed
-            // TODO: Loading indicator
-            console.log(res);
-            if (res.numberOfDocumentsUpdate > 0) {
-              closeSaveTemplateModal();
-            }
+    Meteor.call(
+      "chartOfAccounts.templates.insert",
+      selectedChartOfAccountsId,
+      template,
+      (err, res) => {
+        if (err) {
+          console.log(err);
+          alert("Unable to save template", err);
+        } else {
+          // TODO: Decide if the modal should still close if the save failed
+          console.log(res);
+          if (res.numberOfDocumentsUpdate > 0) {
+            closeSaveTemplateModal();
+            setSelectedTemplateId(res.templateId);
           }
         }
-      );
-    } else {
-      Meteor.call(
-        "chartOfAccounts.templates.insert",
-        selectedChartOfAccountsId,
-        template,
-        (err, res) => {
-          if (err) {
-            console.log(err);
-            alert("Unable to save template", err);
-          } else {
-            // TODO: Decide if the modal should still close if the save failed
-            // TODO: Loading indicator
-            console.log(res);
-            if (res.numberOfDocumentsUpdate > 0) {
-              closeSaveTemplateModal();
-              setSelectedTemplateId(res.templateId);
-            }
+        setTemplateLoading(false);
+      }
+    );
+  };
+
+  const editTemplate = (name) => {
+    const template = createTemplateObject(name);
+    setTemplateLoading(true);
+    Meteor.call(
+      "chartOfAccounts.templates.update",
+      selectedChartOfAccountsId,
+      selectedTemplateId,
+      template,
+      (err, res) => {
+        if (err) {
+          console.log(err);
+          alert("Unable to save template", err);
+        } else {
+          // TODO: Decide if the modal should still close if the save failed
+          console.log(res);
+          if (res.numberOfDocumentsUpdate > 0) {
+            closeEditTemplateModal();
           }
         }
-      );
-    }
+        setTemplateLoading(false);
+      }
+    );
   };
 
   const createJournalEntry = () => {
@@ -563,7 +598,12 @@ const JournalForm = ({ user, chartOfAccounts }) => {
         <SaveTemplateModal
           open={saveTemplateOpen}
           handleClose={closeSaveTemplateModal}
-          handleCloseComplete={saveTemplate}
+          handleCloseComplete={createTemplate}
+        />
+        <SaveTemplateModal
+          open={editTemplateOpen}
+          handleClose={closeEditTemplateModal}
+          handleCloseComplete={editTemplate}
           selectedTemplate={selectedTemplate}
         />
         <div className="journalFormContainer">
@@ -604,7 +644,15 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                 <label className="journalFormText">
                   Select Saved Template:
                 </label>
-                <div className="formRow" style={{ alignItems: "center" }}>
+                <div
+                  className="formRow"
+                  style={{
+                    alignItems: "center",
+                    justifyContent: "flex-start",
+                    width: 350,
+                    flexWrap: "nowrap",
+                  }}
+                >
                   <Select
                     className="journalFormInputSelect"
                     value={
@@ -630,13 +678,44 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                     defaultValue={{ value: "0", label: "No Template" }}
                     styles={customSelectStyles}
                   />
-                  <IconButton
-                    color="inherit"
-                    onClick={openSaveTemplateModal}
-                    style={{ color: "#3597fe" }}
-                  >
-                    <AddIcon fontSize="default" />
-                  </IconButton>
+                  {templateReady ? (
+                    <IconButton
+                      color="inherit"
+                      onClick={openSaveTemplateModal}
+                      style={{ color: "#3597fe" }}
+                    >
+                      <AddIcon fontSize="default" />
+                    </IconButton>
+                  ) : null}
+                  {templateReady && selectedTemplate ? (
+                    <IconButton
+                      color="inherit"
+                      onClick={openEditTemplateModal}
+                      disabled={!selectedAllocation}
+                      style={{ color: "#60cead" }}
+                    >
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                  ) : null}
+                  {selectedTemplate ? (
+                    <IconButton
+                      color="inherit"
+                      onClick={handleDeleteTemplate}
+                      style={{ color: "#f54747" }}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  ) : null}
+                  {templateLoading ? (
+                    <ClipLoader
+                      color={BLUE}
+                      loading={templateLoading}
+                      size={25}
+                      css={`
+                        margin-left: 10px;
+                      `}
+                    />
+                  ) : null}
                   {/* <button
                     className={`journalFormSaveTemplateButton ${
                       !templateReady ? "buttonDisabled" : ""
