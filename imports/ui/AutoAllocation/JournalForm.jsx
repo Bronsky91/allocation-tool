@@ -13,6 +13,7 @@ import { Redirect } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import BarLoader from "react-spinners/BarLoader";
+import ClipLoader from "react-spinners/ClipLoader";
 import Select from "react-select";
 // Components
 import { Header } from "../Header";
@@ -44,7 +45,6 @@ export const JournalFormParent = () => {
   const chartOfAccounts = useTracker(() =>
     ChartOfAccountsCollection.find({}).fetch()
   );
-  console.log("chartOfAccounts", chartOfAccounts);
 
   if (!user) {
     return <Redirect to="/login" />;
@@ -108,6 +108,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
   );
   const [selectedTemplateId, setSelectedTemplateId] = useState("0");
   const [fileLoading, setFileLoading] = useState(false);
+  const [allocationLoading, setAllocationLoading] = useState(false);
 
   const metricSegments = segments
     .filter((s) => selectedMetric.metricSegments.includes(s.description))
@@ -118,7 +119,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
   );
 
   const [formData, setFormData] = useState({
-    username: user.username,
+    username: user.name,
     toBalanceSegmentValue: 0,
     selectedBalanceSegments: balanceAccountSegments.map((bas) => ({
       ...bas,
@@ -231,6 +232,8 @@ const JournalForm = ({ user, chartOfAccounts }) => {
       selectedAllocation &&
       formData.toBalanceSegmentValue > 0
     ) {
+      setFileLoading(true); // Sets the file loading to true and resets balance chart field object
+      handleChangeFormData("allocationValueOfBalancePerChartField", {});
       Meteor.call(
         "calculateAllocation",
         {
@@ -243,21 +246,17 @@ const JournalForm = ({ user, chartOfAccounts }) => {
         (err, allocationData) => {
           if (err) {
             console.log("err", err);
+            alert(`Error allocating, ${err.reason}`);
           } else {
             handleChangeFormData(
               "allocationValueOfBalancePerChartField",
               allocationData
             );
-            setFileLoading(true);
           }
         }
       );
     }
-  }, [
-    formData.toBalanceSegmentValue,
-    selectedAllocation,
-    formData.journalDescription,
-  ]);
+  }, [formData.toBalanceSegmentValue, selectedAllocation]);
 
   useEffect(() => {
     if (readyToAllocate) {
@@ -340,6 +339,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
     const currentIndex = allocations.findIndex(
       (a) => a._id === selectedAllocation._id
     );
+    setAllocationLoading(true);
     // Removes the selected Allocation from the database
     Meteor.call(
       "chartOfAccounts.metrics.allocations.remove",
@@ -353,6 +353,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
         } else {
           console.log("Deleted Alloction", res);
         }
+        setAllocationLoading(false);
       }
     );
     // Moves the next selectedAllocation down one index, unless it's already 0 then keep it 0
@@ -543,6 +544,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
           selectedChartOfAccounts={selectedChartOfAccounts} // Required, used to save the allocation to the selected Technique
           selectedMetric={selectedMetric} // Required, used to save the allocation to the selected Technique
           availableMethods={availableMethods} // Required, used for listing which method options to use
+          setAllocationLoading={setAllocationLoading} // Required, used to indicate loading when allocations saves on main page
           setNewestAllocationId={setNewestAllocationId} // Set the newest allocation created as selected in the dropdown
         />
         <AllocateModal
@@ -552,6 +554,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
           selectedChartOfAccounts={selectedChartOfAccounts} // Required, used to save the allocation to the selected Technique
           selectedMetric={selectedMetric} // Required, used to save the allocation to the selected Technique
           availableMethods={availableMethods} // Required, used for listing which method options to use
+          setAllocationLoading={setAllocationLoading} // Required, used to indicate loading when allocations saves on main page
           currentAllocation={selectedAllocation} // Used to edit the currently selected allocation
           setEditedCurrentAllocation={setEditedCurrentAllocation} // Set the edited allocation as selected in the dropdown to refresh with new data
         />
@@ -738,7 +741,33 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                     >
                       <DeleteIcon fontSize="small" />
                     </IconButton>
+                    {allocationLoading ? (
+                      <ClipLoader
+                        color={BLUE}
+                        loading={allocationLoading}
+                        size={25}
+                        css={`
+                          margin-left: 10px;
+                        `}
+                      />
+                    ) : null}
                   </div>
+                </div>
+              ) : allocationLoading ? (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    width: 250,
+                    marginTop: 20,
+                  }}
+                >
+                  <ClipLoader
+                    color={BLUE}
+                    loading={allocationLoading}
+                    css={``}
+                  />
                 </div>
               ) : (
                 <button
