@@ -256,7 +256,11 @@ const JournalForm = ({ user, chartOfAccounts }) => {
         }
       );
     }
-  }, [formData.toBalanceSegmentValue, selectedAllocation]);
+  }, [
+    formData.toBalanceSegmentValue,
+    formData.journalDescription,
+    selectedAllocation,
+  ]);
 
   useEffect(() => {
     if (readyToAllocate) {
