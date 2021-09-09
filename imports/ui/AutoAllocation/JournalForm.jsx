@@ -37,6 +37,7 @@ import {
 } from "../../../constants";
 
 export const JournalFormParent = () => {
+  Meteor.subscribe("Meteor.user.details");
   // Current user logged in
   const user = useTracker(() => Meteor.user());
   // Subscriptions
