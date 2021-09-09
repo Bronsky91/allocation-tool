@@ -284,7 +284,7 @@ Meteor.methods({
           typicalBalance: Match.Optional(String),
           category: Match.Optional(String),
         },
-        typicalBalance: String,
+        typicalBalance: Match.Optional(String),
       },
       otherSegments: Match.Maybe([
         {

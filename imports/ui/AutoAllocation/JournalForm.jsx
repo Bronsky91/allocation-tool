@@ -510,6 +510,8 @@ const JournalForm = ({ user, chartOfAccounts }) => {
 
   const createTemplate = (name) => {
     const template = createTemplateObject(name);
+    console.log("Template Object", template);
+
     setTemplateLoading(true);
 
     Meteor.call(
@@ -519,7 +521,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
       (err, res) => {
         if (err) {
           console.log(err);
-          alert("Unable to save template", err);
+          alert("Unable to save template: " + err.reason);
         } else {
           // TODO: Decide if the modal should still close if the save failed
           console.log(res);
