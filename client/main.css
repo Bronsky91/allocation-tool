@@ -734,6 +734,33 @@ input[type="file"] {
   padding: 1em;
 }
 
+.userSettingsMainButtonsContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+/* .userTableContainer {
+  display: flex;
+  flex-direction: column;
+  height: 35%;
+  width: 60%;
+  border: 1px solid black;
+}
+
+.userTableRow {
+  display: flex;
+  flex-direction: row;
+}
+
+.userTableCell {
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.userTableDivider {
+  border: 1px solid black;
+} */
+
 /* Util Styles */
 
 .buttonDisabled {

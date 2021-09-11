@@ -46,8 +46,39 @@ Meteor.methods({
       redskyAdmin: false,
       admin: false,
       adminId: this.userId, // The adminId ties the user to the admin that created them
-      permissions: []
+      permissions: {
+        chartOfAccounts: [],
+        metrics: [],
+        allocations: [],
+        templates: [],
+        createTemplates: false,
+        createAllocations: false
+      }
     });
+  },
+  "user.delete": function (id) {
+    // Only admins can delete users
+    if (!this.userId || !Meteor.user()?.admin) {
+      throw new Meteor.Error("Not authorized.");
+    }
+    Meteor.users.remove({ _id: id })
+  },
+  "user.permissions.insert": function (data) {
+    // Only admins can create users
+    if (!this.userId || !Meteor.user()?.admin) {
+      throw new Meteor.Error("Not authorized.");
+    }
+
+    Meteor.users.update(
+      {_id: data.id},
+      {
+       $set:{
+         permissions: {
+           [field]: []
+         }
+       }
+      }
+    )
   },
   "user.redskyAdmin": function (data) {
     // Only other admins can adjust admin privileges

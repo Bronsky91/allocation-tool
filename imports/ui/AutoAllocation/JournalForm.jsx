@@ -891,7 +891,10 @@ const JournalForm = ({ user, chartOfAccounts }) => {
             <div className="journalFormDownloadContainer">
               {!readyToAllocate || fileLoading ? (
                 <div className="journalFormDownloadInnerContainer">
-                  <div className="journalFormText">
+                  <div
+                    className="journalFormText"
+                    style={{ textAlign: "center" }}
+                  >
                     When your journal entry file is ready it will be available
                     for download here
                   </div>
@@ -901,7 +904,10 @@ const JournalForm = ({ user, chartOfAccounts }) => {
               ) : null}
               {readyToAllocate && !fileLoading ? (
                 <div className="journalFormDownloadInnerContainer">
-                  <div className="journalFormText">
+                  <div
+                    className="journalFormText"
+                    style={{ textAlign: "center" }}
+                  >
                     Your file is ready, click download button below to download
                     your journal entry
                   </div>

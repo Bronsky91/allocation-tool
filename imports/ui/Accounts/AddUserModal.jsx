@@ -17,7 +17,7 @@ const getModalStyle = () => {
 const useStyles = makeStyles((theme) => ({
   paper: {
     position: "absolute",
-    height: "65%",
+    height: "70%",
     width: "30%",
     minWidth: 500,
     backgroundColor: theme.palette.background.paper,
@@ -84,6 +84,7 @@ export const AddUserModal = ({ open, handleClose }) => {
       if (err) {
         setRegisterError(err.reason);
       } else {
+        setRegisterForm(initialRegisterForm);
         handleClose();
       }
     });
