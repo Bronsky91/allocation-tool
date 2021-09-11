@@ -47,6 +47,7 @@ export const AllocateModal = ({
   availableMethods,
   selectedChartOfAccounts,
   selectedMetric,
+  setAllocationLoading,
   setNewestAllocationId, // For creating
   currentAllocation, // For editing
   setEditedCurrentAllocation, // For editing
@@ -170,6 +171,7 @@ export const AllocateModal = ({
         subSegmentIds: subsegmentAllocationData[segmentName],
       });
     }
+    setAllocationLoading(true);
     if (currentAllocation) {
       // Editing
       Meteor.call(
@@ -191,6 +193,7 @@ export const AllocateModal = ({
             // This needs to be in a useEffect because the allocations array is only updated on re-renders, which this causes
             setEditedCurrentAllocation(res);
           }
+          setAllocationLoading(false);
         }
       );
     } else {
@@ -213,6 +216,7 @@ export const AllocateModal = ({
               setNewestAllocationId(result.allocationId);
             }
           }
+          setAllocationLoading(false);
         }
       );
     }

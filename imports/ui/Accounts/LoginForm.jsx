@@ -5,6 +5,9 @@ import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
 import { ChartOfAccountsCollection } from "../../db/ChartOfAccountsCollection";
 
+import ClipLoader from "react-spinners/ClipLoader";
+import { BLUE } from "../../../constants";
+
 export const LoginForm = () => {
   // Subscriptions
   Meteor.subscribe("chartOfAccounts");
@@ -19,15 +22,18 @@ export const LoginForm = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const submit = (e) => {
     e.preventDefault();
+    setLoading(true);
 
     Meteor.loginWithPassword(username, password, (err) => {
       if (err) {
         console.log(err);
         setLoginError(err.reason);
       }
+      setLoading(false);
     });
   };
 
@@ -78,9 +84,19 @@ export const LoginForm = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          <button type="submit" className="loginButton">
-            Log In
-          </button>
+          {loading ? (
+            <ClipLoader
+              color={BLUE}
+              loading={loading}
+              css={`
+                margin-left: 10px;
+              `}
+            />
+          ) : (
+            <button type="submit" className="loginButton">
+              Log In
+            </button>
+          )}
           <Link
             to="/register"
             style={{

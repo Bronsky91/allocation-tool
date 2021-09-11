@@ -7,10 +7,18 @@ import { useTracker } from "meteor/react-meteor-data";
 import { Header } from "../Header";
 // Material UI
 import PersonOutlineIcon from "@material-ui/icons/PersonOutline";
+import { ClipLoader } from "react-spinners";
+import { BLUE } from "../../../constants";
 
 export const UserAccount = () => {
+  const [updateLoading, setUpdateLoading] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
+
   const user = useTracker(() => Meteor.user());
-  const logout = () => Meteor.logout();
+  const logout = () => {
+    setLogoutLoading(true);
+    Meteor.logout();
+  };
 
   if (!user) {
     return <Redirect to="/login" />;
@@ -56,14 +64,22 @@ export const UserAccount = () => {
           >
             Update
           </button>
-          <button
-            type="submit"
-            className="loginButton"
-            style={{ marginTop: 20 }}
-            onClick={logout}
-          >
-            Log Out
-          </button>
+          {logoutLoading ? (
+            <ClipLoader
+              color={BLUE}
+              loading={logoutLoading}
+              css={"margin-left: 10px; margin-top: 20px"}
+            />
+          ) : (
+            <button
+              type="submit"
+              className="loginButton"
+              style={{ marginTop: 20 }}
+              onClick={logout}
+            >
+              Log Out
+            </button>
+          )}
         </div>
       </div>
     </div>

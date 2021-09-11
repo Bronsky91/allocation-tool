@@ -13,6 +13,7 @@ import { Redirect } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import BarLoader from "react-spinners/BarLoader";
+import ClipLoader from "react-spinners/ClipLoader";
 import Select from "react-select";
 // Components
 import { Header } from "../Header";
@@ -36,6 +37,7 @@ import {
 } from "../../../constants";
 
 export const JournalFormParent = () => {
+  Meteor.subscribe("Meteor.user.details");
   // Current user logged in
   const user = useTracker(() => Meteor.user());
   // Subscriptions
@@ -44,7 +46,6 @@ export const JournalFormParent = () => {
   const chartOfAccounts = useTracker(() =>
     ChartOfAccountsCollection.find({}).fetch()
   );
-  console.log("chartOfAccounts", chartOfAccounts);
 
   if (!user) {
     return <Redirect to="/login" />;
@@ -97,6 +98,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
   const [editAllocationModalOpen, setEditAllocationModalOpen] = useState(false);
   const [nestedAllocationOpen, setNestedAllocationOpen] = useState(false);
   const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
+  const [editTemplateOpen, setEditTemplateOpen] = useState(false);
   const [selectedAllocation, setSelectedAllocation] = useState(allocations[0]);
   const [newestAllocationId, setNewestAllocationId] = useState();
   const [editedCurrentAllocation, setEditedCurrentAllocation] = useState();
@@ -108,6 +110,8 @@ const JournalForm = ({ user, chartOfAccounts }) => {
   );
   const [selectedTemplateId, setSelectedTemplateId] = useState("0");
   const [fileLoading, setFileLoading] = useState(false);
+  const [allocationLoading, setAllocationLoading] = useState(false);
+  const [templateLoading, setTemplateLoading] = useState(false);
 
   const metricSegments = segments
     .filter((s) => selectedMetric.metricSegments.includes(s.description))
@@ -118,7 +122,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
   );
 
   const [formData, setFormData] = useState({
-    username: user.username,
+    username: user.name,
     toBalanceSegmentValue: 0,
     selectedBalanceSegments: balanceAccountSegments.map((bas) => ({
       ...bas,
@@ -163,8 +167,6 @@ const JournalForm = ({ user, chartOfAccounts }) => {
 
   const templateReady =
     selectedAllocation && formData.journalDescription.length > 0;
-
-  const templateEdit = selectedTemplateId !== "0" && selectedTemplate;
 
   useEffect(() => {
     setSelectedMetric(
@@ -231,6 +233,8 @@ const JournalForm = ({ user, chartOfAccounts }) => {
       selectedAllocation &&
       formData.toBalanceSegmentValue > 0
     ) {
+      setFileLoading(true); // Sets the file loading to true and resets balance chart field object
+      handleChangeFormData("allocationValueOfBalancePerChartField", {});
       Meteor.call(
         "calculateAllocation",
         {
@@ -243,31 +247,27 @@ const JournalForm = ({ user, chartOfAccounts }) => {
         (err, allocationData) => {
           if (err) {
             console.log("err", err);
+            alert(`Error allocating, ${err.reason}`);
           } else {
             handleChangeFormData(
               "allocationValueOfBalancePerChartField",
               allocationData
             );
-            setFileLoading(true);
           }
         }
       );
     }
   }, [
     formData.toBalanceSegmentValue,
-    selectedAllocation,
     formData.journalDescription,
+    selectedAllocation,
   ]);
 
   useEffect(() => {
     if (readyToAllocate) {
       setFileLoading(false);
     }
-  }, [
-    readyToAllocate,
-    formData.allocationValueOfBalancePerChartField,
-    formData.toBalanceSegmentValue,
-  ]);
+  }, [readyToAllocate]);
 
   useEffect(() => {
     if (selectedTemplate) {
@@ -340,6 +340,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
     const currentIndex = allocations.findIndex(
       (a) => a._id === selectedAllocation._id
     );
+    setAllocationLoading(true);
     // Removes the selected Allocation from the database
     Meteor.call(
       "chartOfAccounts.metrics.allocations.remove",
@@ -353,11 +354,38 @@ const JournalForm = ({ user, chartOfAccounts }) => {
         } else {
           console.log("Deleted Alloction", res);
         }
+        setAllocationLoading(false);
       }
     );
     // Moves the next selectedAllocation down one index, unless it's already 0 then keep it 0
     const nextIndex = currentIndex > 0 ? currentIndex - 1 : 0;
     setSelectedAllocation(allocations[nextIndex]);
+  };
+
+  const handleDeleteTemplate = () => {
+    // Gets current index of selected template in the template array
+    const currentIndex = templates.findIndex(
+      (t) => t._id === selectedTemplate._id
+    );
+    setTemplateLoading(true);
+    // Removes the selected Template from the database
+    Meteor.call(
+      "chartOfAccounts.templates.remove",
+      selectedChartOfAccountsId,
+      selectedTemplate._id,
+      (err, res) => {
+        if (err) {
+          console.log("Error Deleting Template", err.reason);
+          alert(err.reason);
+        } else {
+          console.log("Deleted Template", res);
+        }
+        setTemplateLoading(false);
+      }
+    );
+    // Moves the next selectedTemplate down one index, unless it's already 0 then keep it 0
+    const nextIndex = currentIndex > 0 ? currentIndex - 1 : 0;
+    setSelectedTemplateId(templates[nextIndex]?._id || "0");
   };
 
   const handleMetricChange = (selected) => {
@@ -410,6 +438,14 @@ const JournalForm = ({ user, chartOfAccounts }) => {
 
   const closeSaveTemplateModal = () => {
     setSaveTemplateOpen(false);
+  };
+
+  const openEditTemplateModal = () => {
+    setEditTemplateOpen(true);
+  };
+
+  const closeEditTemplateModal = () => {
+    setEditTemplateOpen(false);
   };
 
   const closeNestedAllocationWithSelection = (selectionData) => {
@@ -472,52 +508,55 @@ const JournalForm = ({ user, chartOfAccounts }) => {
     };
   };
 
-  const saveTemplate = (name) => {
+  const createTemplate = (name) => {
     const template = createTemplateObject(name);
+    console.log("Template Object", template);
 
-    console.log("template", template);
+    setTemplateLoading(true);
 
-    if (templateEdit) {
-      Meteor.call(
-        "chartOfAccounts.templates.update",
-        selectedChartOfAccountsId,
-        selectedTemplateId,
-        template,
-        (err, res) => {
-          if (err) {
-            console.log(err);
-            alert("Unable to save template", err);
-          } else {
-            // TODO: Decide if the modal should still close if the save failed
-            // TODO: Loading indicator
-            console.log(res);
-            if (res.numberOfDocumentsUpdate > 0) {
-              closeSaveTemplateModal();
-            }
+    Meteor.call(
+      "chartOfAccounts.templates.insert",
+      selectedChartOfAccountsId,
+      template,
+      (err, res) => {
+        if (err) {
+          console.log(err);
+          alert("Unable to save template: " + err.reason);
+        } else {
+          // TODO: Decide if the modal should still close if the save failed
+          console.log(res);
+          if (res.numberOfDocumentsUpdate > 0) {
+            closeSaveTemplateModal();
+            setSelectedTemplateId(res.templateId);
           }
         }
-      );
-    } else {
-      Meteor.call(
-        "chartOfAccounts.templates.insert",
-        selectedChartOfAccountsId,
-        template,
-        (err, res) => {
-          if (err) {
-            console.log(err);
-            alert("Unable to save template", err);
-          } else {
-            // TODO: Decide if the modal should still close if the save failed
-            // TODO: Loading indicator
-            console.log(res);
-            if (res.numberOfDocumentsUpdate > 0) {
-              closeSaveTemplateModal();
-              setSelectedTemplateId(res.templateId);
-            }
+        setTemplateLoading(false);
+      }
+    );
+  };
+
+  const editTemplate = (name) => {
+    const template = createTemplateObject(name);
+    setTemplateLoading(true);
+    Meteor.call(
+      "chartOfAccounts.templates.update",
+      selectedChartOfAccountsId,
+      selectedTemplateId,
+      template,
+      (err, res) => {
+        if (err) {
+          console.log(err);
+          alert("Unable to save template", err);
+        } else {
+          // TODO: Decide if the modal should still close if the save failed
+          console.log(res);
+          if (res.numberOfDocumentsUpdate > 0) {
+            closeEditTemplateModal();
           }
         }
-      );
-    }
+        setTemplateLoading(false);
+      }
+    );
   };
 
   const createJournalEntry = () => {
@@ -543,6 +582,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
           selectedChartOfAccounts={selectedChartOfAccounts} // Required, used to save the allocation to the selected Technique
           selectedMetric={selectedMetric} // Required, used to save the allocation to the selected Technique
           availableMethods={availableMethods} // Required, used for listing which method options to use
+          setAllocationLoading={setAllocationLoading} // Required, used to indicate loading when allocations saves on main page
           setNewestAllocationId={setNewestAllocationId} // Set the newest allocation created as selected in the dropdown
         />
         <AllocateModal
@@ -552,6 +592,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
           selectedChartOfAccounts={selectedChartOfAccounts} // Required, used to save the allocation to the selected Technique
           selectedMetric={selectedMetric} // Required, used to save the allocation to the selected Technique
           availableMethods={availableMethods} // Required, used for listing which method options to use
+          setAllocationLoading={setAllocationLoading} // Required, used to indicate loading when allocations saves on main page
           currentAllocation={selectedAllocation} // Used to edit the currently selected allocation
           setEditedCurrentAllocation={setEditedCurrentAllocation} // Set the edited allocation as selected in the dropdown to refresh with new data
         />
@@ -564,7 +605,12 @@ const JournalForm = ({ user, chartOfAccounts }) => {
         <SaveTemplateModal
           open={saveTemplateOpen}
           handleClose={closeSaveTemplateModal}
-          handleCloseComplete={saveTemplate}
+          handleCloseComplete={createTemplate}
+        />
+        <SaveTemplateModal
+          open={editTemplateOpen}
+          handleClose={closeEditTemplateModal}
+          handleCloseComplete={editTemplate}
           selectedTemplate={selectedTemplate}
         />
         <div className="journalFormContainer">
@@ -605,7 +651,15 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                 <label className="journalFormText">
                   Select Saved Template:
                 </label>
-                <div className="formRow" style={{ alignItems: "center" }}>
+                <div
+                  className="formRow"
+                  style={{
+                    alignItems: "center",
+                    justifyContent: "flex-start",
+                    width: 350,
+                    flexWrap: "nowrap",
+                  }}
+                >
                   <Select
                     className="journalFormInputSelect"
                     value={
@@ -631,13 +685,44 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                     defaultValue={{ value: "0", label: "No Template" }}
                     styles={customSelectStyles}
                   />
-                  <IconButton
-                    color="inherit"
-                    onClick={openSaveTemplateModal}
-                    style={{ color: "#3597fe" }}
-                  >
-                    <AddIcon fontSize="default" />
-                  </IconButton>
+                  {templateReady ? (
+                    <IconButton
+                      color="inherit"
+                      onClick={openSaveTemplateModal}
+                      style={{ color: "#3597fe" }}
+                    >
+                      <AddIcon fontSize="default" />
+                    </IconButton>
+                  ) : null}
+                  {templateReady && selectedTemplate ? (
+                    <IconButton
+                      color="inherit"
+                      onClick={openEditTemplateModal}
+                      disabled={!selectedAllocation}
+                      style={{ color: "#60cead" }}
+                    >
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                  ) : null}
+                  {selectedTemplate ? (
+                    <IconButton
+                      color="inherit"
+                      onClick={handleDeleteTemplate}
+                      style={{ color: "#f54747" }}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  ) : null}
+                  {templateLoading ? (
+                    <ClipLoader
+                      color={BLUE}
+                      loading={templateLoading}
+                      size={25}
+                      css={`
+                        margin-left: 10px;
+                      `}
+                    />
+                  ) : null}
                   {/* <button
                     className={`journalFormSaveTemplateButton ${
                       !templateReady ? "buttonDisabled" : ""
@@ -738,7 +823,33 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                     >
                       <DeleteIcon fontSize="small" />
                     </IconButton>
+                    {allocationLoading ? (
+                      <ClipLoader
+                        color={BLUE}
+                        loading={allocationLoading}
+                        size={25}
+                        css={`
+                          margin-left: 10px;
+                        `}
+                      />
+                    ) : null}
                   </div>
+                </div>
+              ) : allocationLoading ? (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    width: 250,
+                    marginTop: 20,
+                  }}
+                >
+                  <ClipLoader
+                    color={BLUE}
+                    loading={allocationLoading}
+                    css={``}
+                  />
                 </div>
               ) : (
                 <button

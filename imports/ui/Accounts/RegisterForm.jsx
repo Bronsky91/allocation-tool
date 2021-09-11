@@ -4,6 +4,9 @@ import { Redirect, useHistory } from "react-router-dom";
 import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
 
+import ClipLoader from "react-spinners/ClipLoader";
+import { BLUE } from "../../../constants";
+
 export const RegisterForm = () => {
   const initialRegisterForm = {
     name: "",
@@ -16,6 +19,7 @@ export const RegisterForm = () => {
   const [registerForm, setRegisterForm] = useState(initialRegisterForm);
   const [registerError, setRegisterError] = useState("");
   const [registerSuccess, setRegisterSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const history = useHistory();
 
@@ -51,6 +55,7 @@ export const RegisterForm = () => {
 
   const submit = (e) => {
     e.preventDefault();
+    setLoading(true);
 
     Meteor.call("user.admin.create", registerForm, (err, res) => {
       if (err) {
@@ -58,6 +63,7 @@ export const RegisterForm = () => {
       } else {
         setRegisterSuccess(true);
       }
+      setLoading(false);
     });
   };
 
@@ -173,13 +179,25 @@ export const RegisterForm = () => {
                 </div>
               ) : null}
             </div>
-            <button
-              type="submit"
-              className={`registerButton ${!formReady ? "buttonDisabled" : ""}`}
-              disabled={!formReady}
-            >
-              Register
-            </button>
+            {loading ? (
+              <ClipLoader
+                color={BLUE}
+                loading={loading}
+                css={`
+                  margin-left: 10px;
+                `}
+              />
+            ) : (
+              <button
+                type="submit"
+                className={`registerButton ${
+                  !formReady ? "buttonDisabled" : ""
+                }`}
+                disabled={!formReady}
+              >
+                Register
+              </button>
+            )}
             <div style={{ color: registerError ? "red" : "#fff" }}>
               {registerError ? registerError : "Error message placeholder"}
             </div>
