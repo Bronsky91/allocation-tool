@@ -38,7 +38,7 @@ Meteor.methods({
     if (!this.userId || !Meteor.user()?.admin) {
       throw new Meteor.Error("Not authorized.");
     }
-    Accounts.createUser({
+    return Accounts.createUser({
       username: data.username,
       password: data.password,
       name: data.name,

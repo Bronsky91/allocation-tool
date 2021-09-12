@@ -99,7 +99,7 @@ export const UserSettings = () => {
           </button>
         ) : null}
 
-        <table>
+        <table style={{ width: "85%" }}>
           <tbody>
             <tr>
               <th></th>
@@ -121,7 +121,7 @@ export const UserSettings = () => {
                 <td>{user.email}</td>
                 <td>
                   <button onClick={() => openUserPermissionModal(user._id)}>
-                    {user.permissions.length > 0 ? "Change" : "Add"}
+                    Change
                   </button>
                 </td>
               </tr>
