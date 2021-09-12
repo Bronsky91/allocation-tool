@@ -52,8 +52,8 @@ Meteor.methods({
         allocations: [],
         templates: [],
         createTemplates: false,
-        createAllocations: false
-      }
+        createAllocations: false,
+      },
     });
   },
   "user.delete": function (id) {
@@ -61,24 +61,23 @@ Meteor.methods({
     if (!this.userId || !Meteor.user()?.admin) {
       throw new Meteor.Error("Not authorized.");
     }
-    Meteor.users.remove({ _id: id })
+    Meteor.users.remove({ _id: id });
   },
-  "user.permissions.insert": function (data) {
-    // Only admins can create users
+  "user.permissions.update": function (userId, key, keyValue) {
+    // Only admins can update permissions
     if (!this.userId || !Meteor.user()?.admin) {
       throw new Meteor.Error("Not authorized.");
     }
 
-    Meteor.users.update(
-      {_id: data.id},
+    return Meteor.users.update(
+      { _id: userId },
       {
-       $set:{
-         permissions: {
-           [field]: []
-         }
-       }
+        $set: {
+          // Using set here instead of $push/$pull to match UI function (saving state of array instead of pushing or pulling one at a time)
+          [`permissions.${key}`]: keyValue,
+        },
       }
-    )
+    );
   },
   "user.redskyAdmin": function (data) {
     // Only other admins can adjust admin privileges

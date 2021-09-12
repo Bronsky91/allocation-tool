@@ -85,6 +85,7 @@ export const UserSettings = () => {
           open={userPermissionsOpen}
           handleClose={closeUserPermissionsModal}
           selectedUser={selectedUser}
+          chartOfAccounts={chartOfAccounts}
         />
         <div className="userSettingsMainButtonsContainer">
           <button>Update Chart of Accounts</button>
@@ -108,7 +109,7 @@ export const UserSettings = () => {
               <th>Permissions</th>
             </tr>
             {allUsers.map((user, index) => (
-              <tr>
+              <tr key={index}>
                 <td>
                   <button>Update</button>
                   <button onClick={() => handleDeleteUser(user._id)}>
