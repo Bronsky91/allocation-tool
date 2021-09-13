@@ -37,15 +37,33 @@ import {
 } from "../../../constants";
 
 export const JournalFormParent = () => {
+  // Subscriptions
+  Meteor.subscribe("chartOfAccounts");
   Meteor.subscribe("Meteor.user.details");
   // Current user logged in
   const user = useTracker(() => Meteor.user());
-  // Subscriptions
-  Meteor.subscribe("chartOfAccounts");
+  console.log("user", user);
 
-  const chartOfAccounts = useTracker(() =>
-    ChartOfAccountsCollection.find({}).fetch()
-  );
+  const chartOfAccounts = useTracker(() => {
+    const allowedChartOfAccounts = ChartOfAccountsCollection.find({}).fetch();
+    const filteredChartOfAccounts = allowedChartOfAccounts.map((coa) => ({
+      ...coa,
+      metrics: coa.metrics
+        .filter((metric) => user.permissions.metrics.includes(metric._id))
+        .map((metric) => ({
+          ...metric,
+          allocations: metric.allocations.filter((allocation) =>
+            user.permissions.allocations.includes(allocation._id)
+          ),
+        })),
+      templates: coa.templates.filter((template) =>
+        user.permissions.templates.includes(template._id)
+      ),
+    }));
+    return filteredChartOfAccounts;
+  });
+
+  console.log("chartOfAccounts", chartOfAccounts);
 
   if (!user) {
     return <Redirect to="/login" />;
@@ -723,15 +741,6 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                       `}
                     />
                   ) : null}
-                  {/* <button
-                    className={`journalFormSaveTemplateButton ${
-                      !templateReady ? "buttonDisabled" : ""
-                    }`}
-                    onClick={() => openSaveTemplateModal()}
-                    disabled={!templateReady}
-                  >
-                    {templateEdit ? "Update Template" : "Save new Template"}
-                  </button> */}
                 </div>
               </div>
             </div>

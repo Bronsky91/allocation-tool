@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import Modal from "@material-ui/core/Modal";
 import { makeStyles } from "@material-ui/core/styles";
 import { SASelect } from "../AutoAllocation/SASelect";
+import { ClipLoader } from "react-spinners";
+import { BLUE } from "../../../constants";
 
 const getModalStyle = () => {
   const top = 50;
@@ -48,24 +50,76 @@ export const UserPermissionsModal = ({
   const [selectedTemplateIds, setSelectedTemplateIds] = useState([]);
   const [createAllocations, setCreateAllocations] = useState(false);
   const [createTemplates, setCreateTemplates] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const allMetrics = chartOfAccounts.reduce(
-    (prevCoa, currentCoa) => [...prevCoa, ...currentCoa.metrics],
-    []
-  );
+  const availableMetrics = chartOfAccounts
+    .filter((coa) =>
+      selectedChartOfAccountIds.map((coaId) => coaId.value).includes(coa._id)
+    )
+    .reduce((prevCoa, currentCoa) => [...prevCoa, ...currentCoa.metrics], []);
 
-  const allAllocations = allMetrics.reduce(
-    (prevMetric, currentMetric) => [
-      ...prevMetric,
-      ...currentMetric.allocations,
-    ],
-    []
-  );
+  const availableAllocations = availableMetrics
+    .filter((metric) =>
+      selectedMetricIds.map((metricId) => metricId.value).includes(metric._id)
+    )
+    .reduce(
+      (prevMetric, currentMetric) => [
+        ...prevMetric,
+        ...currentMetric.allocations,
+      ],
+      []
+    );
 
-  const allTemplates = chartOfAccounts.reduce(
-    (prevCoa, currentCoa) => [...prevCoa, ...currentCoa.templates],
-    []
-  );
+  console.log("availableMetrics", availableMetrics);
+  console.log("availableAllocations", availableAllocations);
+
+  const availableTemplates = chartOfAccounts
+    .filter((coa) =>
+      selectedChartOfAccountIds.map((coaId) => coaId.value).includes(coa._id)
+    )
+    .reduce((prevCoa, currentCoa) => [...prevCoa, ...currentCoa.templates], []);
+
+  const optionsConsistencyCheck = (
+    selectedValues,
+    availableValues,
+    setSelectedValues
+  ) => {
+    // Checks to see if the selectedValues are still valid for the availableValues
+    // Ran when the parent dependency changes
+    const invalidSelectedValues = selectedValues
+      .map((s) => s.value)
+      .filter((id) => !availableValues.map((v) => v._id).includes(id));
+
+    if (invalidSelectedValues.length > 0) {
+      setSelectedValues((sv) =>
+        sv.filter((s) => !invalidSelectedValues.includes(s.value))
+      );
+    }
+  };
+
+  useEffect(() => {
+    optionsConsistencyCheck(
+      selectedMetricIds,
+      availableMetrics,
+      setSelectedMetricIds
+    );
+  }, [availableMetrics]);
+
+  useEffect(() => {
+    optionsConsistencyCheck(
+      selectedAllocationIds,
+      availableAllocations,
+      setSelectedAllocationIds
+    );
+  }, [availableAllocations]);
+
+  useEffect(() => {
+    optionsConsistencyCheck(
+      selectedTemplateIds,
+      availableTemplates,
+      setSelectedTemplateIds
+    );
+  }, [availableTemplates]);
 
   useEffect(() => {
     // Sets permissions that are already saved from DB, set here since first render has no selectedUser
@@ -79,7 +133,7 @@ export const UserPermissionsModal = ({
     }
   }, [selectedUser]);
 
-  const handleChangePermission = (key, keyValue) => {
+  const handleChangePermission = (key, keyValue, last) => {
     Meteor.call(
       "user.permissions.update",
       selectedUser._id,
@@ -89,20 +143,39 @@ export const UserPermissionsModal = ({
         if (err) {
           console.log("err", err);
           alert(`Unable to save permissions: ${err.reason}`);
+          setLoading(false);
         } else {
           console.log("res", res);
+          console.log("last", last);
+          if (last) {
+            setLoading(false);
+          }
         }
       }
     );
   };
 
   const handleSavePermissions = () => {
-    handleChangePermission("chartOfAccounts", selectedChartOfAccountIds);
-    handleChangePermission("metrics", selectedMetricIds);
-    handleChangePermission("allocations", selectedAllocationIds);
-    handleChangePermission("templates", selectedTemplateIds);
+    setLoading(true);
+
+    handleChangePermission(
+      "chartOfAccounts",
+      selectedChartOfAccountIds.map((selected) => selected.value)
+    );
+    handleChangePermission(
+      "metrics",
+      selectedMetricIds.map((selected) => selected.value)
+    );
+    handleChangePermission(
+      "allocations",
+      selectedAllocationIds.map((selected) => selected.value)
+    );
+    handleChangePermission(
+      "templates",
+      selectedTemplateIds.map((selected) => selected.value)
+    );
     handleChangePermission("createAllocations", createAllocations);
-    handleChangePermission("createTemplates", createTemplates);
+    handleChangePermission("createTemplates", createTemplates, true);
     // TODO: Close modal?
   };
 
@@ -115,76 +188,120 @@ export const UserPermissionsModal = ({
         aria-describedby="simple-modal-description"
       >
         <div style={modalStyle} className={classes.paper}>
-          <div>
-            <div>User Permissions for: {selectedUser.name}</div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+            }}
+          >
+            <div style={{ fontWeight: "bold" }}>
+              User Permissions for: {selectedUser.name}
+            </div>
             <div className="column">
-              <div>
+              <div className="userSettingsPermissionsContainer">
                 <label>Chart Of Accounts</label>
                 <SASelect
+                  className="journalFormInputSelect"
                   isMulti={chartOfAccounts.length > 1}
                   value={selectedChartOfAccountIds}
-                  onChange={setSelectedChartOfAccountIds}
+                  onChange={(selected) =>
+                    setSelectedChartOfAccountIds(
+                      chartOfAccounts.length > 1 ? [...selected] : [selected]
+                    )
+                  }
                   options={chartOfAccounts.map((coa) => ({
                     label: coa.name,
                     value: coa._id,
                   }))}
                 />
               </div>
-              <div>
+              <div className="userSettingsPermissionsContainer">
                 <label>Metrics</label>
                 <SASelect
-                  isMulti={allMetrics.length > 1}
+                  className="journalFormInputSelect"
+                  isMulti={availableMetrics.length > 1}
                   value={selectedMetricIds}
-                  onChange={setSelectedMetricIds}
-                  options={allMetrics.map((metric) => ({
+                  onChange={(selected) =>
+                    setSelectedMetricIds(
+                      availableMetrics.length > 1 ? [...selected] : [selected]
+                    )
+                  }
+                  options={availableMetrics.map((metric) => ({
                     label: metric.description,
                     value: metric._id,
                   }))}
                 />
               </div>
-              <div>
+              <div className="userSettingsPermissionsContainer">
                 <label>Allocations</label>
                 <SASelect
-                  isMulti={allAllocations.length > 1}
+                  isMulti={availableAllocations.length > 1}
                   value={selectedAllocationIds}
-                  onChange={setSelectedAllocationIds}
+                  onChange={(selected) =>
+                    setSelectedAllocationIds(
+                      availableAllocations.length > 1
+                        ? [...selected]
+                        : [selected]
+                    )
+                  }
                   className="journalFormInputSelect"
-                  isMulti={true}
-                  options={allAllocations.map((allocation) => ({
+                  options={availableAllocations.map((allocation) => ({
                     label: allocation.name,
                     value: allocation._id,
                   }))}
                 />
               </div>
-              <div>
+              <div className="userSettingsPermissionsContainer">
                 <label>Templates</label>
                 <SASelect
-                  isMulti={allTemplates.length > 1}
+                  className="journalFormInputSelect"
+                  isMulti={availableTemplates.length > 1}
                   value={selectedTemplateIds}
-                  onChange={setSelectedTemplateIds}
-                  options={allTemplates.map((template) => ({
+                  onChange={(selected) =>
+                    setSelectedTemplateIds(
+                      availableTemplates.length > 1 ? [...selected] : [selected]
+                    )
+                  }
+                  options={availableTemplates.map((template) => ({
                     label: template.name,
                     value: template._id,
                   }))}
                 />
               </div>
-              <div>
-                <label>Allocations?</label>
+              <div className="userSettingsPermissionsContainer">
+                <label>Create Allocations?</label>
                 <input
                   type="checkbox"
                   checked={createAllocations}
                   onChange={(e) => setCreateAllocations(e.target.checked)}
                 />
               </div>
-              <div>
-                <label>Templates?</label>
+              <div className="userSettingsPermissionsContainer">
+                <label>Create Templates?</label>
                 <input
                   type="checkbox"
                   checked={createTemplates}
                   onChange={(e) => setCreateTemplates(e.target.checked)}
                 />
               </div>
-              <button onClick={handleSavePermissions}>Save Permissions</button>
+              {loading ? (
+                <ClipLoader
+                  color={BLUE}
+                  loading={loading}
+                  css={`
+                    align-self: center;
+                    margin-top: 20px;
+                  `}
+                />
+              ) : (
+                <button
+                  onClick={handleSavePermissions}
+                  className="journalFormSaveTemplateButton userSettingsPermissionsContainer"
+                >
+                  Save Permissions
+                </button>
+              )}
             </div>
           </div>
         </div>
