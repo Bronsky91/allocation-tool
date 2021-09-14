@@ -57,7 +57,6 @@ export const UserPermissionsModal = ({
       selectedChartOfAccountIds.map((coaId) => coaId.value).includes(coa._id)
     )
     .reduce((prevCoa, currentCoa) => [...prevCoa, ...currentCoa.metrics], []);
-
   const availableAllocations = availableMetrics
     .filter((metric) =>
       selectedMetricIds.map((metricId) => metricId.value).includes(metric._id)
@@ -69,15 +68,28 @@ export const UserPermissionsModal = ({
       ],
       []
     );
-
-  console.log("availableMetrics", availableMetrics);
-  console.log("availableAllocations", availableAllocations);
-
   const availableTemplates = chartOfAccounts
     .filter((coa) =>
       selectedChartOfAccountIds.map((coaId) => coaId.value).includes(coa._id)
     )
     .reduce((prevCoa, currentCoa) => [...prevCoa, ...currentCoa.templates], []);
+
+  const chartOfAccountOptions = chartOfAccounts.map((coa) => ({
+    label: coa.name,
+    value: coa._id,
+  }));
+  const metricOptions = availableMetrics.map((metric) => ({
+    label: metric.description,
+    value: metric._id,
+  }));
+  const allocationOptions = availableAllocations.map((allocation) => ({
+    label: allocation.name,
+    value: allocation._id,
+  }));
+  const templateOptions = availableTemplates.map((template) => ({
+    label: template.name,
+    value: template._id,
+  }));
 
   const optionsConsistencyCheck = (
     selectedValues,
@@ -124,10 +136,26 @@ export const UserPermissionsModal = ({
   useEffect(() => {
     // Sets permissions that are already saved from DB, set here since first render has no selectedUser
     if (selectedUser?.permissions) {
-      setSelectedChartOfAccountIds(selectedUser.permissions.chartOfAccounts);
-      setSelectedMetricIds(selectedUser.permissions.metrics);
-      setSelectedAllocationIds(selectedUser.permissions.allocations);
-      setSelectedTemplateIds(selectedUser.permissions.templates);
+      setSelectedChartOfAccountIds(
+        chartOfAccountOptions.filter((option) =>
+          selectedUser.permissions.chartOfAccounts.includes(option.value)
+        )
+      );
+      setSelectedMetricIds(
+        metricOptions.filter((option) =>
+          selectedUser.permissions.metrics.includes(option.value)
+        )
+      );
+      setSelectedAllocationIds(
+        allocationOptions.filter((option) =>
+          selectedUser.permissions.allocations.includes(option.value)
+        )
+      );
+      setSelectedTemplateIds(
+        templateOptions.filter((option) =>
+          selectedUser.permissions.templates.includes(option.value)
+        )
+      );
       setCreateAllocations(selectedUser.permissions.createAllocations);
       setCreateTemplates(selectedUser.permissions.createTemplates);
     }
@@ -210,10 +238,7 @@ export const UserPermissionsModal = ({
                       chartOfAccounts.length > 1 ? [...selected] : [selected]
                     )
                   }
-                  options={chartOfAccounts.map((coa) => ({
-                    label: coa.name,
-                    value: coa._id,
-                  }))}
+                  options={chartOfAccountOptions}
                 />
               </div>
               <div className="userSettingsPermissionsContainer">
@@ -227,10 +252,7 @@ export const UserPermissionsModal = ({
                       availableMetrics.length > 1 ? [...selected] : [selected]
                     )
                   }
-                  options={availableMetrics.map((metric) => ({
-                    label: metric.description,
-                    value: metric._id,
-                  }))}
+                  options={metricOptions}
                 />
               </div>
               <div className="userSettingsPermissionsContainer">
@@ -246,10 +268,7 @@ export const UserPermissionsModal = ({
                     )
                   }
                   className="journalFormInputSelect"
-                  options={availableAllocations.map((allocation) => ({
-                    label: allocation.name,
-                    value: allocation._id,
-                  }))}
+                  options={allocationOptions}
                 />
               </div>
               <div className="userSettingsPermissionsContainer">
@@ -263,10 +282,7 @@ export const UserPermissionsModal = ({
                       availableTemplates.length > 1 ? [...selected] : [selected]
                     )
                   }
-                  options={availableTemplates.map((template) => ({
-                    label: template.name,
-                    value: template._id,
-                  }))}
+                  options={templateOptions}
                 />
               </div>
               <div className="userSettingsPermissionsContainer">

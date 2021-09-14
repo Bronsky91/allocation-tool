@@ -40,14 +40,24 @@ export const Header = ({
     setSelectChartOfAccountsId(selected.value);
   };
 
-  const headerButtonContainerWidth =
-    location.pathname === "/" && chartOfAccounts.length > 0 ? "26em" : "90px";
+  const getHeaderButtonContainerWidth = () => {
+    if (location.pathname === "/" && chartOfAccounts.length > 0) {
+      if (user && user?.admin) {
+        return "400px";
+      }
+      return "350px";
+    }
+    if (user && user?.admin) {
+      return "82px";
+    }
+    return "30px";
+  };
 
   return (
     <div className="headerContainer">
       <div
         className="headerButtonContainer"
-        style={{ width: headerButtonContainerWidth }}
+        style={{ width: getHeaderButtonContainerWidth() }}
       ></div>
       <div
         className="headerText"
@@ -64,7 +74,7 @@ export const Header = ({
       </div>
       <div
         className="headerButtonContainer"
-        style={{ width: headerButtonContainerWidth }}
+        style={{ width: getHeaderButtonContainerWidth() }}
       >
         {location.pathname === "/" && chartOfAccounts.length > 0 ? (
           <div
@@ -92,12 +102,14 @@ export const Header = ({
             />
           </div>
         ) : null}
-        <button
-          className="headerButton"
-          onClick={() => handleNavigation("/settings")}
-        >
-          <SettingsIcon color="action" fontSize="small" />
-        </button>
+        {user?.admin ? (
+          <button
+            className="headerButton"
+            onClick={() => handleNavigation("/settings")}
+          >
+            <SettingsIcon color="action" fontSize="small" />
+          </button>
+        ) : null}
         <button
           className="headerButton"
           onClick={() => handleNavigation("/account")}

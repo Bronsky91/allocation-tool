@@ -268,6 +268,8 @@ Meteor.methods({
     check(id, String);
     check(template, {
       name: String,
+      isAdminCreated: Boolean,
+      userId: String,
       description: String,
       balancingAccount: [
         {

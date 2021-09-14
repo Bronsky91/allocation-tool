@@ -42,25 +42,27 @@ export const JournalFormParent = () => {
   Meteor.subscribe("Meteor.user.details");
   // Current user logged in
   const user = useTracker(() => Meteor.user());
-  console.log("user", user);
 
   const chartOfAccounts = useTracker(() => {
     const allowedChartOfAccounts = ChartOfAccountsCollection.find({}).fetch();
-    const filteredChartOfAccounts = allowedChartOfAccounts.map((coa) => ({
-      ...coa,
-      metrics: coa.metrics
-        .filter((metric) => user.permissions.metrics.includes(metric._id))
-        .map((metric) => ({
-          ...metric,
-          allocations: metric.allocations.filter((allocation) =>
-            user.permissions.allocations.includes(allocation._id)
-          ),
-        })),
-      templates: coa.templates.filter((template) =>
-        user.permissions.templates.includes(template._id)
-      ),
-    }));
-    return filteredChartOfAccounts;
+    if (user.hasAdmin && user.permissions) {
+      const filteredChartOfAccounts = allowedChartOfAccounts.map((coa) => ({
+        ...coa,
+        metrics: coa.metrics
+          .filter((metric) => user.permissions.metrics.includes(metric._id))
+          .map((metric) => ({
+            ...metric,
+            allocations: metric.allocations.filter((allocation) =>
+              user.permissions.allocations.includes(allocation._id)
+            ),
+          })),
+        templates: coa.templates.filter((template) =>
+          user.permissions.templates.includes(template._id)
+        ),
+      }));
+      return filteredChartOfAccounts;
+    }
+    return allowedChartOfAccounts;
   });
 
   console.log("chartOfAccounts", chartOfAccounts);
@@ -504,6 +506,8 @@ const JournalForm = ({ user, chartOfAccounts }) => {
 
   const createTemplateObject = (name) => {
     return {
+      isAdminCreated: user.admin,
+      userId: user._id,
       name,
       description: formData.journalDescription,
       balancingAccount: formData.selectedBalanceSegments.map(

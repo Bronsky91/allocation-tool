@@ -90,8 +90,6 @@ export const UserSettings = () => {
         <div className="userSettingsMainButtonsContainer">
           <button>Update Chart of Accounts</button>
           <button>Update Metrics</button>
-          <button>Standard Techniques</button>
-          <button>Standard Templates</button>
         </div>
         {user.admin ? (
           <button style={{ margin: 10 }} onClick={openAddUserModal}>
