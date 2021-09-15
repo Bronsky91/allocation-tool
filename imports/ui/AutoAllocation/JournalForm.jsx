@@ -66,6 +66,7 @@ export const JournalFormParent = () => {
   });
 
   console.log("chartOfAccounts", chartOfAccounts);
+  console.log("user", user);
 
   if (!user) {
     return <Redirect to="/login" />;
@@ -187,6 +188,26 @@ const JournalForm = ({ user, chartOfAccounts }) => {
 
   const templateReady =
     selectedAllocation && formData.journalDescription.length > 0;
+
+  // User is an admin or have permissions to create their own templates
+  const isAbleToCreateTemplates =
+    user?.admin || user?.permissions?.createTemplates;
+
+  // User is an admin or have permissions to edit ONLY their own templates
+  const isAbleToEditOrDeleteTemplate =
+    user?.admin ||
+    (user?.permissions?.createTemplates &&
+      selectedTemplate.userId === user?._id);
+
+  // User is an admin or have permissions to create their own allocations
+  const isAbleToCreateAllocations =
+    user?.admin || user?.permissions?.createAllocations;
+
+  // User is an admin or have permissions to edit ONLY their own allocations
+  const isAbleToEditOrDeleteAllocations =
+    user?.admin ||
+    (user?.permissions?.createAllocations &&
+      selectedAllocation.userId === user?._id);
 
   useEffect(() => {
     setSelectedMetric(
@@ -506,7 +527,6 @@ const JournalForm = ({ user, chartOfAccounts }) => {
 
   const createTemplateObject = (name) => {
     return {
-      isAdminCreated: user.admin,
       userId: user._id,
       name,
       description: formData.journalDescription,
@@ -707,7 +727,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                     defaultValue={{ value: "0", label: "No Template" }}
                     styles={customSelectStyles}
                   />
-                  {templateReady ? (
+                  {templateReady && isAbleToCreateTemplates ? (
                     <IconButton
                       color="inherit"
                       onClick={openSaveTemplateModal}
@@ -716,7 +736,9 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                       <AddIcon fontSize="default" />
                     </IconButton>
                   ) : null}
-                  {templateReady && selectedTemplate ? (
+                  {templateReady &&
+                  selectedTemplate &&
+                  isAbleToEditOrDeleteTemplate ? (
                     <IconButton
                       color="inherit"
                       onClick={openEditTemplateModal}
@@ -726,7 +748,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                       <EditIcon fontSize="small" />
                     </IconButton>
                   ) : null}
-                  {selectedTemplate ? (
+                  {selectedTemplate && isAbleToEditOrDeleteTemplate ? (
                     <IconButton
                       color="inherit"
                       onClick={handleDeleteTemplate}
@@ -813,29 +835,35 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                       }))}
                       styles={customSelectStyles}
                     />
-                    <IconButton
-                      color="inherit"
-                      onClick={openAllocationModal}
-                      style={{ color: "#3597fe" }}
-                    >
-                      <AddIcon fontSize="default" />
-                    </IconButton>
-                    <IconButton
-                      color="inherit"
-                      onClick={openEditAllocationModal}
-                      disabled={!selectedAllocation}
-                      style={{ color: "#60cead" }}
-                    >
-                      <EditIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton
-                      color="inherit"
-                      onClick={handleDeleteAllocation}
-                      disabled={!selectedAllocation}
-                      style={{ color: "#f54747" }}
-                    >
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
+                    {isAbleToCreateAllocations ? (
+                      <IconButton
+                        color="inherit"
+                        onClick={openAllocationModal}
+                        style={{ color: "#3597fe" }}
+                      >
+                        <AddIcon fontSize="default" />
+                      </IconButton>
+                    ) : null}
+                    {isAbleToEditOrDeleteAllocations ? (
+                      <IconButton
+                        color="inherit"
+                        onClick={openEditAllocationModal}
+                        disabled={!selectedAllocation}
+                        style={{ color: "#60cead" }}
+                      >
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                    ) : null}
+                    {isAbleToEditOrDeleteAllocations ? (
+                      <IconButton
+                        color="inherit"
+                        onClick={handleDeleteAllocation}
+                        disabled={!selectedAllocation}
+                        style={{ color: "#f54747" }}
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    ) : null}
                     {allocationLoading ? (
                       <ClipLoader
                         color={BLUE}

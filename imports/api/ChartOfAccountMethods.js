@@ -268,7 +268,6 @@ Meteor.methods({
     check(id, String);
     check(template, {
       name: String,
-      isAdminCreated: Boolean,
       userId: String,
       description: String,
       balancingAccount: [
@@ -318,7 +317,6 @@ Meteor.methods({
     });
 
     if (!this.userId) {
-      // TODO: Add proper permissions
       throw new Meteor.Error("Not authorized.");
     }
     const templateId = new Mongo.ObjectID()._str;
@@ -384,7 +382,6 @@ Meteor.methods({
     });
 
     if (!this.userId) {
-      // TODO: Add proper permissions
       throw new Meteor.Error("Not authorized.");
     }
 
