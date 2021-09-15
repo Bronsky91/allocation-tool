@@ -52,44 +52,40 @@ export const UserPermissionsModal = ({
   const [createTemplates, setCreateTemplates] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const availableMetrics = chartOfAccounts
-    .filter((coa) =>
-      selectedChartOfAccountIds.map((coaId) => coaId.value).includes(coa._id)
-    )
-    .reduce((prevCoa, currentCoa) => [...prevCoa, ...currentCoa.metrics], []);
-  const availableAllocations = availableMetrics
-    .filter((metric) =>
-      selectedMetricIds.map((metricId) => metricId.value).includes(metric._id)
-    )
-    .reduce(
-      (prevMetric, currentMetric) => [
-        ...prevMetric,
-        ...currentMetric.allocations,
-      ],
-      []
-    );
-  const availableTemplates = chartOfAccounts
-    .filter((coa) =>
-      selectedChartOfAccountIds.map((coaId) => coaId.value).includes(coa._id)
-    )
-    .reduce((prevCoa, currentCoa) => [...prevCoa, ...currentCoa.templates], []);
+  // Created these functions to use again when each user is selected to load what was saved previously properly
+  const findAvailable = (baseArr, filterArr, objName) =>
+    baseArr
+      .filter((obj) => filterArr.map((f) => f.value).includes(obj._id))
+      .reduce(
+        (prevObj, currentObj) => [...prevObj, ...currentObj[objName]],
+        []
+      );
+  const createOptions = (arr, labelKey) =>
+    arr.map((obj) => ({
+      label: obj[labelKey],
+      value: obj._id,
+    }));
 
-  const chartOfAccountOptions = chartOfAccounts.map((coa) => ({
-    label: coa.name,
-    value: coa._id,
-  }));
-  const metricOptions = availableMetrics.map((metric) => ({
-    label: metric.description,
-    value: metric._id,
-  }));
-  const allocationOptions = availableAllocations.map((allocation) => ({
-    label: allocation.name,
-    value: allocation._id,
-  }));
-  const templateOptions = availableTemplates.map((template) => ({
-    label: template.name,
-    value: template._id,
-  }));
+  const availableMetrics = findAvailable(
+    chartOfAccounts,
+    selectedChartOfAccountIds,
+    "metrics"
+  );
+  const availableAllocations = findAvailable(
+    availableMetrics,
+    selectedMetricIds,
+    "allocations"
+  );
+  const availableTemplates = findAvailable(
+    chartOfAccounts,
+    selectedChartOfAccountIds,
+    "templates"
+  );
+
+  const chartOfAccountOptions = createOptions(chartOfAccounts, "name");
+  const metricOptions = createOptions(availableMetrics, "description");
+  const allocationOptions = createOptions(availableAllocations, "name");
+  const templateOptions = createOptions(availableTemplates, "name");
 
   const optionsConsistencyCheck = (
     selectedValues,
@@ -136,26 +132,59 @@ export const UserPermissionsModal = ({
   useEffect(() => {
     // Sets permissions that are already saved from DB, set here since first render has no selectedUser
     if (selectedUser?.permissions) {
-      setSelectedChartOfAccountIds(
-        chartOfAccountOptions.filter((option) =>
+      // The available options and which are available need to be recreated here because just setting state in sequence
+      // doesn't allow for the next values to set properly since the values from the previous aren't available until next render cycle
+      // Example: Setting setSelectedChartOfAccountIds() then setting setSelectedMetricIds() doesn't work since
+      // setSelectedMetricIds depends on the values that were set in setSelectedChartOfAccountIds which aren't available
+      // directly after in sequence.
+
+      const chartOfAccountOptions = createOptions(chartOfAccounts, "name");
+      const preSelectedChartOfAccounts = chartOfAccountOptions.filter(
+        (option) =>
           selectedUser.permissions.chartOfAccounts.includes(option.value)
-        )
       );
-      setSelectedMetricIds(
-        metricOptions.filter((option) =>
-          selectedUser.permissions.metrics.includes(option.value)
-        )
+      const preSelectedAvailableMetrics = findAvailable(
+        chartOfAccounts,
+        preSelectedChartOfAccounts,
+        "metrics"
       );
-      setSelectedAllocationIds(
-        allocationOptions.filter((option) =>
-          selectedUser.permissions.allocations.includes(option.value)
-        )
+      const preSelectedMetricOptions = createOptions(
+        preSelectedAvailableMetrics,
+        "description"
       );
-      setSelectedTemplateIds(
-        templateOptions.filter((option) =>
-          selectedUser.permissions.templates.includes(option.value)
-        )
+      const preSelectedMetrics = preSelectedMetricOptions.filter((option) =>
+        selectedUser.permissions.metrics.includes(option.value)
       );
+
+      const preSelectedAvailableAllocations = findAvailable(
+        preSelectedAvailableMetrics,
+        preSelectedMetrics,
+        "allocations"
+      );
+      const preSelectedAllocationOptions = createOptions(
+        preSelectedAvailableAllocations,
+        "name"
+      );
+      const preSelectedAllocations = preSelectedAllocationOptions.filter(
+        (option) => selectedUser.permissions.allocations.includes(option.value)
+      );
+
+      const preSelectedAvailableTemplates = findAvailable(
+        chartOfAccounts,
+        preSelectedChartOfAccounts,
+        "templates"
+      );
+      const preSelectedTemplateOptions = createOptions(
+        preSelectedAvailableTemplates,
+        "name"
+      );
+      const preSelectedTemplates = preSelectedTemplateOptions.filter((option) =>
+        selectedUser.permissions.templates.includes(option.value)
+      );
+      setSelectedChartOfAccountIds(preSelectedChartOfAccounts);
+      setSelectedMetricIds(preSelectedMetrics);
+      setSelectedAllocationIds(preSelectedAllocations);
+      setSelectedTemplateIds(preSelectedTemplates);
       setCreateAllocations(selectedUser.permissions.createAllocations);
       setCreateTemplates(selectedUser.permissions.createTemplates);
     }
