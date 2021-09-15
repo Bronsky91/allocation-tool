@@ -202,10 +202,9 @@ export const UserPermissionsModal = ({
           alert(`Unable to save permissions: ${err.reason}`);
           setLoading(false);
         } else {
-          console.log("res", res);
-          console.log("last", last);
           if (last) {
             setLoading(false);
+            handleClose();
           }
         }
       }
@@ -233,7 +232,6 @@ export const UserPermissionsModal = ({
     );
     handleChangePermission("createAllocations", createAllocations);
     handleChangePermission("createTemplates", createTemplates, true);
-    // TODO: Close modal?
   };
 
   if (selectedUser) {
