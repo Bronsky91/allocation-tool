@@ -106,7 +106,7 @@ export const App = ({ loggingIn }) => {
         <ProtectedRoute
           loggingIn={loggingIn}
           exact
-          path="/onboard"
+          path="/import"
           component={ImportData}
         />
         <ProtectedRoute

@@ -29,11 +29,27 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const MetricsModal = ({ open, handleClose }) => {
+export const MetricsModal = ({ open, handleClose, chartOfAccounts }) => {
   // getModalStyle is not a pure function, we roll the style only on the first render
   const classes = useStyles();
 
   const [modalStyle] = React.useState(getModalStyle);
+
+  const allMetrics = chartOfAccounts
+    .map((coa) => ({
+      ...coa,
+      metrics: coa.metrics.map((metric) => ({
+        ...metric,
+        coaName: coa.name,
+        coaId: coa._id,
+      })),
+    }))
+    .reduce(
+      (prevMetric, currentCoa) => [...prevMetric, ...currentCoa.metrics],
+      []
+    );
+
+  console.log("allMetrics", allMetrics);
 
   return (
     <Modal
@@ -43,7 +59,44 @@ export const MetricsModal = ({ open, handleClose }) => {
       aria-describedby="simple-modal-description"
     >
       <div style={modalStyle} className={classes.paper}>
-        Metrics
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <div>Metrics</div>
+          <button>Add New</button>
+          <table style={{ width: "85%" }}>
+            <tbody>
+              <tr>
+                <th>Name</th>
+                <th>Chart Of Accounts</th>
+                <th>Methods</th>
+                <th></th>
+                <th></th>
+              </tr>
+              {allMetrics.map((metric, index) => (
+                <tr key={index}>
+                  <td>{metric.description}</td>
+                  <td>{metric.coaName}</td>
+                  <td>
+                    {metric.validMethods.map((method, i) => (
+                      <div key={i}>{method}</div>
+                    ))}
+                  </td>
+                  <td>
+                    <button>Change</button>
+                  </td>
+                  <td>
+                    <button>Delete</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </Modal>
   );

@@ -29,7 +29,12 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const ChartOfAccountsModal = ({ open, handleClose }) => {
+export const ChartOfAccountsModal = ({
+  open,
+  handleClose,
+  chartOfAccounts,
+  history,
+}) => {
   // getModalStyle is not a pure function, we roll the style only on the first render
   const classes = useStyles();
 
@@ -43,7 +48,42 @@ export const ChartOfAccountsModal = ({ open, handleClose }) => {
       aria-describedby="simple-modal-description"
     >
       <div style={modalStyle} className={classes.paper}>
-        Chart of Accounts
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <div>Chart of Accounts</div>
+          <button onClick={() => history.push("/import")}>Add New</button>
+          <table style={{ width: "85%" }}>
+            <tbody>
+              <tr>
+                <th>Name</th>
+                <th>Segments</th>
+                <th></th>
+                <th></th>
+              </tr>
+              {chartOfAccounts.map((coa, index) => (
+                <tr key={index}>
+                  <td>{coa.name}</td>
+                  <td>
+                    {coa.segments.map((segment) => (
+                      <div>{segment.description}</div>
+                    ))}
+                  </td>
+                  <td>
+                    <button>Change</button>
+                  </td>
+                  <td>
+                    <button>Delete</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </Modal>
   );

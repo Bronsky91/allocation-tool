@@ -44,7 +44,7 @@ export const LoginForm = () => {
     }
     if (chartOfAccounts.length === 0 && user.admin) {
       // If the user has no data yet, redirect to onboarding page
-      return <Redirect to="/onboard" />;
+      return <Redirect to="/import" />;
     }
     return <Redirect to="/" />;
   }

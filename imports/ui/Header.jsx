@@ -63,7 +63,7 @@ export const Header = ({
         className="headerText"
         onClick={() => {
           if (chartOfAccounts.length === 0 && user.admin) {
-            handleNavigation("/onboard");
+            handleNavigation("/import");
           } else {
             handleNavigation("/");
           }

@@ -36,6 +36,7 @@ export const UserSettings = () => {
   const chartOfAccounts = useTracker(() =>
     ChartOfAccountsCollection.find({}).fetch()
   );
+  console.log("chartOfAccounts", chartOfAccounts);
 
   const openChartOfAccountsModal = () => {
     setChartOfAccountsModalOpen(true);
@@ -104,8 +105,14 @@ export const UserSettings = () => {
         <ChartOfAccountsModal
           open={chartOfAccountsModalOpen}
           handleClose={closeChartOfAccountsModal}
+          chartOfAccounts={chartOfAccounts}
+          history={history}
         />
-        <MetricsModal open={metricsModalOpen} handleClose={closeMetricsModal} />
+        <MetricsModal
+          open={metricsModalOpen}
+          handleClose={closeMetricsModal}
+          chartOfAccounts={chartOfAccounts}
+        />
         <AddUserModal open={addUserMoalOpen} handleClose={closeAddUserModal} />
         <UserPermissionsModal
           open={userPermissionsOpen}
@@ -114,10 +121,8 @@ export const UserSettings = () => {
           chartOfAccounts={chartOfAccounts}
         />
         <div className="userSettingsMainButtonsContainer">
-          <button onClick={openChartOfAccountsModal}>
-            Update Chart of Accounts
-          </button>
-          <button onClick={openMetricsModal}>Update Metrics</button>
+          <button onClick={openChartOfAccountsModal}>Chart of Accounts</button>
+          <button onClick={openMetricsModal}>Metrics</button>
         </div>
         {user.admin ? (
           <button style={{ margin: 10 }} onClick={openAddUserModal}>
@@ -168,7 +173,7 @@ export const UserSettings = () => {
             {chartOfAccounts.length === 0 ? (
               <button
                 style={{ margin: 10 }}
-                onClick={() => history.push("/onboard")}
+                onClick={() => history.push("/import")}
               >
                 Return to Onboarding
               </button>
