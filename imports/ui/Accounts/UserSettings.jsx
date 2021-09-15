@@ -9,8 +9,13 @@ import { ChartOfAccountsCollection } from "../../db/ChartOfAccountsCollection";
 import { Header } from "../Header";
 import { AddUserModal } from "./AddUserModal";
 import { UserPermissionsModal } from "./UserPermissions";
+import { ChartOfAccountsModal } from "./ChartOfAccountsModal";
+import { MetricsModal } from "./MetricsModal";
 
 export const UserSettings = () => {
+  const [chartOfAccountsModalOpen, setChartOfAccountsModalOpen] =
+    useState(false);
+  const [metricsModalOpen, setMetricsModalOpen] = useState(false);
   const [addUserMoalOpen, setAddUserModalOpen] = useState(false);
   const [userPermissionsOpen, setUserPermissionsOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState({});
@@ -31,6 +36,22 @@ export const UserSettings = () => {
   const chartOfAccounts = useTracker(() =>
     ChartOfAccountsCollection.find({}).fetch()
   );
+
+  const openChartOfAccountsModal = () => {
+    setChartOfAccountsModalOpen(true);
+  };
+
+  const closeChartOfAccountsModal = () => {
+    setChartOfAccountsModalOpen(false);
+  };
+
+  const openMetricsModal = () => {
+    setMetricsModalOpen(true);
+  };
+
+  const closeMetricsModal = () => {
+    setMetricsModalOpen(false);
+  };
 
   const openAddUserModal = () => {
     setAddUserModalOpen(true);
@@ -80,6 +101,11 @@ export const UserSettings = () => {
           alignItems: "center",
         }}
       >
+        <ChartOfAccountsModal
+          open={chartOfAccountsModalOpen}
+          handleClose={closeChartOfAccountsModal}
+        />
+        <MetricsModal open={metricsModalOpen} handleClose={closeMetricsModal} />
         <AddUserModal open={addUserMoalOpen} handleClose={closeAddUserModal} />
         <UserPermissionsModal
           open={userPermissionsOpen}
@@ -88,8 +114,10 @@ export const UserSettings = () => {
           chartOfAccounts={chartOfAccounts}
         />
         <div className="userSettingsMainButtonsContainer">
-          <button>Update Chart of Accounts</button>
-          <button>Update Metrics</button>
+          <button onClick={openChartOfAccountsModal}>
+            Update Chart of Accounts
+          </button>
+          <button onClick={openMetricsModal}>Update Metrics</button>
         </div>
         {user.admin ? (
           <button style={{ margin: 10 }} onClick={openAddUserModal}>
