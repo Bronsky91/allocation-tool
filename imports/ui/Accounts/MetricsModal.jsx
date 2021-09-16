@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+// Meteor
+import { Meteor } from "meteor/meteor";
 // Material UI
 import Modal from "@material-ui/core/Modal";
 import { makeStyles } from "@material-ui/core/styles";
@@ -51,6 +53,21 @@ export const MetricsModal = ({ open, handleClose, chartOfAccounts }) => {
 
   console.log("allMetrics", allMetrics);
 
+  const handleDelete = (metric) => {
+    // TODO: Add confirmation
+    Meteor.call(
+      "chartOfAccounts.metrics.remove",
+      metric.coaId,
+      metric._id,
+      (err, res) => {
+        if (err) {
+          console.log(err);
+          alert(`Unable to delete Metric: ${err.reason}`);
+        } 
+      }
+    );
+  };
+
   return (
     <Modal
       open={open}
@@ -90,7 +107,7 @@ export const MetricsModal = ({ open, handleClose, chartOfAccounts }) => {
                     <button>Change</button>
                   </td>
                   <td>
-                    <button>Delete</button>
+                    <button onClick={() => handleDelete(metric)}>Delete</button>
                   </td>
                 </tr>
               ))}

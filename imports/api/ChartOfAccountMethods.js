@@ -21,7 +21,15 @@ Meteor.methods({
       segments: [],
       metrics: [],
       templates: [],
+      createdAt: new Date()
     });
+  },
+  "chartOfAccounts.remove": function (id) {
+    // If a user not logged in or the user is not an admin
+    if (!this.userId && !Meteor.user()?.admin) {
+      throw new Meteor.Error("Not authorized.");
+    }
+    return ChartOfAccountsCollection.remove({ _id: id });
   },
   "chartOfAccounts.removeAll": function () {
     // If a user not logged in or the user is not an admin
@@ -66,6 +74,54 @@ Meteor.methods({
               createdAt: new Date(),
             },
           },
+        }
+      );
+    }
+  },
+  "chartOfAccounts.segments.update": function (id, segments) {
+    check(id, String);
+    check(segments, [
+      {
+        _id: String,
+        userId: String,
+        createdAt: Date,
+        updatedAt: Match.Optional(Date),
+        chartFieldOrder: Number,
+        description: String,
+        subSegments: [
+          {
+            description: String,
+            segmentId: Match.OneOf(String, Number),
+            category: Match.Optional(String),
+            typicalBalance: Match.Optional(String),
+          },
+        ],
+      },
+    ]);
+    // If a user not logged in or the user is not an admin
+    if (!this.userId && !Meteor.user()?.admin) {
+      throw new Meteor.Error("Not authorized.");
+    }
+
+    for (const segment of segments) {
+      ChartOfAccountsCollection.update(
+        { _id: id },
+        {
+          $set: {
+            "segments.$[s]": {
+              ...segment,
+              description: segment.description,
+              subSegments: segment.subSegments,
+              chartFieldOrder: segment.chartFieldOrder,
+              updatedAt: new Date(),
+            },
+          },
+
+        },
+        {
+          arrayFilters: [
+            { "s._id": segment._id },
+          ],
         }
       );
     }
@@ -146,6 +202,27 @@ Meteor.methods({
         },
       }
     );
+  },
+  "chartOfAccounts.metrics.remove": function (chartOfAccountId, metricId) {
+    check(chartOfAccountId, String);
+    check(metricId, String);
+
+    // If a user not logged in or the user is not an admin
+    if (!this.userId && !Meteor.user()?.admin) {
+      throw new Meteor.Error("Not authorized.");
+    }
+
+    return ChartOfAccountsCollection.update(
+      { _id: chartOfAccountId },
+      {
+        $pull: {
+          metrics: {
+            _id: metricId
+          },
+        },
+      }
+    );
+
   },
   "chartOfAccounts.metrics.allocations.insert": function (
     chartOfAccountId,

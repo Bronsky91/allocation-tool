@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+// Meteor
+import { Meteor } from "meteor/meteor";
 // Material UI
 import Modal from "@material-ui/core/Modal";
 import { makeStyles } from "@material-ui/core/styles";
