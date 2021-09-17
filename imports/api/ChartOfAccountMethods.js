@@ -21,7 +21,7 @@ Meteor.methods({
       segments: [],
       metrics: [],
       templates: [],
-      createdAt: new Date()
+      createdAt: new Date(),
     });
   },
   "chartOfAccounts.remove": function (id) {
@@ -116,12 +116,9 @@ Meteor.methods({
               updatedAt: new Date(),
             },
           },
-
         },
         {
-          arrayFilters: [
-            { "s._id": segment._id },
-          ],
+          arrayFilters: [{ "s._id": segment._id }],
         }
       );
     }
@@ -189,6 +186,51 @@ Meteor.methods({
       );
     }
   },
+  "chartOfAccounts.metrics.update": function (
+    chartOfAccountsId,
+    metricId,
+    metric
+  ) {
+    check(chartOfAccountsId, String);
+    check(metricId, String);
+    check(metric, {
+      columns: [String],
+      id: Number,
+      name: String,
+      metricSegments: [String], // metricSegments - Array of column names that are linked to Segments
+      validMethods: [String], // validMethods - Array of column names that are used for allocation
+      rows: [[{ rowNumber: Number, value: Match.OneOf(String, Number) }]],
+    });
+
+    const description = metric.name;
+    const columnNames = metric.columns;
+    const validMethods = metric.validMethods;
+    const metricSegments = metric.metricSegments;
+    const columns = columnNames.map((cn, index) => ({
+      title: cn,
+      rows: metric.rows.map((row) => {
+        return row[index];
+      }),
+    }));
+
+    return ChartOfAccountsCollection.update(
+      { _id: chartOfAccountsId },
+      {
+        $set: {
+          "metrics.$[m]": {
+            description,
+            columns,
+            validMethods,
+            metricSegments,
+            updatedAt: new Date(),
+          },
+        },
+      },
+      {
+        arrayFilters: [{ "m._id": metricId }],
+      }
+    );
+  },
   "chartOfAccounts.metrics.removeAll": function (id) {
     // If a user not logged in or the user is not an admin
     if (!this.userId && !Meteor.user()?.admin) {
@@ -217,12 +259,11 @@ Meteor.methods({
       {
         $pull: {
           metrics: {
-            _id: metricId
+            _id: metricId,
           },
         },
       }
     );
-
   },
   "chartOfAccounts.metrics.allocations.insert": function (
     chartOfAccountId,

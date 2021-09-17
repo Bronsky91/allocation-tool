@@ -176,21 +176,6 @@ export const ChartOfAccountsModal = ({
           }
         }
       );
-
-      // segments = [
-      //   {
-      //     chartFieldOrder: Number,
-      //     description: String,
-      //     subSegments: [
-      //       {
-      //         description: String,
-      //         segmentId: Match.OneOf(String, Number),
-      //         category: Match.Optional(String),
-      //         typicalBalance: Match.Optional(String),
-      //       },
-      //     ],
-      //   },
-      // ];
     } else {
       // Displays an alert to the user and an error message why the chart of the accounts isn't valid
       alert(output.err);
@@ -231,7 +216,6 @@ export const ChartOfAccountsModal = ({
                     ))}
                   </td>
                   <td>
-                    {/* TODO: Make file input for now */}
                     <input
                       type="file"
                       style={{ display: "inline-block", width: 90 }}
