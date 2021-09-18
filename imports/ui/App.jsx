@@ -19,6 +19,7 @@ import { UserSettings } from "./Accounts/UserSettings.jsx";
 import { RedskyAdmin } from "./Accounts/RedskyAdmin.jsx";
 import { RegisterForm } from "./Accounts/RegisterForm.jsx";
 import { Header } from "./Header.jsx";
+import { ResetPassword } from "./Accounts/ResetPassword.jsx";
 
 export const App = ({ loggingIn }) => {
   document.title = "RedSky Allocation Tool";
@@ -91,6 +92,7 @@ export const App = ({ loggingIn }) => {
       <Switch>
         <Route exact path="/login" component={LoginForm} />
         <Route exact path="/register" component={RegisterForm} />
+        <Route exact path="/reset-password/:token" component={ResetPassword} />
         <LoggedInProtectedRoute
           loggingIn={loggingIn}
           exact
