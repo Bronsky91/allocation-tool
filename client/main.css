@@ -32,7 +32,7 @@ tr:nth-child(even) {
   border-radius: 10px;
   box-shadow: 0 3px 10px 0 rgba(0, 0, 0, 0.05);
   background-color: #fff;
-  height: 450px;
+  height: 470px;
   width: 660px;
   display: flex;
   flex-direction: column;
@@ -84,6 +84,17 @@ tr:nth-child(even) {
   font-weight: bold;
   color: #343a40;
   margin-bottom: 5px;
+}
+
+.loginLinkText {
+  text-decoration: inherit;
+  color: #3597fe;
+  margin-left: 10;
+  font-size: 12px;
+}
+
+.loginLinkText:hover {
+  cursor: pointer;
 }
 
 /* Header */
@@ -734,6 +745,14 @@ input[type="file"] {
   padding: 1em;
 }
 
+.userSettingsMainButtonsContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.userSettingsPermissionsContainer {
+  margin-top: 20px;
+}
 /* Util Styles */
 
 .buttonDisabled {

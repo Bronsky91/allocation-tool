@@ -8,9 +8,17 @@ import { ChartOfAccountsCollection } from "../../db/ChartOfAccountsCollection";
 // Components
 import { Header } from "../Header";
 import { AddUserModal } from "./AddUserModal";
+import { UserPermissionsModal } from "./UserPermissions";
+import { ChartOfAccountsModal } from "./ChartOfAccountsModal";
+import { MetricsModal } from "./MetricsModal";
 
 export const UserSettings = () => {
+  const [chartOfAccountsModalOpen, setChartOfAccountsModalOpen] =
+    useState(false);
+  const [metricsModalOpen, setMetricsModalOpen] = useState(false);
   const [addUserMoalOpen, setAddUserModalOpen] = useState(false);
+  const [userPermissionsOpen, setUserPermissionsOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState({});
 
   // Subscriptions
   Meteor.subscribe("chartOfAccounts");
@@ -21,11 +29,30 @@ export const UserSettings = () => {
     Meteor.users.find({ adminId: user._id }, {}).fetch()
   );
 
+  console.log("allUsers", allUsers);
+
   const history = useHistory();
 
   const chartOfAccounts = useTracker(() =>
     ChartOfAccountsCollection.find({}).fetch()
   );
+  console.log("chartOfAccounts", chartOfAccounts);
+
+  const openChartOfAccountsModal = () => {
+    setChartOfAccountsModalOpen(true);
+  };
+
+  const closeChartOfAccountsModal = () => {
+    setChartOfAccountsModalOpen(false);
+  };
+
+  const openMetricsModal = () => {
+    setMetricsModalOpen(true);
+  };
+
+  const closeMetricsModal = () => {
+    setMetricsModalOpen(false);
+  };
 
   const openAddUserModal = () => {
     setAddUserModalOpen(true);
@@ -33,6 +60,19 @@ export const UserSettings = () => {
 
   const closeAddUserModal = () => {
     setAddUserModalOpen(false);
+  };
+
+  const openUserPermissionModal = (userId) => {
+    setSelectedUser(allUsers.find((user) => user._id === userId));
+    setUserPermissionsOpen(true);
+  };
+
+  const closeUserPermissionsModal = () => {
+    setUserPermissionsOpen(false);
+  };
+
+  const handleDeleteUser = (userId) => {
+    Meteor.call("user.delete", userId);
   };
 
   const handleRemoveAllData = () => {
@@ -57,58 +97,72 @@ export const UserSettings = () => {
       <div
         style={{
           display: "flex",
+          flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
         }}
       >
+        <ChartOfAccountsModal
+          open={chartOfAccountsModalOpen}
+          handleClose={closeChartOfAccountsModal}
+          chartOfAccounts={chartOfAccounts}
+          history={history}
+        />
+        <MetricsModal
+          open={metricsModalOpen}
+          handleClose={closeMetricsModal}
+          chartOfAccounts={chartOfAccounts}
+        />
         <AddUserModal open={addUserMoalOpen} handleClose={closeAddUserModal} />
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <div style={{ marginTop: 10 }}>
-            {chartOfAccounts.length > 0 ? (
-              <div style={{ fontWeight: "bold" }}>Chart of Accounts:</div>
-            ) : null}
+        <UserPermissionsModal
+          open={userPermissionsOpen}
+          handleClose={closeUserPermissionsModal}
+          selectedUser={selectedUser}
+          chartOfAccounts={chartOfAccounts}
+        />
+        <div className="userSettingsMainButtonsContainer">
+          <button onClick={openChartOfAccountsModal}>Chart of Accounts</button>
+          <button onClick={openMetricsModal}>Metrics</button>
+        </div>
+        {user.admin ? (
+          <button style={{ margin: 10 }} onClick={openAddUserModal}>
+            Add User
+          </button>
+        ) : null}
 
-            {chartOfAccounts.map((coa, index) => (
-              <ul key={index}>
-                <li>{coa.name}</li>
-                <ul>
-                  <li>Segments:</li>
-                  <ul>
-                    {coa.segments.map((segment) => (
-                      <li key={segment._id}>{segment.description}</li>
-                    ))}
-                  </ul>
-                  <li>Metrics:</li>
-                  <ul>
-                    {coa.metrics.map((metric) => (
-                      <li key={metric._id}>{metric.description}</li>
-                    ))}
-                  </ul>
-                </ul>
-              </ul>
+        <table style={{ width: "85%" }}>
+          <tbody>
+            <tr>
+              <th></th>
+              <th>Name</th>
+              <th>Username</th>
+              <th>Email</th>
+              <th>Permissions</th>
+            </tr>
+            {allUsers.map((user, index) => (
+              <tr key={index}>
+                <td>
+                  <button>Update</button>
+                  <button onClick={() => handleDeleteUser(user._id)}>
+                    Delete
+                  </button>
+                </td>
+                <td>{user.name}</td>
+                <td>{user.username}</td>
+                <td>{user.email}</td>
+                <td>
+                  <button onClick={() => openUserPermissionModal(user._id)}>
+                    Change
+                  </button>
+                </td>
+              </tr>
             ))}
-          </div>
+          </tbody>
+        </table>
 
-          {user.admin ? (
-            <div>
-              <div style={{ fontWeight: "bold" }}>Users:</div>
-              {allUsers.map((user, index) => (
-                <ul key={index}>
-                  <li>Name - {user.name}</li>
-                  <ul>
-                    <li>TODO: Update Permissions</li>
-                  </ul>
-                </ul>
-              ))}
-            </div>
-          ) : null}
-
+        {/* ### THIS IS TEMP FOR REDSKY */}
+        <div style={{ display: "flex", flexDirection: "column" }}>
           <div style={{ display: "flex", flexDirection: "column" }}>
-            {user.admin ? (
-              <button style={{ margin: 10 }} onClick={openAddUserModal}>
-                Add User
-              </button>
-            ) : null}
             <button
               style={{ margin: 10 }}
               onClick={handleRemoveAllData}
@@ -119,14 +173,14 @@ export const UserSettings = () => {
             {chartOfAccounts.length === 0 ? (
               <button
                 style={{ margin: 10 }}
-                onClick={() => history.push("/onboard")}
+                onClick={() => history.push("/import")}
               >
                 Return to Onboarding
               </button>
             ) : null}
             {user.redskyAdmin ? (
               <button onClick={() => history.push("/admin")}>
-                Admin Panel
+                Redsky Admin Panel
               </button>
             ) : null}
           </div>

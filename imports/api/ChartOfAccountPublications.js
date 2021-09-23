@@ -8,7 +8,7 @@ Meteor.publish("chartOfAccounts", function publishChartOfAccounts() {
     if (Meteor.user().admin) {
       return ChartOfAccountsCollection.find({ userId: this.userId });
     }
-    // The user has the permissions array
+    // The user has the permissions array and uses their adminId along with their permissions
     if (Meteor.user().permissions) {
       return ChartOfAccountsCollection.find({
         $and: [

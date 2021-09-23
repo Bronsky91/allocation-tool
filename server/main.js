@@ -1,5 +1,4 @@
 import { Meteor } from "meteor/meteor";
-import { Accounts } from "meteor/accounts-base";
 // API
 import "/imports/api/ChartOfAccountMethods";
 import "/imports/api/UserMethods";
@@ -59,12 +58,15 @@ const SECOND_SEED_USERNAME = "nate";
 const SECOND_SEE_PASSWORD = "password";
 
 Meteor.startup(() => {
+  Accounts.urls.resetPassword = (token) => {
+    return Meteor.absoluteUrl(`reset-password/${token}`);
+  };
   if (!Accounts.findUserByUsername(SEED_USERNAME)) {
     Accounts.createUser({
       username: SEED_USERNAME,
       password: SEED_PASSWORD,
       name: "Bryan Reed",
-      email: "bryan@redsky.com",
+      email: "bryan87reed@gmail.com",
       redskyAdmin: true,
       admin: true,
     });
@@ -72,7 +74,7 @@ Meteor.startup(() => {
       username: SECOND_SEED_USERNAME,
       password: SECOND_SEE_PASSWORD,
       name: "Nate Curi",
-      email: "nate@dci.com",
+      email: "nate@redsky.com",
       redskyAdmin: true,
       admin: true,
     });

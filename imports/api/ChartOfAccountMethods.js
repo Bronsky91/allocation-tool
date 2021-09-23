@@ -21,7 +21,15 @@ Meteor.methods({
       segments: [],
       metrics: [],
       templates: [],
+      createdAt: new Date(),
     });
+  },
+  "chartOfAccounts.remove": function (id) {
+    // If a user not logged in or the user is not an admin
+    if (!this.userId && !Meteor.user()?.admin) {
+      throw new Meteor.Error("Not authorized.");
+    }
+    return ChartOfAccountsCollection.remove({ _id: id });
   },
   "chartOfAccounts.removeAll": function () {
     // If a user not logged in or the user is not an admin
@@ -66,6 +74,51 @@ Meteor.methods({
               createdAt: new Date(),
             },
           },
+        }
+      );
+    }
+  },
+  "chartOfAccounts.segments.update": function (id, segments) {
+    check(id, String);
+    check(segments, [
+      {
+        _id: String,
+        userId: String,
+        createdAt: Date,
+        updatedAt: Match.Optional(Date),
+        chartFieldOrder: Number,
+        description: String,
+        subSegments: [
+          {
+            description: String,
+            segmentId: Match.OneOf(String, Number),
+            category: Match.Optional(String),
+            typicalBalance: Match.Optional(String),
+          },
+        ],
+      },
+    ]);
+    // If a user not logged in or the user is not an admin
+    if (!this.userId && !Meteor.user()?.admin) {
+      throw new Meteor.Error("Not authorized.");
+    }
+
+    for (const segment of segments) {
+      ChartOfAccountsCollection.update(
+        { _id: id },
+        {
+          $set: {
+            "segments.$[s]": {
+              ...segment,
+              description: segment.description,
+              subSegments: segment.subSegments,
+              chartFieldOrder: segment.chartFieldOrder,
+              updatedAt: new Date(),
+            },
+          },
+        },
+        {
+          arrayFilters: [{ "s._id": segment._id }],
         }
       );
     }
@@ -133,6 +186,51 @@ Meteor.methods({
       );
     }
   },
+  "chartOfAccounts.metrics.update": function (
+    chartOfAccountsId,
+    metricId,
+    metric
+  ) {
+    check(chartOfAccountsId, String);
+    check(metricId, String);
+    check(metric, {
+      columns: [String],
+      id: Number,
+      name: String,
+      metricSegments: [String], // metricSegments - Array of column names that are linked to Segments
+      validMethods: [String], // validMethods - Array of column names that are used for allocation
+      rows: [[{ rowNumber: Number, value: Match.OneOf(String, Number) }]],
+    });
+
+    const description = metric.name;
+    const columnNames = metric.columns;
+    const validMethods = metric.validMethods;
+    const metricSegments = metric.metricSegments;
+    const columns = columnNames.map((cn, index) => ({
+      title: cn,
+      rows: metric.rows.map((row) => {
+        return row[index];
+      }),
+    }));
+
+    return ChartOfAccountsCollection.update(
+      { _id: chartOfAccountsId },
+      {
+        $set: {
+          "metrics.$[m]": {
+            description,
+            columns,
+            validMethods,
+            metricSegments,
+            updatedAt: new Date(),
+          },
+        },
+      },
+      {
+        arrayFilters: [{ "m._id": metricId }],
+      }
+    );
+  },
   "chartOfAccounts.metrics.removeAll": function (id) {
     // If a user not logged in or the user is not an admin
     if (!this.userId && !Meteor.user()?.admin) {
@@ -143,6 +241,26 @@ Meteor.methods({
       {
         $set: {
           metrics: [],
+        },
+      }
+    );
+  },
+  "chartOfAccounts.metrics.remove": function (chartOfAccountId, metricId) {
+    check(chartOfAccountId, String);
+    check(metricId, String);
+
+    // If a user not logged in or the user is not an admin
+    if (!this.userId && !Meteor.user()?.admin) {
+      throw new Meteor.Error("Not authorized.");
+    }
+
+    return ChartOfAccountsCollection.update(
+      { _id: chartOfAccountId },
+      {
+        $pull: {
+          metrics: {
+            _id: metricId,
+          },
         },
       }
     );
@@ -268,6 +386,7 @@ Meteor.methods({
     check(id, String);
     check(template, {
       name: String,
+      userId: String,
       description: String,
       balancingAccount: [
         {
@@ -316,7 +435,6 @@ Meteor.methods({
     });
 
     if (!this.userId) {
-      // TODO: Add proper permissions
       throw new Meteor.Error("Not authorized.");
     }
     const templateId = new Mongo.ObjectID()._str;
@@ -382,7 +500,6 @@ Meteor.methods({
     });
 
     if (!this.userId) {
-      // TODO: Add proper permissions
       throw new Meteor.Error("Not authorized.");
     }
 

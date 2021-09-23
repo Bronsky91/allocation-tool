@@ -37,15 +37,36 @@ import {
 } from "../../../constants";
 
 export const JournalFormParent = () => {
+  // Subscriptions
+  Meteor.subscribe("chartOfAccounts");
   Meteor.subscribe("Meteor.user.details");
   // Current user logged in
   const user = useTracker(() => Meteor.user());
-  // Subscriptions
-  Meteor.subscribe("chartOfAccounts");
 
-  const chartOfAccounts = useTracker(() =>
-    ChartOfAccountsCollection.find({}).fetch()
-  );
+  const chartOfAccounts = useTracker(() => {
+    const allowedChartOfAccounts = ChartOfAccountsCollection.find({}).fetch();
+    if (user.hasAdmin && user.permissions) {
+      const filteredChartOfAccounts = allowedChartOfAccounts.map((coa) => ({
+        ...coa,
+        metrics: coa.metrics
+          .filter((metric) => user.permissions.metrics.includes(metric._id))
+          .map((metric) => ({
+            ...metric,
+            allocations: metric.allocations.filter((allocation) =>
+              user.permissions.allocations.includes(allocation._id)
+            ),
+          })),
+        templates: coa.templates.filter((template) =>
+          user.permissions.templates.includes(template._id)
+        ),
+      }));
+      return filteredChartOfAccounts;
+    }
+    return allowedChartOfAccounts;
+  });
+
+  console.log("chartOfAccounts", chartOfAccounts);
+  console.log("user", user);
 
   if (!user) {
     return <Redirect to="/login" />;
@@ -167,6 +188,26 @@ const JournalForm = ({ user, chartOfAccounts }) => {
 
   const templateReady =
     selectedAllocation && formData.journalDescription.length > 0;
+
+  // User is an admin or have permissions to create their own templates
+  const isAbleToCreateTemplates =
+    user?.admin || user?.permissions?.createTemplates;
+
+  // User is an admin or have permissions to edit ONLY their own templates
+  const isAbleToEditOrDeleteTemplate =
+    user?.admin ||
+    (user?.permissions?.createTemplates &&
+      selectedTemplate.userId === user?._id);
+
+  // User is an admin or have permissions to create their own allocations
+  const isAbleToCreateAllocations =
+    user?.admin || user?.permissions?.createAllocations;
+
+  // User is an admin or have permissions to edit ONLY their own allocations
+  const isAbleToEditOrDeleteAllocations =
+    user?.admin ||
+    (user?.permissions?.createAllocations &&
+      selectedAllocation.userId === user?._id);
 
   useEffect(() => {
     setSelectedMetric(
@@ -486,6 +527,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
 
   const createTemplateObject = (name) => {
     return {
+      userId: user._id,
       name,
       description: formData.journalDescription,
       balancingAccount: formData.selectedBalanceSegments.map(
@@ -685,7 +727,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                     defaultValue={{ value: "0", label: "No Template" }}
                     styles={customSelectStyles}
                   />
-                  {templateReady ? (
+                  {templateReady && isAbleToCreateTemplates ? (
                     <IconButton
                       color="inherit"
                       onClick={openSaveTemplateModal}
@@ -694,7 +736,9 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                       <AddIcon fontSize="default" />
                     </IconButton>
                   ) : null}
-                  {templateReady && selectedTemplate ? (
+                  {templateReady &&
+                  selectedTemplate &&
+                  isAbleToEditOrDeleteTemplate ? (
                     <IconButton
                       color="inherit"
                       onClick={openEditTemplateModal}
@@ -704,7 +748,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                       <EditIcon fontSize="small" />
                     </IconButton>
                   ) : null}
-                  {selectedTemplate ? (
+                  {selectedTemplate && isAbleToEditOrDeleteTemplate ? (
                     <IconButton
                       color="inherit"
                       onClick={handleDeleteTemplate}
@@ -723,15 +767,6 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                       `}
                     />
                   ) : null}
-                  {/* <button
-                    className={`journalFormSaveTemplateButton ${
-                      !templateReady ? "buttonDisabled" : ""
-                    }`}
-                    onClick={() => openSaveTemplateModal()}
-                    disabled={!templateReady}
-                  >
-                    {templateEdit ? "Update Template" : "Save new Template"}
-                  </button> */}
                 </div>
               </div>
             </div>
@@ -800,29 +835,35 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                       }))}
                       styles={customSelectStyles}
                     />
-                    <IconButton
-                      color="inherit"
-                      onClick={openAllocationModal}
-                      style={{ color: "#3597fe" }}
-                    >
-                      <AddIcon fontSize="default" />
-                    </IconButton>
-                    <IconButton
-                      color="inherit"
-                      onClick={openEditAllocationModal}
-                      disabled={!selectedAllocation}
-                      style={{ color: "#60cead" }}
-                    >
-                      <EditIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton
-                      color="inherit"
-                      onClick={handleDeleteAllocation}
-                      disabled={!selectedAllocation}
-                      style={{ color: "#f54747" }}
-                    >
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
+                    {isAbleToCreateAllocations ? (
+                      <IconButton
+                        color="inherit"
+                        onClick={openAllocationModal}
+                        style={{ color: "#3597fe" }}
+                      >
+                        <AddIcon fontSize="default" />
+                      </IconButton>
+                    ) : null}
+                    {isAbleToEditOrDeleteAllocations ? (
+                      <IconButton
+                        color="inherit"
+                        onClick={openEditAllocationModal}
+                        disabled={!selectedAllocation}
+                        style={{ color: "#60cead" }}
+                      >
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                    ) : null}
+                    {isAbleToEditOrDeleteAllocations ? (
+                      <IconButton
+                        color="inherit"
+                        onClick={handleDeleteAllocation}
+                        disabled={!selectedAllocation}
+                        style={{ color: "#f54747" }}
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    ) : null}
                     {allocationLoading ? (
                       <ClipLoader
                         color={BLUE}
@@ -891,7 +932,10 @@ const JournalForm = ({ user, chartOfAccounts }) => {
             <div className="journalFormDownloadContainer">
               {!readyToAllocate || fileLoading ? (
                 <div className="journalFormDownloadInnerContainer">
-                  <div className="journalFormText">
+                  <div
+                    className="journalFormText"
+                    style={{ textAlign: "center" }}
+                  >
                     When your journal entry file is ready it will be available
                     for download here
                   </div>
@@ -901,7 +945,10 @@ const JournalForm = ({ user, chartOfAccounts }) => {
               ) : null}
               {readyToAllocate && !fileLoading ? (
                 <div className="journalFormDownloadInnerContainer">
-                  <div className="journalFormText">
+                  <div
+                    className="journalFormText"
+                    style={{ textAlign: "center" }}
+                  >
                     Your file is ready, click download button below to download
                     your journal entry
                   </div>
