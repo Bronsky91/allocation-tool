@@ -754,29 +754,65 @@ input[type="file"] {
   margin-top: 20px;
 }
 
-.simpleButton {
-  width: 10em;
-  height: 40px;
-  border-radius: 8px;
-  border-width: 0px;
-  background-color: #3597fe;
-  color: white;
+.topBlockContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 80%;
+  padding: 2em;
 }
 
-.simpleButton:hover {
-  cursor: pointer;
-}
-
-.editFileInput {
-  padding: 15px 45px;
-  border-radius: 8px;
-  box-shadow: 0 3px 5px 0 rgba(0, 0, 0, 0.04);
-  border: dashed 2px #60cead;
+.topBlock {
+  display: flex;
+  flex-direction: column;
+  height: 15em;
+  width: 26em;
+  border: gray solid 0.5px;
+  border-radius: 15px;
   background-color: white;
-  opacity: 0.9;
+  padding: 15px;
 }
-.editFileInput:hover {
-  cursor: pointer;
+
+.settingSelect {
+  width: 15em;
+}
+
+.selectRowTopBlock {
+  padding: 15px;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  align-items: center;
+}
+
+.subContainerTopBlock {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 15px;
+  overflow: auto;
+}
+
+.bottomBlockContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 80%;
+}
+
+.tableContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  width: 100%;
+  border: gray 0.5px solid;
+  border-radius: 15px;
+  padding: 15px;
+}
+
+.userManagementTable {
 }
 
 /* Util Styles */

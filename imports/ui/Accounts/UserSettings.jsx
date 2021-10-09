@@ -5,21 +5,22 @@ import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
 // DB Collections
 import { ChartOfAccountsCollection } from "../../db/ChartOfAccountsCollection";
+// Material UI
+import { IconButton } from "@material-ui/core";
+import AddIcon from "@material-ui/icons/Add";
+import EditIcon from "@material-ui/icons/Edit";
+import DeleteIcon from "@material-ui/icons/Delete";
+// Packages
+import Select from "react-select";
 // Components
 import { Header } from "../Header";
 import { AddUserModal } from "./AddUserModal";
 import { UserPermissionsModal } from "./UserPermissions";
 import { ChartOfAccountsModal } from "./ChartOfAccountsModal";
 import { MetricsModal } from "./MetricsModal";
+import { customSelectStyles } from "../../../constants";
 
 export const UserSettings = () => {
-  const [chartOfAccountsModalOpen, setChartOfAccountsModalOpen] =
-    useState(false);
-  const [metricsModalOpen, setMetricsModalOpen] = useState(false);
-  const [addUserMoalOpen, setAddUserModalOpen] = useState(false);
-  const [userPermissionsOpen, setUserPermissionsOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState({});
-
   // Subscriptions
   Meteor.subscribe("chartOfAccounts");
   Meteor.subscribe("userList");
@@ -29,31 +30,31 @@ export const UserSettings = () => {
     Meteor.users.find({ adminId: user._id }, {}).fetch()
   );
   const allUsers = [user, ...otherUsers];
-  console.log("otherUsers", otherUsers);
-  console.log("allUsers", allUsers);
-
-  const history = useHistory();
 
   const chartOfAccounts = useTracker(() =>
     ChartOfAccountsCollection.find({}).fetch()
   );
+
+  const allMetrics = chartOfAccounts
+    .map((coa) => ({
+      ...coa,
+      metrics: coa.metrics.map((metric) => ({
+        ...metric,
+        coaName: coa.name,
+        coaId: coa._id,
+      })),
+    }))
+    .reduce(
+      (prevMetric, currentCoa) => [...prevMetric, ...currentCoa.metrics],
+      []
+    );
   console.log("chartOfAccounts", chartOfAccounts);
 
-  const openChartOfAccountsModal = () => {
-    setChartOfAccountsModalOpen(true);
-  };
-
-  const closeChartOfAccountsModal = () => {
-    setChartOfAccountsModalOpen(false);
-  };
-
-  const openMetricsModal = () => {
-    setMetricsModalOpen(true);
-  };
-
-  const closeMetricsModal = () => {
-    setMetricsModalOpen(false);
-  };
+  const [selectedCoa, setSelectedCoa] = useState(chartOfAccounts[0]);
+  const [selectedMetric, setSelectedMetric] = useState(allMetrics[0]);
+  const [addUserMoalOpen, setAddUserModalOpen] = useState(false);
+  const [userPermissionsOpen, setUserPermissionsOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState({});
 
   const openAddUserModal = () => {
     setAddUserModalOpen(true);
@@ -76,16 +77,18 @@ export const UserSettings = () => {
     Meteor.call("user.delete", userId);
   };
 
-  const handleRemoveAllData = () => {
-    Meteor.call("chartOfAccounts.removeAll", {}, (err, res) => {
-      if (err) {
-        // TODO: User alert of errors in the uploaded workbookData
-        console.log("Error Deleting Segments", err);
-        alert(err);
-      } else {
-        console.log("Deleted All Segments", res);
-      }
-    });
+  const handleChartOfAccountChange = (c) => {
+    const newSelectedChartOfAccounts = chartOfAccounts.find(
+      (coa) => coa._id === c.value
+    );
+    setSelectedCoa(newSelectedChartOfAccounts);
+  };
+
+  const handleMetricChange = (m) => {
+    const newSelectedMetric = allMetrics.find(
+      (metric) => metric._id === m.value
+    );
+    setSelectedMetric(newSelectedMetric);
   };
 
   if (!user) {
@@ -93,8 +96,15 @@ export const UserSettings = () => {
   }
 
   return (
-    <div>
+    <div className="userAccountParentContainer">
       <Header />
+      <AddUserModal open={addUserMoalOpen} handleClose={closeAddUserModal} />
+      <UserPermissionsModal
+        open={userPermissionsOpen}
+        handleClose={closeUserPermissionsModal}
+        selectedUser={selectedUser}
+        chartOfAccounts={chartOfAccounts}
+      />
       <div
         style={{
           display: "flex",
@@ -103,91 +113,182 @@ export const UserSettings = () => {
           alignItems: "center",
         }}
       >
-        <ChartOfAccountsModal
-          open={chartOfAccountsModalOpen}
-          handleClose={closeChartOfAccountsModal}
-          chartOfAccounts={chartOfAccounts}
-          history={history}
-        />
-        <MetricsModal
-          open={metricsModalOpen}
-          handleClose={closeMetricsModal}
-          chartOfAccounts={chartOfAccounts}
-        />
-        <AddUserModal open={addUserMoalOpen} handleClose={closeAddUserModal} />
-        <UserPermissionsModal
-          open={userPermissionsOpen}
-          handleClose={closeUserPermissionsModal}
-          selectedUser={selectedUser}
-          chartOfAccounts={chartOfAccounts}
-        />
-        <div className="userSettingsMainButtonsContainer">
-          <button onClick={openChartOfAccountsModal}>Chart of Accounts</button>
-          <button onClick={openMetricsModal}>Metrics</button>
+        <div className="topBlockContainer">
+          <div className="tableContainer">
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-between",
+                width: "100%",
+              }}
+            >
+              <div>User Management</div>
+              <button>Add User</button>
+            </div>
+
+            <table className="userManagementTable">
+              <tbody>
+                <tr>
+                  <th></th>
+                  <th>Name</th>
+                  <th>Username</th>
+                  <th>Email</th>
+                </tr>
+                {allUsers.map((user, index) => (
+                  <tr key={index}>
+                    <td>
+                      <button>Update</button>
+                      <button onClick={() => handleDeleteUser(user._id)}>
+                        Delete
+                      </button>
+                    </td>
+                    <td>{user.name}</td>
+                    <td>{user.username}</td>
+                    <td>{user.email}</td>
+                    <td>
+                      {!user.admin ? (
+                        <button
+                          onClick={() => openUserPermissionModal(user._id)}
+                        >
+                          Change
+                        </button>
+                      ) : null}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-        {user.admin ? (
+        <div className="bottomBlockContainer">
+          <div className="topBlock">
+            <div style={{ fontWeight: "bold", fontSize: 18 }}>
+              Chart of Accounts
+            </div>
+
+            <div className="selectRowTopBlock">
+              <Select
+                value={chartOfAccounts
+                  .map((coa) => ({
+                    value: coa._id,
+                    label: coa.name,
+                  }))
+                  .find((coaOption) => coaOption.value === selectedCoa?._id)}
+                onChange={handleChartOfAccountChange}
+                className="settingSelect"
+                options={chartOfAccounts.map((coa) => ({
+                  value: coa._id,
+                  label: coa.name,
+                }))}
+              />
+              <IconButton
+                color="inherit"
+                // onClick={openSaveTemplateModal}
+                style={{ color: "#3597fe" }}
+              >
+                <AddIcon fontSize="default" />
+              </IconButton>
+              <IconButton
+                color="inherit"
+                // onClick={openEditTemplateModal}
+                style={{ color: "#60cead" }}
+              >
+                <EditIcon fontSize="small" />
+              </IconButton>
+              <IconButton
+                color="inherit"
+                // onClick={handleDeleteTemplate}
+                style={{ color: "#f54747" }}
+              >
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+            </div>
+            <div className="subContainerTopBlock">
+              <div>
+                <div style={{ fontWeight: "bold" }}>Segments:</div>
+                <ul>
+                  {selectedCoa
+                    ? selectedCoa.segments.map((segment, index) => (
+                        <li key={index}>{segment.description}</li>
+                      ))
+                    : null}
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div className="topBlock">
+            <div style={{ fontWeight: "bold", fontSize: 18 }}>Metrics</div>
+            <div className="selectRowTopBlock">
+              <Select
+                value={allMetrics
+                  .map((metric) => ({
+                    value: metric._id,
+                    label: `${metric.description} - ${metric.coaName}`,
+                  }))
+                  .find(
+                    (metricOption) => metricOption.value === selectedMetric?._id
+                  )}
+                onChange={handleMetricChange}
+                className="settingSelect"
+                options={allMetrics.map((metric) => ({
+                  value: metric._id,
+                  label: `${metric.description} - ${metric.coaName}`,
+                }))}
+              />
+              <IconButton
+                color="inherit"
+                // onClick={openSaveTemplateModal}
+                style={{ color: "#3597fe" }}
+              >
+                <AddIcon fontSize="default" />
+              </IconButton>
+              <IconButton
+                color="inherit"
+                // onClick={openEditTemplateModal}
+                style={{ color: "#60cead" }}
+              >
+                <EditIcon fontSize="small" />
+              </IconButton>
+              <IconButton
+                color="inherit"
+                // onClick={handleDeleteTemplate}
+                style={{ color: "#f54747" }}
+              >
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+            </div>
+            <div className="subContainerTopBlock">
+              <div>
+                <div style={{ fontWeight: "bold" }}>Connected Segments:</div>
+                <ul>
+                  {selectedMetric
+                    ? selectedMetric.metricSegments.map(
+                        (metricSegment, index) => (
+                          <li key={index}>{metricSegment}</li>
+                        )
+                      )
+                    : null}
+                </ul>
+              </div>
+              <div>
+                <div style={{ fontWeight: "bold" }}>Methods:</div>
+                <ul>
+                  {selectedMetric
+                    ? selectedMetric.validMethods.map((method, index) => (
+                        <li key={index}>{method}</li>
+                      ))
+                    : null}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* {user.admin ? (
           <button style={{ margin: 10 }} onClick={openAddUserModal}>
             Add User
           </button>
-        ) : null}
-
-        <table style={{ width: "85%" }}>
-          <tbody>
-            <tr>
-              <th></th>
-              <th>Name</th>
-              <th>Username</th>
-              <th>Email</th>
-              <th>Permissions</th>
-            </tr>
-            {allUsers.map((user, index) => (
-              <tr key={index}>
-                <td>
-                  <button>Update</button>
-                  <button onClick={() => handleDeleteUser(user._id)}>
-                    Delete
-                  </button>
-                </td>
-                <td>{user.name}</td>
-                <td>{user.username}</td>
-                <td>{user.email}</td>
-                <td>
-                  {!user.admin ? (
-                    <button onClick={() => openUserPermissionModal(user._id)}>
-                      Change
-                    </button>
-                  ) : null}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {/* ### THIS IS TEMP FOR REDSKY */}
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <button
-              style={{ margin: 10 }}
-              onClick={handleRemoveAllData}
-              disabled={chartOfAccounts.length === 0}
-            >
-              Delete All Data
-            </button>
-            {chartOfAccounts.length === 0 ? (
-              <button
-                style={{ margin: 10 }}
-                onClick={() => history.push("/import")}
-              >
-                Return to Onboarding
-              </button>
-            ) : null}
-            {user.redskyAdmin ? (
-              <button onClick={() => history.push("/admin")}>
-                Redsky Admin Panel
-              </button>
-            ) : null}
-          </div>
-        </div>
+        ) : null} */}
       </div>
     </div>
   );
