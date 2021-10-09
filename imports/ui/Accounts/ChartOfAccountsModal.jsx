@@ -4,6 +4,8 @@ import { Meteor } from "meteor/meteor";
 // Material UI
 import Modal from "@material-ui/core/Modal";
 import { makeStyles } from "@material-ui/core/styles";
+import { IconButton } from "@material-ui/core";
+import DeleteIcon from "@material-ui/icons/Delete";
 import { isChartOfAccountWorkBookDataValid } from "../../utils/CheckWorkbookData";
 import { ReadWorkbook } from "../../utils/ReadWorkbook";
 import {
@@ -25,8 +27,8 @@ const getModalStyle = () => {
 const useStyles = makeStyles((theme) => ({
   paper: {
     position: "absolute",
-    height: "60%",
-    width: "70%",
+    height: "40%",
+    width: "60%",
     minWidth: 750,
     backgroundColor: theme.palette.background.paper,
     boxShadow: theme.shadows[5],
@@ -51,13 +53,18 @@ export const ChartOfAccountsModal = ({
   // TODO: Implement loading indicators for Meteor.call() actions
 
   const handleDelete = (id) => {
-    // TODO: Add confirmation
-    Meteor.call("chartOfAccounts.remove", id, (err, res) => {
-      if (err) {
-        console.log(err);
-        alert(`Unable to delete Chart of Accounts: ${err.reason}`);
-      }
-    });
+    const coaToDelete = chartOfAccounts.find((coa) => coa._id === id);
+    const isConfirmed = confirm(
+      `Are you sure you want to delete the ${coaToDelete.name} chart of accounts?`
+    );
+    if (isConfirmed) {
+      Meteor.call("chartOfAccounts.remove", id, (err, res) => {
+        if (err) {
+          console.log(err);
+          alert(`Unable to delete Chart of Accounts: ${err.reason}`);
+        }
+      });
+    }
   };
 
   const handleFile = async (e, id) => {
@@ -195,10 +202,17 @@ export const ChartOfAccountsModal = ({
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
+            width: "100%",
           }}
         >
-          <div>Chart of Accounts</div>
-          <button onClick={() => history.push("/import")}>Add New</button>
+          <div className="onboardTitle">Chart of Accounts</div>
+          <button
+            onClick={() => history.push("/import")}
+            className="simpleButton button"
+            style={{ margin: 20 }}
+          >
+            Add New
+          </button>
           <table style={{ width: "85%" }}>
             <tbody>
               <tr>
@@ -215,21 +229,28 @@ export const ChartOfAccountsModal = ({
                       <div>{segment.description}</div>
                     ))}
                   </td>
+                  {/* <td>
+                    <label htmlFor="coa-upload" className="editFileInput">
+                      <span>Choose File</span>
+                    </label>
+                  </td> */}
                   <td>
-                    <input
-                      type="file"
-                      style={{ display: "inline-block", width: 90 }}
-                      accept=".xls,.xlsx"
-                      onChange={(e) => handleFile(e, coa._id)}
-                      key={coa.updatedAt || coa.createdAt}
-                      // Using the updatedAt or createAt date as key since this should change once the update is processed
-                      // resetting the input to be available for another upload if needed
-                    />
-                  </td>
-                  <td>
-                    <button onClick={() => handleDelete(coa._id)}>
-                      Delete
-                    </button>
+                    <IconButton
+                      color="inherit"
+                      // onClick={() => handleDelete(coa._id)}
+                      style={{ color: "#f54747" }}
+                    >
+                      <DeleteIcon />
+                      <input
+                        type="file"
+                        id="coa-upload"
+                        accept=".xls,.xlsx"
+                        onChange={(e) => handleFile(e, coa._id)}
+                        key={coa.updatedAt || coa.createdAt}
+                        // Using the updatedAt or createAt date as key since this should change once the update is processed
+                        // resetting the input to be available for another upload if needed
+                      />
+                    </IconButton>
                   </td>
                 </tr>
               ))}

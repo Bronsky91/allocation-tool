@@ -753,6 +753,32 @@ input[type="file"] {
 .userSettingsPermissionsContainer {
   margin-top: 20px;
 }
+
+.simpleButton {
+  width: 10em;
+  height: 40px;
+  border-radius: 8px;
+  border-width: 0px;
+  background-color: #3597fe;
+  color: white;
+}
+
+.simpleButton:hover {
+  cursor: pointer;
+}
+
+.editFileInput {
+  padding: 15px 45px;
+  border-radius: 8px;
+  box-shadow: 0 3px 5px 0 rgba(0, 0, 0, 0.04);
+  border: dashed 2px #60cead;
+  background-color: white;
+  opacity: 0.9;
+}
+.editFileInput:hover {
+  cursor: pointer;
+}
+
 /* Util Styles */
 
 .buttonDisabled {

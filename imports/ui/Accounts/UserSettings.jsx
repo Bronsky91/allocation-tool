@@ -25,10 +25,11 @@ export const UserSettings = () => {
   Meteor.subscribe("userList");
 
   const user = useTracker(() => Meteor.user());
-  const allUsers = useTracker(() =>
+  const otherUsers = useTracker(() =>
     Meteor.users.find({ adminId: user._id }, {}).fetch()
   );
-
+  const allUsers = [user, ...otherUsers];
+  console.log("otherUsers", otherUsers);
   console.log("allUsers", allUsers);
 
   const history = useHistory();
@@ -63,7 +64,7 @@ export const UserSettings = () => {
   };
 
   const openUserPermissionModal = (userId) => {
-    setSelectedUser(allUsers.find((user) => user._id === userId));
+    setSelectedUser(otherUsers.find((user) => user._id === userId));
     setUserPermissionsOpen(true);
   };
 
@@ -151,9 +152,11 @@ export const UserSettings = () => {
                 <td>{user.username}</td>
                 <td>{user.email}</td>
                 <td>
-                  <button onClick={() => openUserPermissionModal(user._id)}>
-                    Change
-                  </button>
+                  {!user.admin ? (
+                    <button onClick={() => openUserPermissionModal(user._id)}>
+                      Change
+                    </button>
+                  ) : null}
                 </td>
               </tr>
             ))}
