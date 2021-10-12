@@ -8,7 +8,6 @@ table {
   border-collapse: collapse;
   width: 100%;
 }
-
 td,
 th {
   border: 1px solid #dddddd;
@@ -813,6 +812,44 @@ input[type="file"] {
 }
 
 .userManagementTable {
+  border-top: none;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.userManagementTable tr {
+  border-top: 1px solid #dddddd;
+  background-color: white;
+  border-bottom: none;
+}
+
+.userManagementTable th {
+  border: none;
+}
+
+.userManagementTable td {
+  border: none;
+}
+
+.userDropDownButton {
+  width: 25px;
+  height: 25px;
+  border-radius: 25px;
+  border: solid 1px #3597fe;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.userDropDownButton:hover {
+  cursor: pointer;
+}
+.userDropDownContainer {
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  padding: 12px 16px;
+  z-index: 1;
 }
 
 /* Util Styles */

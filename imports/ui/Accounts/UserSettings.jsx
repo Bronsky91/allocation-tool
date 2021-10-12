@@ -10,6 +10,8 @@ import { IconButton } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import EditIcon from "@material-ui/icons/Edit";
 import DeleteIcon from "@material-ui/icons/Delete";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 // Packages
 import Select from "react-select";
 // Components
@@ -52,6 +54,7 @@ export const UserSettings = () => {
 
   const [selectedCoa, setSelectedCoa] = useState(chartOfAccounts[0]);
   const [selectedMetric, setSelectedMetric] = useState(allMetrics[0]);
+  const [showUserOptions, setShowUserOptions] = useState(false);
   const [addUserMoalOpen, setAddUserModalOpen] = useState(false);
   const [userPermissionsOpen, setUserPermissionsOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState({});
@@ -129,7 +132,7 @@ export const UserSettings = () => {
 
             <table className="userManagementTable">
               <tbody>
-                <tr>
+                <tr style={{ border: "none" }}>
                   <th></th>
                   <th>Name</th>
                   <th>Username</th>
@@ -138,10 +141,30 @@ export const UserSettings = () => {
                 {allUsers.map((user, index) => (
                   <tr key={index}>
                     <td>
-                      <button>Update</button>
-                      <button onClick={() => handleDeleteUser(user._id)}>
-                        Delete
-                      </button>
+                      <div
+                        className="userDropDownButton"
+                        onClick={() => {
+                          setShowUserOptions(!showUserOptions);
+                        }}
+                      >
+                        {showUserOptions ? (
+                          <ExpandLessIcon
+                            fontSize="small"
+                            style={{ color: "#3597fe" }}
+                          />
+                        ) : (
+                          <ExpandMoreIcon
+                            fontSize="small"
+                            style={{ color: "#3597fe" }}
+                          />
+                        )}
+                      </div>
+                      <div
+                        className="userDropDownContainer"
+                        style={{ display: showUserOptions ? "block" : "none" }}
+                      >
+                        Testing
+                      </div>
                     </td>
                     <td>{user.name}</td>
                     <td>{user.username}</td>
