@@ -757,7 +757,7 @@ input[type="file"] {
   display: flex;
   flex-direction: row;
   justify-content: center;
-  width: 80%;
+  width: 70%;
   padding: 2em;
 }
 
@@ -796,7 +796,7 @@ input[type="file"] {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  width: 80%;
+  width: 70%;
 }
 
 .tableContainer {
@@ -843,13 +843,41 @@ input[type="file"] {
 .userDropDownButton:hover {
   cursor: pointer;
 }
+
 .userDropDownContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   position: absolute;
-  background-color: #f9f9f9;
-  min-width: 160px;
+  background-color: white;
+  width: 140px;
+  height: 110px;
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
   padding: 12px 16px;
   z-index: 1;
+  border-radius: 10px;
+}
+
+.userDropDownOption {
+  color: #3597fe;
+}
+
+.userDropDownOption:hover {
+  cursor: pointer;
+}
+
+.addUserButton {
+  width: 100px;
+  height: 40px;
+  border-radius: 8px;
+  border-width: 0px;
+  background-color: #3597fe;
+  color: white;
+  margin-left: 10px;
+}
+
+.addUserButton:hover {
+  cursor: pointer;
 }
 
 /* Util Styles */

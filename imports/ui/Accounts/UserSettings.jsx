@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Redirect, useHistory } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Redirect } from "react-router-dom";
 // Meteor
 import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
@@ -18,9 +18,6 @@ import Select from "react-select";
 import { Header } from "../Header";
 import { AddUserModal } from "./AddUserModal";
 import { UserPermissionsModal } from "./UserPermissions";
-import { ChartOfAccountsModal } from "./ChartOfAccountsModal";
-import { MetricsModal } from "./MetricsModal";
-import { customSelectStyles } from "../../../constants";
 
 export const UserSettings = () => {
   // Subscriptions
@@ -32,6 +29,7 @@ export const UserSettings = () => {
     Meteor.users.find({ adminId: user._id }, {}).fetch()
   );
   const allUsers = [user, ...otherUsers];
+  console.log("allUsers", allUsers);
 
   const chartOfAccounts = useTracker(() =>
     ChartOfAccountsCollection.find({}).fetch()
@@ -54,11 +52,15 @@ export const UserSettings = () => {
 
   const [selectedCoa, setSelectedCoa] = useState(chartOfAccounts[0]);
   const [selectedMetric, setSelectedMetric] = useState(allMetrics[0]);
-  const [showUserOptions, setShowUserOptions] = useState(false);
+  const [userOptions, setUserOptions] = useState(
+    allUsers.map((user) => ({ userId: user._id, show: false }))
+  );
   const [addUserMoalOpen, setAddUserModalOpen] = useState(false);
   const [userPermissionsOpen, setUserPermissionsOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState({});
+  const [currentOpenUserOption, setCurrentOpenUserOption] = useState("");
 
+  // TODO: Implement User limit?
   const openAddUserModal = () => {
     setAddUserModalOpen(true);
   };
@@ -126,16 +128,22 @@ export const UserSettings = () => {
                 width: "100%",
               }}
             >
-              <div>User Management</div>
-              <button>Add User</button>
+              <div
+                style={{ color: "#3597fe", fontSize: 18, fontWeight: "bold" }}
+              >
+                User Management
+              </div>
+              <button className="addUserButton" onClick={openAddUserModal}>
+                Add User
+              </button>
             </div>
 
             <table className="userManagementTable">
               <tbody>
                 <tr style={{ border: "none" }}>
-                  <th></th>
-                  <th>Name</th>
+                  <th style={{ width: "40px" }}></th>
                   <th>Username</th>
+                  <th>Name</th>
                   <th>Email</th>
                 </tr>
                 {allUsers.map((user, index) => (
@@ -144,10 +152,12 @@ export const UserSettings = () => {
                       <div
                         className="userDropDownButton"
                         onClick={() => {
-                          setShowUserOptions(!showUserOptions);
+                          setCurrentOpenUserOption((currentOption) =>
+                            currentOption === "" ? user._id : ""
+                          );
                         }}
                       >
-                        {showUserOptions ? (
+                        {currentOpenUserOption === user._id ? (
                           <ExpandLessIcon
                             fontSize="small"
                             style={{ color: "#3597fe" }}
@@ -161,22 +171,29 @@ export const UserSettings = () => {
                       </div>
                       <div
                         className="userDropDownContainer"
-                        style={{ display: showUserOptions ? "block" : "none" }}
+                        style={{
+                          display:
+                            currentOpenUserOption === user._id
+                              ? "flex"
+                              : "none",
+                        }}
                       >
-                        Testing
+                        <div className="userDropDownOption">Edit User Info</div>
+                        <div className="userDropDownOption">
+                          Edit Permissions
+                        </div>
+                        <div className="userDropDownOption">
+                          Change Password
+                        </div>
+                        <div className="userDropDownOption">Delete</div>
                       </div>
                     </td>
-                    <td>{user.name}</td>
                     <td>{user.username}</td>
-                    <td>{user.email}</td>
+                    <td>{user.name}</td>
                     <td>
-                      {!user.admin ? (
-                        <button
-                          onClick={() => openUserPermissionModal(user._id)}
-                        >
-                          Change
-                        </button>
-                      ) : null}
+                      {user.email || user.emails.length > 0
+                        ? user.emails[0].address
+                        : ""}
                     </td>
                   </tr>
                 ))}

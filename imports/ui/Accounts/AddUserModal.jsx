@@ -203,7 +203,7 @@ export const AddUserModal = ({ open, handleClose }) => {
               className={`registerButton ${!formReady ? "buttonDisabled" : ""}`}
               disabled={!formReady}
             >
-              Register
+              Create
             </button>
             <div style={{ color: registerError ? "red" : "#fff" }}>
               {registerError ? registerError : "Error message placeholder"}
