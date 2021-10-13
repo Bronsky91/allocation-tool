@@ -435,7 +435,7 @@ export const UserSettings = () => {
             </div>
 
             <div className="selectRowTopBlock">
-              {/* <Select
+              <Select
                 value={chartOfAccounts
                   .map((coa) => ({
                     value: coa._id,
@@ -448,7 +448,7 @@ export const UserSettings = () => {
                   value: coa._id,
                   label: coa.name,
                 }))}
-              /> */}
+              />
               <IconButton
                 color="inherit"
                 onClick={() => {
@@ -499,22 +499,22 @@ export const UserSettings = () => {
           <div className="topBlock">
             <div style={{ fontWeight: "bold", fontSize: 18 }}>Metrics</div>
             <div className="selectRowTopBlock">
-              {/* <Select
-              value={allMetrics
-                .map((metric) => ({
+              <Select
+                value={allMetrics
+                  .map((metric) => ({
+                    value: metric._id,
+                    label: `${metric.description} - ${metric.coaName}`,
+                  }))
+                  .find(
+                    (metricOption) => metricOption.value === selectedMetric?._id
+                  )}
+                onChange={handleMetricChange}
+                className="settingSelect"
+                options={allMetrics.map((metric) => ({
                   value: metric._id,
                   label: `${metric.description} - ${metric.coaName}`,
-                }))
-                .find(
-                  (metricOption) => metricOption.value === selectedMetric?._id
-                )}
-              onChange={handleMetricChange}
-              className="settingSelect"
-              options={allMetrics.map((metric) => ({
-                value: metric._id,
-                label: `${metric.description} - ${metric.coaName}`,
-              }))}
-              /> */}
+                }))}
+              />
               <IconButton
                 color="inherit"
                 // onClick={openSaveTemplateModal}
