@@ -19,7 +19,15 @@ import Select from "react-select";
 import { Header } from "../Header";
 import { AddUserModal } from "./AddUserModal";
 import { UserPermissionsModal } from "./UserPermissions";
-import { GL_CODE, SUB_GL_CODE } from "../../../constants";
+// Constants and Utils
+import {
+  CHART_OF_ACCOUNT_COLUMNS,
+  GL_CODE,
+  SUB_GL_CODE,
+  VALID_COLUMN_NAMES,
+} from "../../../constants";
+import { ReadWorkbook } from "../../utils/ReadWorkbook";
+import { isChartOfAccountWorkBookDataValid } from "../../utils/CheckWorkbookData";
 
 export const UserSettings = () => {
   // Subscriptions
@@ -69,6 +77,14 @@ export const UserSettings = () => {
     useState([]);
   const [showMethodSelection, setShowMethodSelection] = useState(false);
   const [metricData, setMetricData] = useState([]);
+
+  useEffect(() => {
+    if (metricData.length === 0) {
+      setShowMethodSelection(false);
+    } else {
+      setShowMethodSelection(true);
+    }
+  }, [metricData]);
 
   // TODO: Implement User limit?
   const openAddUserModal = () => {
@@ -148,7 +164,7 @@ export const UserSettings = () => {
         }
         // Since we know the sheet.name is included in the valid sheet names from the previous file
         // we grab the current segment to keep the _id, chartFieldOrder, etc
-        const currentSegment = currentChartOfAccounts.segments.find(
+        const currentSegment = selectedCoa.segments.find(
           (segment) => segment.description === sheet.name
         );
         // Columns object that matches the columns to it's index in the sheet to be inserted properly in the rows map
@@ -220,6 +236,7 @@ export const UserSettings = () => {
       console.log("subSegmentsRemoved", subSegmentsRemoved);
 
       // TODO: Create a confirmation box that displays which subsegments are being removed/added
+      // TODO: Custom Modal that has removed subsegments on one side and added subsegments on the other
 
       Meteor.call(
         "chartOfAccounts.segments.update",
@@ -242,18 +259,22 @@ export const UserSettings = () => {
 
   const handleMetricDelete = () => {
     // TODO: Add confirmation
-
-    Meteor.call(
-      "chartOfAccounts.metrics.remove",
-      selectedMetric.coaId,
-      selectedMetric._id,
-      (err, res) => {
-        if (err) {
-          console.log(err);
-          alert(`Unable to delete Metric: ${err.reason}`);
-        }
-      }
+    const isConfirmed = confirm(
+      `Are you sure you want to delete the ${selectedMetric.description} - ${selectedMetric.coaName} metric?`
     );
+    if (isConfirmed) {
+      Meteor.call(
+        "chartOfAccounts.metrics.remove",
+        selectedMetric.coaId,
+        selectedMetric._id,
+        (err, res) => {
+          if (err) {
+            console.log(err);
+            alert(`Unable to delete Metric: ${err.reason}`);
+          }
+        }
+      );
+    }
   };
 
   // TODO: Implement proper state for metric onboard controls
@@ -576,7 +597,7 @@ export const UserSettings = () => {
         </div>
 
         {/* Metric Add/Edit Panel */}
-        {/* {showMethodSelection ? (
+        {showMethodSelection ? (
           <div className="onboardMetricOnboardContainer">
             <div className="onboardMetricOnboardHeaderContainer">
               <div className="onboardTitle" style={{ marginTop: 0 }}>
@@ -688,7 +709,7 @@ export const UserSettings = () => {
               </div>
             ))}
           </div>
-        ) : null} */}
+        ) : null}
       </div>
     </div>
   );
