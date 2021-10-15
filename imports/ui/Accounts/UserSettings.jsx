@@ -64,9 +64,7 @@ export const UserSettings = () => {
   console.log("chartOfAccounts", chartOfAccounts);
   console.log("allMetrics", allMetrics);
 
-  const chartOfAccountsEditInputRef = useRef();
-  const metricssEditInputRef = useRef();
-
+  // State
   const [selectedCoa, setSelectedCoa] = useState(chartOfAccounts[0]);
   const [selectedMetric, setSelectedMetric] = useState(allMetrics[0]);
   const [addUserMoalOpen, setAddUserModalOpen] = useState(false);
@@ -78,6 +76,47 @@ export const UserSettings = () => {
   const [showMethodSelection, setShowMethodSelection] = useState(false);
   const [metricData, setMetricData] = useState([]);
 
+  // Ref
+  const chartOfAccountsEditInputRef = useRef();
+  const metricssEditInputRef = useRef();
+  const userRowButtonRefs = useRef([]);
+
+  useEffect(() => {
+    /**
+     * Close if clicked on outside of user dropdown elements
+     */
+    const handleClickOutside = (event) => {
+      // Don't close the dropdown is the user permission modal is open
+      if (userPermissionsOpen) {
+        return;
+      }
+      // Don't close the dropdown if an option is selected
+      if (event.target.className === "userDropDownOption") {
+        return;
+      }
+      // Go through each dropdown and check if the click event doesn't contain any dropdowns
+      for (let el of userRowButtonRefs.current) {
+        if (!el.contains(event.target)) {
+          closeUserDropdown();
+        }
+      }
+    };
+    // Bind the event listener
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      // Unbind the event listener on clean up
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+    // If more modals are added, make sure to include them in the hook effect here
+    // Modal checks are added here to keep the state in the handleClickOutside up to date
+  }, [userRowButtonRefs, userPermissionsOpen]);
+
+  useEffect(() => {
+    setSelectedUser(
+      allUsers.find((user) => user._id === currentOpenUserOption)
+    );
+  }, [currentOpenUserOption]);
+
   useEffect(() => {
     if (metricData.length === 0) {
       setShowMethodSelection(false);
@@ -85,6 +124,10 @@ export const UserSettings = () => {
       setShowMethodSelection(true);
     }
   }, [metricData]);
+
+  const closeUserDropdown = () => {
+    setCurrentOpenUserOption("");
+  };
 
   // TODO: Implement User limit?
   const openAddUserModal = () => {
@@ -95,17 +138,23 @@ export const UserSettings = () => {
     setAddUserModalOpen(false);
   };
 
-  const openUserPermissionModal = (userId) => {
-    setSelectedUser(otherUsers.find((user) => user._id === userId));
+  const openUserPermissionModal = () => {
     setUserPermissionsOpen(true);
   };
 
   const closeUserPermissionsModal = () => {
     setUserPermissionsOpen(false);
+    closeUserDropdown();
   };
 
-  const handleDeleteUser = (userId) => {
-    Meteor.call("user.delete", userId);
+  const handleDeleteUser = () => {
+    const isConfirmed = confirm(
+      `Are you sure you want to delete ${selectedUser.name}?`
+    );
+    if (isConfirmed) {
+      Meteor.call("user.delete", selectedUser._id);
+      closeUserDropdown();
+    }
   };
 
   const handleChartOfAccountChange = (c) => {
@@ -396,12 +445,12 @@ export const UserSettings = () => {
                 </tr>
                 {allUsers.map((user, index) => (
                   <tr key={index}>
-                    <td>
+                    <td ref={(el) => (userRowButtonRefs.current[index] = el)}>
                       <div
                         className="userDropDownButton"
                         onClick={() => {
                           setCurrentOpenUserOption((currentOption) =>
-                            currentOption === "" ? user._id : ""
+                            currentOption === user._id ? "" : user._id
                           );
                         }}
                       >
@@ -424,16 +473,37 @@ export const UserSettings = () => {
                             currentOpenUserOption === user._id
                               ? "flex"
                               : "none",
+                          height: user.admin ? 50 : 110,
                         }}
                       >
-                        <div className="userDropDownOption">Edit User Info</div>
-                        <div className="userDropDownOption">
-                          Edit Permissions
+                        <div
+                          className="userDropDownOption"
+                          onClick={() => console.log("Clicked Edit User Info")}
+                        >
+                          Edit User Info
                         </div>
-                        <div className="userDropDownOption">
+                        {!user.admin ? (
+                          <div
+                            className="userDropDownOption"
+                            onClick={openUserPermissionModal}
+                          >
+                            Edit Permissions
+                          </div>
+                        ) : null}
+                        <div
+                          className="userDropDownOption"
+                          onClick={() => console.log("Clicked Change Password")}
+                        >
                           Change Password
                         </div>
-                        <div className="userDropDownOption">Delete</div>
+                        {!user.admin ? (
+                          <div
+                            className="userDropDownOption"
+                            onClick={handleDeleteUser}
+                          >
+                            Delete
+                          </div>
+                        ) : null}
                       </div>
                     </td>
                     <td>{user.username}</td>

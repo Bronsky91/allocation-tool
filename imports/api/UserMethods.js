@@ -61,6 +61,9 @@ Meteor.methods({
     if (!this.userId || !Meteor.user()?.admin) {
       throw new Meteor.Error("Not authorized.");
     }
+    if (this.userId === id) {
+      throw new Meteor.Error("A user cannot delete themselves");
+    }
     Meteor.users.remove({ _id: id });
   },
   "user.name.update": function (name) {
@@ -80,9 +83,8 @@ Meteor.methods({
       // Add the new email and if it's unable to get added it will a throw an error to the Meteor.call()
       Accounts.addEmail(this.userId, email);
       // If the new email was added then we can remove the old email
-      Accounts.removeEmail(this.userId, oldEmail.address)
+      Accounts.removeEmail(this.userId, oldEmail.address);
     }
-
   },
   "user.permissions.update": function (userId, key, keyValue) {
     // Only admins can update permissions
