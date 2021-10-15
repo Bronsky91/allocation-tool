@@ -879,6 +879,26 @@ input[type="file"] {
   cursor: pointer;
 }
 
+.updateChartOfAccountsButton {
+  width: 150px;
+  height: 40px;
+  border-radius: 8px;
+  border-width: 0px;
+  color: white;
+  margin-left: 10px;
+}
+.updateChartOfAccountsButton:hover {
+  cursor: pointer;
+}
+
+.segmentsUpdateContainer {
+  overflow: auto;
+  height: 70px;
+  padding: 5px;
+  margin-top: 5px;
+  border: solid black thin;
+}
+
 /* Util Styles */
 
 .buttonDisabled {

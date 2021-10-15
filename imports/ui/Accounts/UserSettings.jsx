@@ -22,6 +22,7 @@ import { AddUserModal } from "./AddUserModal";
 import { UserPermissionsModal } from "./UserPermissions";
 import { EditUserModal } from "./EditUserModal";
 import { ChangePasswordModal } from "./ChangePasswordModal";
+import { ConfirmChartOfAccountsUpdateModal } from "./ConfirmChartOfAccountsUpdateModal";
 // Constants and Utils
 import {
   BLUE,
@@ -68,6 +69,13 @@ export const UserSettings = () => {
   console.log("chartOfAccounts", chartOfAccounts);
   console.log("allMetrics", allMetrics);
 
+  const initialChartOfAccountsDataToConfirm = {
+    segments: [],
+    subSegmentsAdded: [],
+    subSegmentsUpdated: [],
+    subSegmentsRemoved: [],
+  };
+
   // State
   const [selectedCoa, setSelectedCoa] = useState(chartOfAccounts[0]);
   const [selectedMetric, setSelectedMetric] = useState(allMetrics[0]);
@@ -75,12 +83,25 @@ export const UserSettings = () => {
   const [editUserModalOpen, setEditUserModalOpen] = useState(false);
   const [changePasswordModalOpen, setChangePasswordModalOpen] = useState(false);
   const [userPermissionsOpen, setUserPermissionsOpen] = useState(false);
+  const [editedSelectedCoa, setEditedSelectedCoa] = useState();
+  const [
+    confirmChartOfAccountsUpdateModalOpen,
+    setConfirmChartOfAccountsUpdateModalOpen,
+  ] = useState(false);
   const [selectedUser, setSelectedUser] = useState({});
   const [currentOpenUserOption, setCurrentOpenUserOption] = useState("");
   const [possibleAllocationSegmentNames, setPossibleAllocationSegmentNames] =
     useState([]);
   const [showMethodSelection, setShowMethodSelection] = useState(false);
+  const [chartOfAccountsDataToConfirm, setChartOfAccountsDataToConfirm] =
+    useState(initialChartOfAccountsDataToConfirm);
   const [metricData, setMetricData] = useState([]);
+  const [chartOfAccountsFileKey, setChartOfAccountsFileKey] = useState(
+    new Date()
+  );
+  // TODO: implement the metricfilekey (might need two, a new AND edit key)
+  const [metricsFileKey, setMetricsFileKey] = useState(new Date());
+  // TODO: Implement these loading icons
   const [chartOfAccountsLoading, setChartOfAccountsLoading] = useState(false);
   const [metricsLoading, setMetricsLoading] = useState(false);
 
@@ -128,6 +149,22 @@ export const UserSettings = () => {
     editUserModalOpen,
     changePasswordModalOpen,
   ]);
+
+  useEffect(() => {
+    // After a new allocation is edited, update the selectedCoa state to reflect
+    // This is required because the next time the user opens the edit modal we want the data to reflect their most recent changes
+    if (
+      selectedCoa &&
+      editedSelectedCoa &&
+      selectedCoa.updatedAt !== editedSelectedCoa
+    ) {
+      setSelectedCoa(
+        chartOfAccounts.find((coa) => coa._id === selectedCoa._id)
+      );
+      // Once the updated selectedCoa state is refreshed, set the edit flag to undefined
+      setEditedSelectedCoa();
+    }
+  }, [chartOfAccounts]);
 
   useEffect(() => {
     // Updates the selectedUser state when a dropdown is opened
@@ -182,6 +219,16 @@ export const UserSettings = () => {
   const closeUserPermissionsModal = () => {
     setUserPermissionsOpen(false);
     closeUserDropdown();
+  };
+
+  const openConfirmChartOfAccountsModal = () => {
+    setConfirmChartOfAccountsUpdateModalOpen(true);
+  };
+
+  const closeConfirmChartOfAccountsModal = () => {
+    setChartOfAccountsDataToConfirm(initialChartOfAccountsDataToConfirm);
+    setChartOfAccountsFileKey(new Date());
+    setConfirmChartOfAccountsUpdateModalOpen(false);
   };
 
   const handleDeleteUser = () => {
@@ -301,8 +348,7 @@ export const UserSettings = () => {
         });
       }
 
-      console.log("segments", segments);
-
+      // subSegments with new segmentIds
       const subSegmentsAdded = segments.flatMap((segment) => {
         const oldSegment = currentSegments.find(
           (currrentSegment) => currrentSegment._id === segment._id
@@ -314,8 +360,24 @@ export const UserSettings = () => {
               .includes(subSegment.segmentId.toString())
         );
       });
-      console.log("subSegmentsAdded", subSegmentsAdded);
 
+      // subSegments with new descriptions but same segmentIds
+      const subSegmentsUpdated = segments.flatMap((segment) => {
+        const oldSegment = currentSegments.find(
+          (currrentSegment) => currrentSegment._id === segment._id
+        );
+        return segment.subSegments.filter(
+          (subSegment) =>
+            !oldSegment.subSegments
+              .map((s) => s.description)
+              .includes(subSegment.description) &&
+            oldSegment.subSegments
+              .map((s) => s.segmentId.toString())
+              .includes(subSegment.segmentId.toString())
+        );
+      });
+
+      // subSegments that were removed, the segmentIds are no longer in the sheet
       const subSegmentsRemoved = currentSegments.flatMap((oldSegment) => {
         const newSegment = segments.find(
           (segment) => segment._id === oldSegment._id
@@ -327,24 +389,24 @@ export const UserSettings = () => {
               .includes(oldSubSegment.segmentId.toString())
         );
       });
-      console.log("subSegmentsRemoved", subSegmentsRemoved);
 
-      // TODO: Create a confirmation box that displays which subsegments are being removed/added
-      // TODO: Custom Modal that has removed subsegments on one side and added subsegments on the other
-
-      Meteor.call(
-        "chartOfAccounts.segments.update",
-        selectedCoa._id,
+      setChartOfAccountsDataToConfirm({
         segments,
-        (err, res) => {
-          if (err) {
-            console.log(err);
-            alert(`Unable to update chart of accounts: ${err.reason}`);
-          } else {
-            console.log("updated coa", res);
-          }
-        }
-      );
+        subSegmentsAdded,
+        subSegmentsUpdated,
+        subSegmentsRemoved,
+      });
+
+      // If true, there are no changes to make to the chart of accounts
+      const noChangesToMake =
+        JSON.stringify(currentSegments) === JSON.stringify(segments);
+      if (noChangesToMake) {
+        alert(
+          `There are no changes to make to ${selectedCoa.name} using the file uploaded`
+        );
+      } else {
+        openConfirmChartOfAccountsModal();
+      }
     } else {
       // Displays an alert to the user and an error message why the chart of the accounts isn't valid
       alert(output.err);
@@ -469,6 +531,13 @@ export const UserSettings = () => {
         handleClose={closeUserPermissionsModal}
         selectedUser={selectedUser}
         chartOfAccounts={chartOfAccounts}
+      />
+      <ConfirmChartOfAccountsUpdateModal
+        open={confirmChartOfAccountsUpdateModalOpen}
+        handleClose={closeConfirmChartOfAccountsModal}
+        selectedCoa={selectedCoa}
+        chartOfAccountsDataToConfirm={chartOfAccountsDataToConfirm}
+        setEditedSelectedCoa={setEditedSelectedCoa}
       />
       <div
         style={{
@@ -628,9 +697,7 @@ export const UserSettings = () => {
                   accept=".xls,.xlsx"
                   ref={chartOfAccountsEditInputRef}
                   onChange={handleChartOfAccountsFile}
-                  key={selectedCoa?.updatedAt || selectedCoa?.createdAt}
-                  // Using the updatedAt or createAt date as key since this should change once the update is processed
-                  // resetting the input to be available for another upload if needed
+                  key={chartOfAccountsFileKey}
                 />
               </IconButton>
               <IconButton
@@ -706,9 +773,7 @@ export const UserSettings = () => {
                   accept=".xls,.xlsx"
                   ref={metricssEditInputRef}
                   onChange={handleMetricFile}
-                  key={selectedMetric?.updatedAt || selectedMetric?.createdAt}
-                  // Using the updatedAt or createAt date as key since this should change once the update is processed
-                  // resetting the input to be available for another upload if needed
+                  key={metricsFileKey}
                 />
               </IconButton>
               <IconButton

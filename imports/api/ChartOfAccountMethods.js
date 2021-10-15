@@ -103,6 +103,7 @@ Meteor.methods({
       throw new Meteor.Error("Not authorized.");
     }
 
+    const updatedAt = new Date();
     for (const segment of segments) {
       ChartOfAccountsCollection.update(
         { _id: id },
@@ -113,7 +114,7 @@ Meteor.methods({
               description: segment.description,
               subSegments: segment.subSegments,
               chartFieldOrder: segment.chartFieldOrder,
-              updatedAt: new Date(),
+              updatedAt,
             },
           },
         },
@@ -122,6 +123,7 @@ Meteor.methods({
         }
       );
     }
+    return updatedAt;
   },
   "chartOfAccounts.segments.removeAll": function (id) {
     // If a user not logged in or the user is not an admin
