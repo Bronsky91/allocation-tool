@@ -789,12 +789,15 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                   Select Metric to Allocate with:
                 </label>
                 <Select
-                  value={metrics
-                    .map((metric) => ({
-                      value: metric._id,
-                      label: metric.description,
-                    }))
-                    .find((metric) => metric.value === selectedMetric._id)}
+                  value={
+                    metrics
+                      .map((metric) => ({
+                        value: metric._id,
+                        label: metric.description,
+                      }))
+                      .find((metric) => metric.value === selectedMetric._id) ||
+                    null
+                  }
                   onChange={handleMetricChange}
                   className="journalFormInputSelect"
                   options={metrics.map((metric) => ({
@@ -818,15 +821,17 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                     }}
                   >
                     <Select
-                      value={allocations
-                        .map((allocation) => ({
-                          value: allocation._id,
-                          label: allocation.name,
-                        }))
-                        .find(
-                          (allocation) =>
-                            allocation.value === selectedAllocation?._id
-                        )}
+                      value={
+                        allocations
+                          .map((allocation) => ({
+                            value: allocation._id,
+                            label: allocation.name,
+                          }))
+                          .find(
+                            (allocation) =>
+                              allocation.value === selectedAllocation?._id
+                          ) || null
+                      }
                       onChange={handleAllocationChange}
                       className="journalFormInputSelect"
                       options={allocations.map((allocation) => ({

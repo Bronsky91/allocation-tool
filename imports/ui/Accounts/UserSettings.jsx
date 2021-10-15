@@ -15,12 +15,14 @@ import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import CloseIcon from "@material-ui/icons/Close";
 // Packages
 import Select from "react-select";
+import { ClipLoader } from "react-spinners";
 // Components
 import { Header } from "../Header";
 import { AddUserModal } from "./AddUserModal";
 import { UserPermissionsModal } from "./UserPermissions";
 // Constants and Utils
 import {
+  BLUE,
   CHART_OF_ACCOUNT_COLUMNS,
   GL_CODE,
   SUB_GL_CODE,
@@ -75,6 +77,8 @@ export const UserSettings = () => {
     useState([]);
   const [showMethodSelection, setShowMethodSelection] = useState(false);
   const [metricData, setMetricData] = useState([]);
+  const [chartOfAccountsLoading, setChartOfAccountsLoading] = useState(false);
+  const [metricsLoading, setMetricsLoading] = useState(false);
 
   // Ref
   const chartOfAccountsEditInputRef = useRef();
@@ -82,9 +86,6 @@ export const UserSettings = () => {
   const userRowButtonRefs = useRef([]);
 
   useEffect(() => {
-    /**
-     * Close if clicked on outside of user dropdown elements
-     */
     const handleClickOutside = (event) => {
       // Don't close the dropdown is the user permission modal is open
       if (userPermissionsOpen) {
@@ -112,6 +113,7 @@ export const UserSettings = () => {
   }, [userRowButtonRefs, userPermissionsOpen]);
 
   useEffect(() => {
+    // Updates the selectedUser state when a dropdown is opened
     setSelectedUser(
       allUsers.find((user) => user._id === currentOpenUserOption)
     );
@@ -172,6 +174,10 @@ export const UserSettings = () => {
   };
 
   const handleChartOfAccountsDelete = () => {
+    // Gets current index of selected chart of accounts in the chart of accounts array
+    const currentIndex = chartOfAccounts.findIndex(
+      (a) => a._id === selectedCoa._id
+    );
     const isConfirmed = confirm(
       `Are you sure you want to delete the ${selectedCoa.name} chart of accounts?`
     );
@@ -180,6 +186,10 @@ export const UserSettings = () => {
         if (err) {
           console.log(err);
           alert(`Unable to delete Chart of Accounts: ${err.reason}`);
+        } else {
+          // Moves the next selectedCoa down one index, unless it's already 0 then keep it 0
+          const nextIndex = currentIndex > 0 ? currentIndex - 1 : 0;
+          setSelectedCoa(chartOfAccounts[nextIndex]);
         }
       });
     }
@@ -307,6 +317,10 @@ export const UserSettings = () => {
   };
 
   const handleMetricDelete = () => {
+    // Gets current index of selected chart of accounts in the chart of accounts array
+    const currentIndex = allMetrics.findIndex(
+      (a) => a._id === selectedMetric._id
+    );
     // TODO: Add confirmation
     const isConfirmed = confirm(
       `Are you sure you want to delete the ${selectedMetric.description} - ${selectedMetric.coaName} metric?`
@@ -320,6 +334,10 @@ export const UserSettings = () => {
           if (err) {
             console.log(err);
             alert(`Unable to delete Metric: ${err.reason}`);
+          } else {
+            // Moves the next selectedmetric down one index, unless it's already 0 then keep it 0
+            const nextIndex = currentIndex > 0 ? currentIndex - 1 : 0;
+            setSelectedMetric(allMetrics[nextIndex]);
           }
         }
       );
@@ -527,12 +545,16 @@ export const UserSettings = () => {
 
             <div className="selectRowTopBlock">
               <Select
-                value={chartOfAccounts
-                  .map((coa) => ({
-                    value: coa._id,
-                    label: coa.name,
-                  }))
-                  .find((coaOption) => coaOption.value === selectedCoa?._id)}
+                value={
+                  chartOfAccounts
+                    .map((coa) => ({
+                      value: coa._id,
+                      label: coa.name,
+                    }))
+                    .find(
+                      (coaOption) => coaOption.value === selectedCoa?._id
+                    ) || null
+                }
                 onChange={handleChartOfAccountChange}
                 className="settingSelect"
                 options={chartOfAccounts.map((coa) => ({
@@ -573,6 +595,16 @@ export const UserSettings = () => {
               >
                 <DeleteIcon fontSize="small" />
               </IconButton>
+              {chartOfAccountsLoading ? (
+                <ClipLoader
+                  color={BLUE}
+                  loading={chartOfAccountsLoading}
+                  size={25}
+                  css={`
+                    margin-left: 10px;
+                  `}
+                />
+              ) : null}
             </div>
             <div className="subContainerTopBlock">
               {selectedCoa ? (
@@ -591,14 +623,17 @@ export const UserSettings = () => {
             <div style={{ fontWeight: "bold", fontSize: 18 }}>Metrics</div>
             <div className="selectRowTopBlock">
               <Select
-                value={allMetrics
-                  .map((metric) => ({
-                    value: metric._id,
-                    label: `${metric.description} - ${metric.coaName}`,
-                  }))
-                  .find(
-                    (metricOption) => metricOption.value === selectedMetric?._id
-                  )}
+                value={
+                  allMetrics
+                    .map((metric) => ({
+                      value: metric._id,
+                      label: `${metric.description} - ${metric.coaName}`,
+                    }))
+                    .find(
+                      (metricOption) =>
+                        metricOption.value === selectedMetric?._id
+                    ) || null
+                }
                 onChange={handleMetricChange}
                 className="settingSelect"
                 options={allMetrics.map((metric) => ({
@@ -638,6 +673,16 @@ export const UserSettings = () => {
               >
                 <DeleteIcon fontSize="small" />
               </IconButton>
+              {metricsLoading ? (
+                <ClipLoader
+                  color={BLUE}
+                  loading={metricsLoading}
+                  size={25}
+                  css={`
+                    margin-left: 10px;
+                  `}
+                />
+              ) : null}
             </div>
             <div className="subContainerTopBlock">
               {selectedMetric ? (

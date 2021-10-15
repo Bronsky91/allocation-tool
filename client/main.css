@@ -765,7 +765,7 @@ input[type="file"] {
   display: flex;
   flex-direction: column;
   height: 15em;
-  width: 26em;
+  width: 28em;
   border: gray solid 0.5px;
   border-radius: 15px;
   background-color: white;
