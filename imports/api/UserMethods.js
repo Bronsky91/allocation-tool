@@ -66,9 +66,9 @@ Meteor.methods({
     }
     Meteor.users.remove({ _id: id });
   },
-  "user.name.update": function (name) {
+  "user.name.update": function (id, name) {
     return Meteor.users.update(
-      { _id: this.userId },
+      { _id: id },
       {
         $set: {
           name,
@@ -76,14 +76,14 @@ Meteor.methods({
       }
     );
   },
-  "user.email.update": function (email) {
+  "user.email.update": function (id, email) {
     const oldEmail = Meteor.user()?.emails[0];
     // If the new email is different then what's already on the account
     if (email !== oldEmail?.address) {
       // Add the new email and if it's unable to get added it will a throw an error to the Meteor.call()
-      Accounts.addEmail(this.userId, email);
+      Accounts.addEmail(id, email);
       // If the new email was added then we can remove the old email
-      Accounts.removeEmail(this.userId, oldEmail.address);
+      Accounts.removeEmail(id, oldEmail.address);
     }
   },
   "user.permissions.update": function (userId, key, keyValue) {
@@ -101,6 +101,13 @@ Meteor.methods({
         },
       }
     );
+  },
+  "user.password.set": function (userId, newPassword) {
+    // Only admins can change passwords
+    if (!this.userId || !Meteor.user()?.admin) {
+      throw new Meteor.Error("Not authorized.");
+    }
+    Accounts.setPassword(userId, newPassword, { logout: false });
   },
   "user.redskyAdmin": function (data) {
     // Only other admins can adjust admin privileges

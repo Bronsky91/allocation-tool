@@ -45,7 +45,6 @@ export const AddUserModal = ({ open, handleClose }) => {
 
   const [registerForm, setRegisterForm] = useState(initialRegisterForm);
   const [registerError, setRegisterError] = useState("");
-  const [registerSuccess, setRegisterSuccess] = useState(false);
 
   const passwordsMatch =
     registerForm.password === registerForm.confirmPassword ||

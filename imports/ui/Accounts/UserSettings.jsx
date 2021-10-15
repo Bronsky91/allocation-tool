@@ -20,6 +20,8 @@ import { ClipLoader } from "react-spinners";
 import { Header } from "../Header";
 import { AddUserModal } from "./AddUserModal";
 import { UserPermissionsModal } from "./UserPermissions";
+import { EditUserModal } from "./EditUserModal";
+import { ChangePasswordModal } from "./ChangePasswordModal";
 // Constants and Utils
 import {
   BLUE,
@@ -70,6 +72,8 @@ export const UserSettings = () => {
   const [selectedCoa, setSelectedCoa] = useState(chartOfAccounts[0]);
   const [selectedMetric, setSelectedMetric] = useState(allMetrics[0]);
   const [addUserMoalOpen, setAddUserModalOpen] = useState(false);
+  const [editUserModalOpen, setEditUserModalOpen] = useState(false);
+  const [changePasswordModalOpen, setChangePasswordModalOpen] = useState(false);
   const [userPermissionsOpen, setUserPermissionsOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState({});
   const [currentOpenUserOption, setCurrentOpenUserOption] = useState("");
@@ -87,8 +91,16 @@ export const UserSettings = () => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      // Don't close the dropdown is the user permission modal is open
+      // Don't close the dropdown if the user permission modal is open
       if (userPermissionsOpen) {
+        return;
+      }
+      // Don't close the dropdown if the user edit modal is open
+      if (editUserModalOpen) {
+        return;
+      }
+      // Don't close the dropdown if the change password modal is open
+      if (changePasswordModalOpen) {
         return;
       }
       // Don't close the dropdown if an option is selected
@@ -110,7 +122,12 @@ export const UserSettings = () => {
     };
     // If more modals are added, make sure to include them in the hook effect here
     // Modal checks are added here to keep the state in the handleClickOutside up to date
-  }, [userRowButtonRefs, userPermissionsOpen]);
+  }, [
+    userRowButtonRefs,
+    userPermissionsOpen,
+    editUserModalOpen,
+    changePasswordModalOpen,
+  ]);
 
   useEffect(() => {
     // Updates the selectedUser state when a dropdown is opened
@@ -138,6 +155,24 @@ export const UserSettings = () => {
 
   const closeAddUserModal = () => {
     setAddUserModalOpen(false);
+  };
+
+  const openEditUserModal = () => {
+    setEditUserModalOpen(true);
+  };
+
+  const closeEditUserModal = () => {
+    setEditUserModalOpen(false);
+    closeUserDropdown();
+  };
+
+  const openChangePasswordModal = () => {
+    setChangePasswordModalOpen(true);
+  };
+
+  const closeChangePasswordModal = () => {
+    setChangePasswordModalOpen(false);
+    closeUserDropdown();
   };
 
   const openUserPermissionModal = () => {
@@ -419,6 +454,16 @@ export const UserSettings = () => {
     <div className="userAccountParentContainer">
       <Header />
       <AddUserModal open={addUserMoalOpen} handleClose={closeAddUserModal} />
+      <EditUserModal
+        open={editUserModalOpen}
+        handleClose={closeEditUserModal}
+        selectedUser={selectedUser}
+      />
+      <ChangePasswordModal
+        open={changePasswordModalOpen}
+        handleClose={closeChangePasswordModal}
+        selectedUser={selectedUser}
+      />
       <UserPermissionsModal
         open={userPermissionsOpen}
         handleClose={closeUserPermissionsModal}
@@ -496,7 +541,7 @@ export const UserSettings = () => {
                       >
                         <div
                           className="userDropDownOption"
-                          onClick={() => console.log("Clicked Edit User Info")}
+                          onClick={openEditUserModal}
                         >
                           Edit User Info
                         </div>
@@ -510,7 +555,7 @@ export const UserSettings = () => {
                         ) : null}
                         <div
                           className="userDropDownOption"
-                          onClick={() => console.log("Clicked Change Password")}
+                          onClick={openChangePasswordModal}
                         >
                           Change Password
                         </div>
