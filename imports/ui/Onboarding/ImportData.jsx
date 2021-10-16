@@ -11,6 +11,7 @@ import { isChartOfAccountWorkBookDataValid } from "../../utils/CheckWorkbookData
 import { ChartOfAccountsCollection } from "../../db/ChartOfAccountsCollection";
 // Constants
 import {
+  barLoaderCSS,
   BLUE,
   CHART_OF_ACCOUNT_COLUMNS,
   GL_CODE,
@@ -58,10 +59,6 @@ export const ImportData = () => {
   const possibleAllocationSegmentNames = segments
     .filter((segment) => ![GL_CODE, SUB_GL_CODE].includes(segment.description))
     .map((segment) => segment.description);
-
-  const barLoaderCSS = `
-    margin-top: 2em;
-  `;
 
   useEffect(() => {
     if (metricData.length === 0) {
@@ -150,6 +147,7 @@ export const ImportData = () => {
       ) {
         // Clear metric upload file input
         setMetricFileInputKey(new Date());
+        setLoading(false);
         return alert("No segments are detected, check file and upload again");
       }
       setMetricData((metricData) => {
@@ -454,7 +452,7 @@ export const ImportData = () => {
                 onChange={handleMetricFile}
                 key={metricFileInputKey}
               />
-              <BarLoader loading={loading} color={BLUE} css={barLoaderCSS} />
+              <BarLoader loading={true} color={BLUE} css={barLoaderCSS} />
               <div className="onboardFileName">{metricFileName}</div>
               {confirmedMetricData.length > 0 ? (
                 <button

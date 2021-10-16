@@ -12,7 +12,6 @@ import EditIcon from "@material-ui/icons/Edit";
 import DeleteIcon from "@material-ui/icons/Delete";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
-import CloseIcon from "@material-ui/icons/Close";
 // Packages
 import Select from "react-select";
 import { ClipLoader } from "react-spinners";
@@ -33,6 +32,7 @@ import {
 } from "../../../constants";
 import { ReadWorkbook } from "../../utils/ReadWorkbook";
 import { isChartOfAccountWorkBookDataValid } from "../../utils/CheckWorkbookData";
+import { AddMetricModal } from "./AddMetricModal";
 
 export const UserSettings = () => {
   // Subscriptions
@@ -79,6 +79,7 @@ export const UserSettings = () => {
   // State
   const [selectedCoa, setSelectedCoa] = useState(chartOfAccounts[0]);
   const [selectedMetric, setSelectedMetric] = useState(allMetrics[0]);
+  // Modals
   const [addUserMoalOpen, setAddUserModalOpen] = useState(false);
   const [editUserModalOpen, setEditUserModalOpen] = useState(false);
   const [changePasswordModalOpen, setChangePasswordModalOpen] = useState(false);
@@ -88,6 +89,8 @@ export const UserSettings = () => {
     confirmChartOfAccountsUpdateModalOpen,
     setConfirmChartOfAccountsUpdateModalOpen,
   ] = useState(false);
+  const [addMetricModalOpen, setAddMetricModalOpen] = useState(false);
+  // Selections
   const [selectedUser, setSelectedUser] = useState({});
   const [currentOpenUserOption, setCurrentOpenUserOption] = useState("");
   const [possibleAllocationSegmentNames, setPossibleAllocationSegmentNames] =
@@ -229,6 +232,15 @@ export const UserSettings = () => {
     setChartOfAccountsDataToConfirm(initialChartOfAccountsDataToConfirm);
     setChartOfAccountsFileKey(new Date());
     setConfirmChartOfAccountsUpdateModalOpen(false);
+  };
+
+  const openAddMetricModal = () => {
+    // TODO: implement paywall
+    setAddMetricModalOpen(true);
+  };
+
+  const closeAddMetricModal = () => {
+    setAddMetricModalOpen(false);
   };
 
   const handleDeleteUser = () => {
@@ -539,6 +551,11 @@ export const UserSettings = () => {
         chartOfAccountsDataToConfirm={chartOfAccountsDataToConfirm}
         setEditedSelectedCoa={setEditedSelectedCoa}
       />
+      <AddMetricModal
+        open={addMetricModalOpen}
+        handleClose={closeAddMetricModal}
+        chartOfAccounts={chartOfAccounts}
+      />
       <div
         style={{
           display: "flex",
@@ -755,7 +772,7 @@ export const UserSettings = () => {
               />
               <IconButton
                 color="inherit"
-                // onClick={openSaveTemplateModal}
+                onClick={openAddMetricModal}
                 style={{ color: "#3597fe" }}
               >
                 <AddIcon fontSize="default" />
@@ -820,121 +837,6 @@ export const UserSettings = () => {
             </div>
           </div>
         </div>
-
-        {/* Metric Add/Edit Panel */}
-        {showMethodSelection ? (
-          <div className="onboardMetricOnboardContainer">
-            <div className="onboardMetricOnboardHeaderContainer">
-              <div className="onboardTitle" style={{ marginTop: 0 }}>
-                Metric Onboarding
-              </div>
-              <IconButton
-                onClick={() => setShowMethodSelection(false)}
-                color="inherit"
-              >
-                <CloseIcon />
-              </IconButton>
-            </div>
-            {metricData.map((data, index) => (
-              <div className="onboardMetricOnboardInnerContainer" key={index}>
-                <div className="onboardMetricOnboardTitle">{data.name}</div>
-                <div className="onboardMetricOnboardText">
-                  Segments that can be used in allocations
-                </div>
-                <ul>
-                  {possibleAllocationSegmentNames.length > 0
-                    ? data.columns.map((column, i) => {
-                        if (possibleAllocationSegmentNames.includes(column)) {
-                          return (
-                            <li key={i} style={{ fontWeight: "bold" }} key={i}>
-                              {column}
-                            </li>
-                          );
-                        }
-                      })
-                    : null}
-                </ul>
-                <div className="onboardMetricOnboardText">
-                  Select methods that will be used for allocations
-                </div>
-                <div className="onboardMetricOnboardSelectionContainer">
-                  <div className="onboardMetricOnboardSelection">
-                    <div
-                      style={{
-                        // borderBottom: "1px solid black",
-                        width: "10em",
-                        marginBottom: "1em",
-                      }}
-                    >
-                      <button onClick={(e) => handleSelectAll(data.name)}>
-                        <label style={{ fontWeight: "bold" }}>
-                          {data.validMethods.length ===
-                          data.columns.filter(
-                            (column) => !data.metricSegments.includes(column)
-                          ).length
-                            ? "Unselect All"
-                            : "Select All"}
-                        </label>
-                      </button>
-                    </div>
-                  </div>
-                  {possibleAllocationSegmentNames.length > 0
-                    ? data.columns.map((column, i) => {
-                        // Exclude any columns that match possible allocation segment names
-                        if (!possibleAllocationSegmentNames.includes(column)) {
-                          return (
-                            <div
-                              key={i}
-                              className="onboardMetricOnboardSelection"
-                            >
-                              <input
-                                type="checkbox"
-                                onChange={(e) =>
-                                  handleMetricChecked(e, data.name, column)
-                                }
-                                value={column}
-                                checked={data.validMethods.includes(column)}
-                              />
-                              <label style={{ fontWeight: "bold" }}>
-                                {column}
-                              </label>
-                            </div>
-                          );
-                        }
-                      })
-                    : null}
-                </div>
-                <div>
-                  <button
-                    // onClick={() => handleSaveMetric(data.name)}
-                    className={`onboardMetricOnboardButton ${
-                      metricData.find((metric) => metric.name === data.name)
-                        .validMethods.length === 0
-                        ? "buttonDisabled"
-                        : ""
-                    }`}
-                    disabled={
-                      metricData.find((metric) => metric.name === data.name)
-                        .validMethods.length === 0
-                    }
-                  >
-                    Save Metric
-                  </button>
-                  <button
-                    className="onboardMetricOnboardButton"
-                    style={{
-                      backgroundColor: "#f54747",
-                      marginLeft: "2em",
-                    }}
-                    // onClick={() => handleCancelMetric(data.name)}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : null}
       </div>
     </div>
   );
