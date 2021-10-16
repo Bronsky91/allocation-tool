@@ -215,23 +215,25 @@ Meteor.methods({
       }),
     }));
 
-    return ChartOfAccountsCollection.update(
+    const updatedAt = new Date();
+
+    ChartOfAccountsCollection.update(
       { _id: chartOfAccountsId },
       {
         $set: {
-          "metrics.$[m]": {
-            description,
-            columns,
-            validMethods,
-            metricSegments,
-            updatedAt: new Date(),
-          },
+          "metrics.$[m].description": description,
+          "metrics.$[m].columns": columns,
+          "metrics.$[m].validMethods": validMethods,
+          "metrics.$[m].metricSegments": metricSegments,
+          "metrics.$[m].updatedAt": updatedAt,
         },
       },
       {
         arrayFilters: [{ "m._id": metricId }],
       }
     );
+
+    return updatedAt;
   },
   "chartOfAccounts.metrics.removeAll": function (id) {
     // If a user not logged in or the user is not an admin

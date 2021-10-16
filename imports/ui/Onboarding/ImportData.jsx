@@ -452,7 +452,7 @@ export const ImportData = () => {
                 onChange={handleMetricFile}
                 key={metricFileInputKey}
               />
-              <BarLoader loading={true} color={BLUE} css={barLoaderCSS} />
+              <BarLoader loading={loading} color={BLUE} css={barLoaderCSS} />
               <div className="onboardFileName">{metricFileName}</div>
               {confirmedMetricData.length > 0 ? (
                 <button

@@ -33,6 +33,7 @@ import {
 import { ReadWorkbook } from "../../utils/ReadWorkbook";
 import { isChartOfAccountWorkBookDataValid } from "../../utils/CheckWorkbookData";
 import { AddMetricModal } from "./AddMetricModal";
+import { EditMetricModal } from "./EditMetricModal";
 
 export const UserSettings = () => {
   // Subscriptions
@@ -85,25 +86,22 @@ export const UserSettings = () => {
   const [changePasswordModalOpen, setChangePasswordModalOpen] = useState(false);
   const [userPermissionsOpen, setUserPermissionsOpen] = useState(false);
   const [editedSelectedCoa, setEditedSelectedCoa] = useState();
+  const [editedSelectedMetric, setEditedSelectedMetric] = useState();
   const [
     confirmChartOfAccountsUpdateModalOpen,
     setConfirmChartOfAccountsUpdateModalOpen,
   ] = useState(false);
   const [addMetricModalOpen, setAddMetricModalOpen] = useState(false);
-  // Selections
+  const [editMetricModalOpen, setEditMetricModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState({});
   const [currentOpenUserOption, setCurrentOpenUserOption] = useState("");
-  const [possibleAllocationSegmentNames, setPossibleAllocationSegmentNames] =
-    useState([]);
-  const [showMethodSelection, setShowMethodSelection] = useState(false);
   const [chartOfAccountsDataToConfirm, setChartOfAccountsDataToConfirm] =
     useState(initialChartOfAccountsDataToConfirm);
-  const [metricData, setMetricData] = useState([]);
+  const [metricData, setMetricData] = useState();
   const [chartOfAccountsFileKey, setChartOfAccountsFileKey] = useState(
     new Date()
   );
-  // TODO: implement the metricfilekey (might need two, a new AND edit key)
-  const [metricsFileKey, setMetricsFileKey] = useState(new Date());
+  const [metricFileInputKey, setMetricFileInputKey] = useState(new Date());
   // TODO: Implement these loading icons
   const [chartOfAccountsLoading, setChartOfAccountsLoading] = useState(false);
   const [metricsLoading, setMetricsLoading] = useState(false);
@@ -154,8 +152,9 @@ export const UserSettings = () => {
   ]);
 
   useEffect(() => {
-    // After a new allocation is edited, update the selectedCoa state to reflect
-    // This is required because the next time the user opens the edit modal we want the data to reflect their most recent changes
+    // After a chart of accounts is edited, update the selectedCoa state to reflect
+    // This is required because the next time the user sees the data in the main page we want the data
+    // to reflect their most recent changes
     if (
       selectedCoa &&
       editedSelectedCoa &&
@@ -170,19 +169,28 @@ export const UserSettings = () => {
   }, [chartOfAccounts]);
 
   useEffect(() => {
+    // After a metric is edited, update the selectedMetric state to reflect
+    // This is required because the next time the user sees the data in the main page we want the data
+    // to reflect their most recent changes
+    if (
+      selectedMetric &&
+      editedSelectedMetric &&
+      selectedMetric.updatedAt !== editedSelectedMetric
+    ) {
+      setSelectedMetric(
+        allMetrics.find((metric) => metric._id === selectedMetric._id)
+      );
+      // Once the updated selectedCoa state is refreshed, set the edit flag to undefined
+      setEditedSelectedMetric();
+    }
+  }, [allMetrics]);
+
+  useEffect(() => {
     // Updates the selectedUser state when a dropdown is opened
     setSelectedUser(
       allUsers.find((user) => user._id === currentOpenUserOption)
     );
   }, [currentOpenUserOption]);
-
-  useEffect(() => {
-    if (metricData.length === 0) {
-      setShowMethodSelection(false);
-    } else {
-      setShowMethodSelection(true);
-    }
-  }, [metricData]);
 
   const closeUserDropdown = () => {
     setCurrentOpenUserOption("");
@@ -241,6 +249,15 @@ export const UserSettings = () => {
 
   const closeAddMetricModal = () => {
     setAddMetricModalOpen(false);
+  };
+
+  const openEditMetricModal = () => {
+    // TODO: implement paywall
+    setEditMetricModalOpen(true);
+  };
+
+  const closeEditMetricModal = () => {
+    setEditMetricModalOpen(false);
   };
 
   const handleDeleteUser = () => {
@@ -453,22 +470,18 @@ export const UserSettings = () => {
     }
   };
 
-  // TODO: Implement proper state for metric onboard controls
   const handleMetricFile = async (e) => {
-    // Previous Metric Data
-    const prevMetricData = allMetrics.find(
-      (metric) => metric._id === selectedMetric._id
-    );
     // Segments possible for allocation
-    const currentPossibleAllocationSegmentNames = chartOfAccounts
-      .find((coa) => coa._id === selectedMetric.coaId)
-      .segments.filter(
+    const metricCoa = chartOfAccounts.find(
+      (coa) => coa._id === selectedMetric.coaId
+    );
+    const possibleAllocationSegmentNames = metricCoa?.segments
+      .filter(
         (segment) => ![GL_CODE, SUB_GL_CODE].includes(segment.description)
       )
       .map((segment) => segment.description);
 
-    setPossibleAllocationSegmentNames(currentPossibleAllocationSegmentNames);
-
+    setMetricsLoading(true);
     // Excel File
     const file = e.target.files[0];
     // Formatted Data
@@ -478,46 +491,28 @@ export const UserSettings = () => {
       const rawMetricData = data.sheets[0];
       if (
         rawMetricData.columns.filter((column) =>
-          currentPossibleAllocationSegmentNames.includes(column)
+          possibleAllocationSegmentNames.includes(column)
         ).length === 0
       ) {
         // Clear metric upload file input
-        return alert(
-          "No useable segments are detected, check file and upload again"
-        );
+        setMetricFileInputKey(new Date());
+        setMetricsLoading(false);
+        return alert("No segments are detected, check file and upload again");
       }
-
-      // TODO: Create blocks if the user tries to upload stupid stuff. Ex: Adding removing columns (maybe?)
-
-      setMetricData((metricData) => {
-        // If the metric data uploaded is already being worked with replace it with new file
-        if (metricData.map((m) => m.name).includes(rawMetricData.name)) {
-          return metricData.map((data) => {
-            if (data.name === rawMetricData.name) {
-              return {
-                ...rawMetricData,
-                validMethods: [],
-                metricSegments: rawMetricData.columns.filter((column) =>
-                  currentPossibleAllocationSegmentNames.includes(column)
-                ),
-              };
-            }
-            return data;
-          });
-        }
-        // Add the upload metric data to the working metricData state object
-        return [
-          ...metricData,
-          {
-            ...rawMetricData,
-            validMethods: [],
-            metricSegments: rawMetricData.columns.filter((column) =>
-              currentPossibleAllocationSegmentNames.includes(column)
-            ),
-          },
-        ];
+      setMetricData({
+        ...rawMetricData,
+        validMethods: selectedMetric.validMethods.filter((method) =>
+          rawMetricData.columns.includes(method)
+        ),
+        metricSegments: rawMetricData.columns.filter((column) =>
+          possibleAllocationSegmentNames.includes(column)
+        ),
       });
     }
+    // Clear metric upload file input
+    setMetricFileInputKey(new Date());
+    setMetricsLoading(false);
+    openEditMetricModal();
   };
 
   if (!user) {
@@ -555,6 +550,17 @@ export const UserSettings = () => {
         open={addMetricModalOpen}
         handleClose={closeAddMetricModal}
         chartOfAccounts={chartOfAccounts}
+      />
+      <EditMetricModal
+        open={editMetricModalOpen}
+        handleClose={closeEditMetricModal}
+        selectedMetric={selectedMetric}
+        metricData={metricData}
+        setMetricData={setMetricData}
+        setEditedSelectedMetric={setEditedSelectedMetric}
+        metricCoa={chartOfAccounts.find(
+          (coa) => coa._id === selectedMetric?.coaId
+        )}
       />
       <div
         style={{
@@ -790,7 +796,7 @@ export const UserSettings = () => {
                   accept=".xls,.xlsx"
                   ref={metricssEditInputRef}
                   onChange={handleMetricFile}
-                  key={metricsFileKey}
+                  key={metricFileInputKey}
                 />
               </IconButton>
               <IconButton

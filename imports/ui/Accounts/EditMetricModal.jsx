@@ -36,61 +36,25 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const AddMetricModal = ({ open, handleClose, chartOfAccounts }) => {
+export const EditMetricModal = ({
+  open,
+  handleClose,
+  selectedMetric,
+  metricData,
+  setMetricData,
+  metricCoa,
+  setEditedSelectedMetric,
+}) => {
   // getModalStyle is not a pure function, we roll the style only on the first render
   const classes = useStyles();
 
   const [modalStyle] = useState(getModalStyle);
-  const [selectedCoa, setSelectedCoa] = useState(chartOfAccounts[0]);
-  const [metricData, setMetricData] = useState();
-  const [loading, setLoading] = useState(false);
   const [completeLoading, setCompleteLoading] = useState(false);
-  const [metricFileInputKey, setMetricFileInputKey] = useState(new Date());
 
   // Segments possible for allocation
-  const possibleAllocationSegmentNames = selectedCoa?.segments
+  const possibleAllocationSegmentNames = metricCoa?.segments
     .filter((segment) => ![GL_CODE, SUB_GL_CODE].includes(segment.description))
     .map((segment) => segment.description);
-
-  const handleChartOfAccountChange = (c) => {
-    const newSelectedChartOfAccounts = chartOfAccounts.find(
-      (coa) => coa._id === c.value
-    );
-    setSelectedCoa(newSelectedChartOfAccounts);
-    setMetricData();
-  };
-
-  const handleMetricFile = async (e) => {
-    setLoading(true);
-    // Excel File
-    const file = e.target.files[0];
-    // Formatted Data
-    const data = await ReadWorkbook(file);
-
-    if (data && "sheets" in data && data.sheets.length > 0) {
-      const rawMetricData = data.sheets[0];
-      if (
-        rawMetricData.columns.filter((column) =>
-          possibleAllocationSegmentNames.includes(column)
-        ).length === 0
-      ) {
-        // Clear metric upload file input
-        setMetricFileInputKey(new Date());
-        setLoading(false);
-        return alert("No segments are detected, check file and upload again");
-      }
-      setMetricData({
-        ...rawMetricData,
-        validMethods: [],
-        metricSegments: rawMetricData.columns.filter((column) =>
-          possibleAllocationSegmentNames.includes(column)
-        ),
-      });
-    }
-    // Clear metric upload file input
-    setMetricFileInputKey(new Date());
-    setLoading(false);
-  };
 
   const handleSelectAll = () => {
     setMetricData((metricData) => {
@@ -137,21 +101,27 @@ export const AddMetricModal = ({ open, handleClose, chartOfAccounts }) => {
   const handleCancelMetric = () => {
     // Removes the saved metric from the react hook state
     setMetricData();
+    handleClose();
   };
 
   const handleSaveMetric = () => {
     setCompleteLoading(true);
-
+    console.log("selectedMetric.coaId", selectedMetric.coaId);
+    console.log("selectedMetric._id", selectedMetric);
+    console.log("metricData", metricData);
     // Saves the metric to the chart of accounts
     Meteor.call(
-      "chartOfAccounts.metrics.insert",
-      selectedCoa._id,
-      [metricData],
+      "chartOfAccounts.metrics.update",
+      selectedMetric.coaId,
+      selectedMetric._id,
+      metricData,
       (err, res) => {
         if (err) {
           alert(`Unable to save metrics: ${err.reason}`);
         } else {
+          setEditedSelectedMetric(res);
           setMetricData();
+          handleClose();
         }
         setCompleteLoading(false);
       }
@@ -177,50 +147,9 @@ export const AddMetricModal = ({ open, handleClose, chartOfAccounts }) => {
           }}
         >
           <div style={{ fontWeight: "bold", fontSize: 18 }}>
-            Create New Metric
+            Edit Metric - {selectedMetric?.description} -{" "}
+            {selectedMetric?.coaName}
           </div>
-          <div style={{ marginTop: 10, marginBottom: 10 }}>
-            Select Chart Of Accounts this Metric will be used for:
-          </div>
-          <Select
-            value={
-              chartOfAccounts
-                .map((coa) => ({
-                  value: coa._id,
-                  label: coa.name,
-                }))
-                .find((coaOption) => coaOption.value === selectedCoa?._id) ||
-              null
-            }
-            onChange={handleChartOfAccountChange}
-            className="settingSelect"
-            options={chartOfAccounts.map((coa) => ({
-              value: coa._id,
-              label: coa.name,
-            }))}
-          />
-          <label
-            htmlFor="file-upload"
-            className="onboardFileInput"
-            style={{ display: metricData ? "none" : "block", width: 100 }}
-          >
-            <span>Choose File</span>
-          </label>
-          <input
-            type="file"
-            id="file-upload"
-            accept=".xls,.xlsx"
-            onChange={handleMetricFile}
-            key={metricFileInputKey}
-          />
-          <BarLoader
-            loading={loading}
-            color={BLUE}
-            css={`
-              display: block;
-              margin-top: 2em;
-            `}
-          />
           {metricData ? (
             <div>
               <div className="onboardMetricOnboardTitle">{metricData.name}</div>
