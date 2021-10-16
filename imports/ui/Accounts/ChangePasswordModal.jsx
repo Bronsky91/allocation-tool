@@ -102,10 +102,10 @@ export const ChangePasswordModal = ({ open, handleClose, selectedUser }) => {
     >
       <div style={modalStyle} className={classes.paper}>
         <div style={{ fontWeight: "bold" }}>Change Password</div>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} style={{ marginTop: 10 }}>
           <div className="loginInputContainer">
             <label className="loginText" htmlFor="password">
-              Password
+              New Password
             </label>
 
             <input
@@ -122,7 +122,7 @@ export const ChangePasswordModal = ({ open, handleClose, selectedUser }) => {
           </div>
           <div className="loginInputContainer">
             <label className="loginText" htmlFor="confirmPassword">
-              Confirm Password
+              Confirm New Password
             </label>
 
             <input

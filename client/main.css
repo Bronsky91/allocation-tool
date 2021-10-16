@@ -766,7 +766,7 @@ input[type="file"] {
   flex-direction: column;
   height: 15em;
   width: 28em;
-  border: gray solid 0.5px;
+  /* border: gray solid 0.5px; */
   border-radius: 15px;
   background-color: white;
   padding: 15px;
@@ -806,7 +806,7 @@ input[type="file"] {
   align-items: center;
   background-color: white;
   width: 100%;
-  border: gray 0.5px solid;
+  /* border: gray 0.5px solid; */
   border-radius: 15px;
   padding: 15px;
 }
