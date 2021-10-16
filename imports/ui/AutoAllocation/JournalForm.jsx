@@ -99,12 +99,14 @@ const JournalForm = ({ user, chartOfAccounts }) => {
   );
   const segments = selectedChartOfAccounts.segments;
   const metrics = selectedChartOfAccounts.metrics;
-  const allocations = selectedChartOfAccounts.metrics
-    .map((m) => m._id)
-    .includes(selectedMetric._id)
-    ? selectedChartOfAccounts.metrics.find(
-        (metric) => metric._id === selectedMetric._id
-      ).allocations
+  const allocations = selectedMetric
+    ? selectedChartOfAccounts.metrics
+        .map((m) => m._id)
+        .includes(selectedMetric._id)
+      ? selectedChartOfAccounts.metrics.find(
+          (metric) => metric._id === selectedMetric._id
+        ).allocations
+      : []
     : [];
   const templates = selectedChartOfAccounts.templates;
 
@@ -134,9 +136,11 @@ const JournalForm = ({ user, chartOfAccounts }) => {
   const [allocationLoading, setAllocationLoading] = useState(false);
   const [templateLoading, setTemplateLoading] = useState(false);
 
-  const metricSegments = segments
-    .filter((s) => selectedMetric.metricSegments.includes(s.description))
-    .sort((a, b) => a.chartFieldOrder - b.chartFieldOrder);
+  const metricSegments = selectedMetric
+    ? segments
+        .filter((s) => selectedMetric.metricSegments.includes(s.description))
+        .sort((a, b) => a.chartFieldOrder - b.chartFieldOrder)
+    : [];
 
   const selectedTemplate = templates.find(
     (template) => template._id === selectedTemplateId
@@ -170,15 +174,19 @@ const JournalForm = ({ user, chartOfAccounts }) => {
     metricSegments, // Used to dynamically create the chart order in workbook
   });
 
-  const nonMetricSegments = segments.filter(
-    (s) =>
-      !selectedMetric.metricSegments.includes(s.description) &&
-      !GLSegmentNames.includes(s.description)
-  );
+  const nonMetricSegments = selectedMetric
+    ? segments.filter(
+        (s) =>
+          !selectedMetric.metricSegments.includes(s.description) &&
+          !GLSegmentNames.includes(s.description)
+      )
+    : [];
 
-  const availableMethods = selectedMetric.columns.filter((c) =>
-    selectedMetric.validMethods.includes(c.title)
-  );
+  const availableMethods = selectedMetric
+    ? selectedMetric.columns.filter((c) =>
+        selectedMetric.validMethods.includes(c.title)
+      )
+    : [];
 
   const readyToAllocate =
     selectedAllocation &&
@@ -795,7 +803,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                         value: metric._id,
                         label: metric.description,
                       }))
-                      .find((metric) => metric.value === selectedMetric._id) ||
+                      .find((metric) => metric.value === selectedMetric?._id) ||
                     null
                   }
                   onChange={handleMetricChange}
@@ -897,14 +905,14 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                     css={``}
                   />
                 </div>
-              ) : (
+              ) : selectedMetric ? (
                 <button
                   onClick={openAllocationModal}
                   className="journalFormAllocationButton"
                 >
                   Create new Allocation Technique
                 </button>
-              )}
+              ) : null}
             </div>
           </div>
 
