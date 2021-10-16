@@ -62,6 +62,34 @@ export const UserPermissionsModal = ({
         (prevObj, currentObj) => [...prevObj, ...currentObj[objName]],
         []
       );
+
+  const findAvailableTemplates = (
+    coas,
+    selectedCoas,
+    selectedMetrics,
+    selectedAllocations
+  ) => {
+    // Available templates has to be the last thing selected since it depends on the selected chart of accounts, metrics, and allocations
+
+    // Templates only from selected Chart of accounts
+    const templatesFromSelectedCoas = coas
+      .filter((coa) => selectedCoas.map((c) => c.value).includes(coa._id))
+      .reduce(
+        (prevObj, currentObj) => [...prevObj, ...currentObj["templates"]],
+        []
+      );
+    // Templates from selected Chart of Accounts, Metrics, and Allocations
+    return templatesFromSelectedCoas.filter(
+      (template) =>
+        selectedMetrics
+          .map((m) => m.value)
+          .includes(template.metricToAllocate) &&
+        selectedAllocations
+          .map((a) => a.value)
+          .includes(template.allocationTechinque)
+    );
+  };
+
   const createOptions = (arr, labelKey) =>
     arr.map((obj) => ({
       label: obj[labelKey],
@@ -78,10 +106,11 @@ export const UserPermissionsModal = ({
     selectedMetricIds,
     "allocations"
   );
-  const availableTemplates = findAvailable(
+  const availableTemplates = findAvailableTemplates(
     chartOfAccounts,
     selectedChartOfAccountIds,
-    "templates"
+    selectedMetricIds,
+    selectedAllocationIds
   );
 
   const chartOfAccountOptions = createOptions(chartOfAccounts, "name");
@@ -171,10 +200,11 @@ export const UserPermissionsModal = ({
         (option) => selectedUser.permissions.allocations.includes(option.value)
       );
 
-      const preSelectedAvailableTemplates = findAvailable(
+      const preSelectedAvailableTemplates = findAvailableTemplates(
         chartOfAccounts,
         preSelectedChartOfAccounts,
-        "templates"
+        preSelectedMetrics,
+        preSelectedAvailableAllocations
       );
       const preSelectedTemplateOptions = createOptions(
         preSelectedAvailableTemplates,
