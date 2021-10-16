@@ -2,7 +2,7 @@ import { Meteor } from "meteor/meteor";
 
 Meteor.publish("userListRedsky", function () {
   if (Meteor.user()?.redskyAdmin) {
-    return Meteor.users.find({});
+    return Meteor.users.find({}, {});
   }
 });
 
@@ -23,7 +23,13 @@ Meteor.publish("Meteor.user.admin", function () {
 Meteor.publish("Meteor.user.details", function () {
   // Shows the name and permissions for main page
   const options = {
-    fields: { name: 1, permissions: 1, emails: 1 },
+    fields: {
+      name: 1,
+      permissions: 1,
+      emails: 1,
+      metricLimit: 1,
+      userLimit: 1,
+    },
   };
   return Meteor.users.find({ _id: this.userId }, options);
 });

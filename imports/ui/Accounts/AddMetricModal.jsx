@@ -152,6 +152,7 @@ export const AddMetricModal = ({ open, handleClose, chartOfAccounts }) => {
           alert(`Unable to save metrics: ${err.reason}`);
         } else {
           setMetricData();
+          handleClose();
         }
         setCompleteLoading(false);
       }

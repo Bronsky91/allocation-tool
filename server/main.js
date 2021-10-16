@@ -46,6 +46,10 @@ Accounts.onCreateUser((options, user) => {
     user.adminId = options?.adminId || "";
     // Users that aren't admins need permissions
     user.permissions = options?.permissions || [];
+  } else {
+    // Paywalls for # of users and metrics for users that are created on the registration page
+    user.userLimit = options.userLimit;
+    user.metricLimit = options.metricLimit;
   }
 
   return user;

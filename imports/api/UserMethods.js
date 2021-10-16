@@ -17,18 +17,22 @@ Meteor.methods({
       email: data.email,
       redskyAdmin: false,
       admin: false,
+      metricLimit: 0,
+      userLimit: 0,
     });
   },
-  "user.admin.toggle": function (data) {
+  "user.admin.update": function (userId, data) {
     // Only redsky admins can adjust admin privileges
     if (!this.userId || !Meteor.user()?.redskyAdmin) {
       throw new Meteor.Error("Not authorized.");
     }
     Meteor.users.update(
-      { _id: data.id },
+      { _id: userId },
       {
         $set: {
           admin: data.admin,
+          metricLimit: data.metricLimit,
+          userLimit: data.userLimit,
         },
       }
     );

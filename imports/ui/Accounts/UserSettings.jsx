@@ -196,9 +196,14 @@ export const UserSettings = () => {
     setCurrentOpenUserOption("");
   };
 
-  // TODO: Implement User limit?
   const openAddUserModal = () => {
-    setAddUserModalOpen(true);
+    if (otherUsers.length < user.userLimit) {
+      setAddUserModalOpen(true);
+    } else {
+      alert(
+        `Your current user limit is ${user.userLimit}, please contact Redsky Innovations to add additional users`
+      );
+    }
   };
 
   const closeAddUserModal = () => {
@@ -243,8 +248,13 @@ export const UserSettings = () => {
   };
 
   const openAddMetricModal = () => {
-    // TODO: implement paywall
-    setAddMetricModalOpen(true);
+    if (allMetrics.length < user.metricLimit) {
+      setAddMetricModalOpen(true);
+    } else {
+      alert(
+        `Your current metric limit is ${user.metricLimit}, please contact Redsky Innovations for additional metrics`
+      );
+    }
   };
 
   const closeAddMetricModal = () => {
