@@ -1,4 +1,5 @@
 import { Meteor } from "meteor/meteor";
+import { Accounts } from "meteor/accounts-base";
 // API
 import "/imports/api/ChartOfAccountMethods";
 import "/imports/api/UserMethods";
@@ -28,6 +29,10 @@ Meteor.methods({
     });
   },
 });
+
+Accounts.emailTemplates.siteName = "Redsky Innovations - Allocation Tool";
+Accounts.emailTemplates.from =
+  "Redsky Innovations <accounts@redskyinnovations.com>";
 
 Accounts.onCreateUser((options, user) => {
   // User's actual name, used in Journal Entries
