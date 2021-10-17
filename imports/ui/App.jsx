@@ -22,8 +22,6 @@ import { Header } from "./Header.jsx";
 import { ResetPassword } from "./Accounts/ResetPassword.jsx";
 
 export const App = ({ loggingIn }) => {
-  document.title = "RedSky Allocation Tool";
-
   Meteor.subscribe("Meteor.user.admin");
 
   const user = useTracker(() => Meteor.user());

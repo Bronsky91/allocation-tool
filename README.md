@@ -1,4 +1,4 @@
 Auto Allocation Tool
 
-Deloyment Command: `meteor deploy journalentry.redskyinnovations.com --settings ./settings.json`
-Staging Deloyment Command: `meteor deploy journalentry-staging.redskyinnovations.com --settings ./staging-settings.json`
+Deloyment Command: `meteor deploy allocationtool.redskyinnovations.com --settings ./settings.json`
+Staging Deloyment Command: `meteor deploy allocationtool-staging.redskyinnovations.com--settings ./staging-settings.json`

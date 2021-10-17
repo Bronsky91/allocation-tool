@@ -1,5 +1,5 @@
 {
-  "name": "journal-entry-tool",
+  "name": "allocation-tool",
   "private": true,
   "scripts": {
     "start": "meteor run",
