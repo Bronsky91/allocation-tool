@@ -65,9 +65,6 @@ export const JournalFormParent = () => {
     return allowedChartOfAccounts;
   });
 
-  console.log("chartOfAccounts", chartOfAccounts);
-  console.log("user", user);
-
   if (!user) {
     return <Redirect to="/login" />;
   }

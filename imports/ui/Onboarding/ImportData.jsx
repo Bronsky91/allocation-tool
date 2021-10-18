@@ -36,6 +36,24 @@ export const ImportData = () => {
   // Current user logged in
   const user = useTracker(() => Meteor.user());
 
+  const chartOfAccounts = useTracker(() =>
+    ChartOfAccountsCollection.find({}).fetch()
+  );
+
+  const allMetrics = chartOfAccounts
+    .map((coa) => ({
+      ...coa,
+      metrics: coa.metrics.map((metric) => ({
+        ...metric,
+        coaName: coa.name,
+        coaId: coa._id,
+      })),
+    }))
+    .reduce(
+      (prevMetric, currentCoa) => [...prevMetric, ...currentCoa.metrics],
+      []
+    );
+
   const history = useHistory();
 
   // metricData is uploaded metrics sheets and worked data before saving
@@ -267,6 +285,12 @@ export const ImportData = () => {
   };
 
   const handleCompleteOnboard = () => {
+    if (allMetrics.length + confirmedMetricData.length > user.metricLimit) {
+      return alert(
+        `Your current metric limit is ${user.metricLimit}, please contact Redsky Innovations for additional metrics`
+      );
+    }
+
     setCompleteLoading(true);
 
     Meteor.call("chartOfAccounts.insert", coaName, (error, result) => {
