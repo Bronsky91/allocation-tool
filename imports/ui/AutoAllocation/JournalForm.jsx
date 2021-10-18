@@ -316,15 +316,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
   }, [readyToAllocate]);
 
   useEffect(() => {
-    if (selectedTemplate) {
-      // TODO: WTF is this?
-      console.log("New Selected Template", selectedTemplate);
-    }
-  }, [selectedTemplate]);
-
-  useEffect(() => {
     if (selectedTemplateId !== "0" && selectedTemplate) {
-      console.log("selectedTemplate", selectedTemplate);
       // Apply template to form
       setSelectedMetric(
         metrics.find((m) => m._id === selectedTemplate.metricToAllocate)
@@ -557,7 +549,6 @@ const JournalForm = ({ user, chartOfAccounts }) => {
 
   const createTemplate = (name) => {
     const template = createTemplateObject(name);
-    console.log("Template Object", template);
 
     setTemplateLoading(true);
 
@@ -568,7 +559,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
       (err, res) => {
         if (err) {
           console.log(err);
-          alert("Unable to save template: " + err.reason);
+          alert(`Unable to save template: ${err.reason}`);
         } else {
           // TODO: Decide if the modal should still close if the save failed
           console.log(res);
@@ -611,7 +602,6 @@ const JournalForm = ({ user, chartOfAccounts }) => {
       // Show Nesting Modal
       openNestedAllocationModal();
     }
-    console.log(formData);
     CreateWorkbook(formData);
   };
 

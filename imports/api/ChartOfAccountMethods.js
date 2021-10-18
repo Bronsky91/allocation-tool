@@ -461,6 +461,7 @@ Meteor.methods({
     check(templateId, String);
     check(template, {
       name: String,
+      userId: String,
       description: String,
       balancingAccount: [
         {
