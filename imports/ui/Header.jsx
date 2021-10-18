@@ -3,7 +3,7 @@ import React from "react";
 import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
 // Router
-import { Link, Redirect, useHistory, useLocation } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 // DB
 import { ChartOfAccountsCollection } from "../db/ChartOfAccountsCollection";
 // Material UI
@@ -17,11 +17,11 @@ export const Header = ({
   selectedChartOfAccountsId,
   setSelectChartOfAccountsId,
 }) => {
-  // Current user logged in
-  const user = useTracker(() => Meteor.user());
   // Subscriptions
   Meteor.subscribe("chartOfAccounts");
   Meteor.subscribe("Meteor.user.admin");
+  // Current user logged in
+  const user = useTracker(() => Meteor.user());
 
   const chartOfAccounts = useTracker(() =>
     ChartOfAccountsCollection.find({}).fetch()

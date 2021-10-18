@@ -76,9 +76,15 @@ export const JournalFormParent = () => {
       </div>
     );
   }
+
+  if (user.admin) {
+    return <Redirect to="/import" />;
+  }
+
   return (
     <div>
       <Header />
+      <div>Please contact your administrator</div>
     </div>
   );
 };
