@@ -77,14 +77,9 @@ export const JournalFormParent = () => {
     );
   }
 
-  if (user.admin) {
-    return <Redirect to="/import" />;
-  }
-
   return (
     <div>
       <Header />
-      <div>Please contact your administrator</div>
     </div>
   );
 };
@@ -157,7 +152,6 @@ const JournalForm = ({ user, chartOfAccounts }) => {
       selectedSubSegment: bas.subSegments[0],
     })),
     selectedAllocationSegment: glCodeSegment.subSegments[0],
-    // selectedSubGLSegment
     subGLSegment: {
       balance: subGLCodeSegment.subSegments.find(
         (s) => Number(s.segmentId) === 0
@@ -725,9 +719,9 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                           (template) => template.value === selectedTemplateId
                         ) || { value: "0", label: "No Template" }
                     }
-                    onChange={(selected) =>
-                      setSelectedTemplateId(selected.value)
-                    }
+                    onChange={(selected) => {
+                      setSelectedTemplateId(selected.value);
+                    }}
                     options={[
                       { value: "0", label: "No Template" },
                       ...selectedChartOfAccounts.templates.map((template) => ({

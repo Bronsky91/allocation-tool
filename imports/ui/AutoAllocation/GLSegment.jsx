@@ -56,9 +56,11 @@ export const GLSegment = ({
           <Select
             className="journalFormInputSelect"
             onChange={handleChangeTypicalBalance}
-            value={typicalBalanceOptions.find(
-              (tb) => tb.value === formData.typicalBalance
-            )}
+            value={
+              typicalBalanceOptions.find(
+                (tb) => tb.value === formData.typicalBalance
+              ) || null
+            }
             options={typicalBalanceOptions}
             styles={customSelectStyles}
           />

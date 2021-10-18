@@ -16,7 +16,7 @@ export const SegmentSelect = ({
   return (
     <Select
       onChange={onChange}
-      value={options.find((option) => option.value === value)}
+      value={options.find((option) => option.value === value) || null}
       options={options}
       className="journalFormInputSelect"
       isSearchable={true}
