@@ -106,9 +106,6 @@ export const EditMetricModal = ({
 
   const handleSaveMetric = () => {
     setCompleteLoading(true);
-    console.log("selectedMetric.coaId", selectedMetric.coaId);
-    console.log("selectedMetric._id", selectedMetric);
-    console.log("metricData", metricData);
     // Saves the metric to the chart of accounts
     Meteor.call(
       "chartOfAccounts.metrics.update",

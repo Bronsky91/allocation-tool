@@ -46,7 +46,6 @@ export const SubGLSegment = ({
         allocations: noSubGL,
       });
     } else if (selectedOption === "both") {
-      console.log("time to change in both");
       handleChangeFormData("subGLSegment", {
         balance: selectedSegment,
         allocations: selectedSegment,

@@ -388,9 +388,8 @@ const JournalForm = ({ user, chartOfAccounts }) => {
       (err, res) => {
         if (err) {
           console.log("Error Deleting Allocation", err);
-          alert(err);
+          alert(err.reason);
         } else {
-          console.log("Deleted Alloction", res);
         }
         setAllocationLoading(false);
       }

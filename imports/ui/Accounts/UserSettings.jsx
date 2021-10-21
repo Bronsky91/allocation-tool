@@ -67,9 +67,6 @@ export const UserSettings = () => {
       []
     );
 
-  console.log("chartOfAccounts", chartOfAccounts);
-  console.log("allMetrics", allMetrics);
-
   const initialChartOfAccountsDataToConfirm = {
     segments: [],
     subSegmentsAdded: [],
@@ -262,7 +259,6 @@ export const UserSettings = () => {
   };
 
   const openEditMetricModal = () => {
-    // TODO: implement paywall
     setEditMetricModalOpen(true);
   };
 
@@ -457,7 +453,6 @@ export const UserSettings = () => {
     const currentIndex = allMetrics.findIndex(
       (a) => a._id === selectedMetric._id
     );
-    // TODO: Add confirmation
     const isConfirmed = confirm(
       `Are you sure you want to delete the ${selectedMetric.description} - ${selectedMetric.coaName} metric?`
     );

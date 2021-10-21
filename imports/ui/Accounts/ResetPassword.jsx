@@ -12,7 +12,6 @@ export const ResetPassword = () => {
   const { token } = useParams();
 
   const history = useHistory();
-  console.log("token", token);
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -32,13 +31,11 @@ export const ResetPassword = () => {
   const submit = (e) => {
     e.preventDefault();
 
-    console.log("new password", password);
     setLoading(true);
 
     Accounts.resetPassword(token, password, (err) => {
       if (err) {
         // Display error
-        console.log("password reset error", err);
         setLoginError(err.reason);
       } else {
         setLoading(false);

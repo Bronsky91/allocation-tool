@@ -187,7 +187,6 @@ export const AllocateModal = ({
             console.log("err", err);
             alert("Unable to update Allocation");
           } else {
-            console.log(res);
             // Once the edit is complete re-select the edited allocation technique to update values for when the modal is next opened
             // A Date timestamp is being used here to be provie a new value for the useEffect so it will be triggered each time
             // This needs to be in a useEffect because the allocations array is only updated on re-renders, which this causes
@@ -209,8 +208,6 @@ export const AllocateModal = ({
           if (err) {
             console.log("err", err);
           } else {
-            // TODO: Set loading bar here, it takes forever sometimes...
-            console.log("result", result);
             if (result.numberOfDocumentsUpdate > 0 && result.allocationId) {
               // Once the allocation is saved, make it the selected the allocation in the dropdown
               setNewestAllocationId(result.allocationId);
