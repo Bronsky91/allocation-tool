@@ -103,6 +103,7 @@ Meteor.methods({
       throw new Meteor.Error("Not authorized.");
     }
 
+    const updatedAt = new Date();
     for (const segment of segments) {
       ChartOfAccountsCollection.update(
         { _id: id },
@@ -113,7 +114,7 @@ Meteor.methods({
               description: segment.description,
               subSegments: segment.subSegments,
               chartFieldOrder: segment.chartFieldOrder,
-              updatedAt: new Date(),
+              updatedAt,
             },
           },
         },
@@ -122,6 +123,7 @@ Meteor.methods({
         }
       );
     }
+    return updatedAt;
   },
   "chartOfAccounts.segments.removeAll": function (id) {
     // If a user not logged in or the user is not an admin
@@ -213,23 +215,25 @@ Meteor.methods({
       }),
     }));
 
-    return ChartOfAccountsCollection.update(
+    const updatedAt = new Date();
+
+    ChartOfAccountsCollection.update(
       { _id: chartOfAccountsId },
       {
         $set: {
-          "metrics.$[m]": {
-            description,
-            columns,
-            validMethods,
-            metricSegments,
-            updatedAt: new Date(),
-          },
+          "metrics.$[m].description": description,
+          "metrics.$[m].columns": columns,
+          "metrics.$[m].validMethods": validMethods,
+          "metrics.$[m].metricSegments": metricSegments,
+          "metrics.$[m].updatedAt": updatedAt,
         },
       },
       {
         arrayFilters: [{ "m._id": metricId }],
       }
     );
+
+    return updatedAt;
   },
   "chartOfAccounts.metrics.removeAll": function (id) {
     // If a user not logged in or the user is not an admin
@@ -457,6 +461,7 @@ Meteor.methods({
     check(templateId, String);
     check(template, {
       name: String,
+      userId: String,
       description: String,
       balancingAccount: [
         {

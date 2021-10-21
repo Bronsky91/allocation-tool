@@ -22,8 +22,6 @@ import { Header } from "./Header.jsx";
 import { ResetPassword } from "./Accounts/ResetPassword.jsx";
 
 export const App = ({ loggingIn }) => {
-  document.title = "RedSky Allocation Tool";
-
   Meteor.subscribe("Meteor.user.admin");
 
   const user = useTracker(() => Meteor.user());
@@ -67,7 +65,28 @@ export const App = ({ loggingIn }) => {
   );
 
   // Must be logged in as an admin for this route... Briefly shows '...' while loading account data rather than redirecting...
-  const AdminRoute = ({ component: Component, ...rest }) => (
+  const ClientAdminRoute = ({ component: Component, ...rest }) => (
+    <Route
+      {...rest}
+      render={(props) => {
+        const isLoggedIn = Meteor.userId() !== null;
+        const isAdmin = user ? user.admin : false;
+
+        return rest.loggingIn ? (
+          <Header />
+        ) : isAdmin ? (
+          <Component {...props} />
+        ) : isLoggedIn ? (
+          <NotFound />
+        ) : (
+          <Redirect to={{ pathname: "/login" }} />
+        );
+      }}
+    />
+  );
+
+  // Must be logged in as an admin for this route... Briefly shows '...' while loading account data rather than redirecting...
+  const RedskyAdminRoute = ({ component: Component, ...rest }) => (
     <Route
       {...rest}
       render={(props) => {
@@ -99,13 +118,13 @@ export const App = ({ loggingIn }) => {
           path="/account"
           component={UserAccount}
         />
-        <ProtectedRoute
+        <ClientAdminRoute
           loggingIn={loggingIn}
           exact
           path="/settings"
           component={UserSettings}
         />
-        <ProtectedRoute
+        <ClientAdminRoute
           loggingIn={loggingIn}
           exact
           path="/import"
@@ -118,7 +137,7 @@ export const App = ({ loggingIn }) => {
           component={JournalFormParent}
         />
         {/* ### USE FOR REDSKY ADMIN ### */}
-        <AdminRoute
+        <RedskyAdminRoute
           loggingIn={loggingIn}
           exact
           path="/admin"

@@ -38,7 +38,6 @@ export const LoginForm = () => {
     setLoading(true);
 
     if (forgotPassword) {
-      console.log("submitting forgot password");
       Accounts.forgotPassword({ email: forgotPasswordEmail }, (err, res) => {
         if (err) {
           console.log(err);

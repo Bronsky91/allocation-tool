@@ -11,6 +11,7 @@ import { isChartOfAccountWorkBookDataValid } from "../../utils/CheckWorkbookData
 import { ChartOfAccountsCollection } from "../../db/ChartOfAccountsCollection";
 // Constants
 import {
+  barLoaderCSS,
   BLUE,
   CHART_OF_ACCOUNT_COLUMNS,
   GL_CODE,
@@ -35,6 +36,24 @@ export const ImportData = () => {
   // Current user logged in
   const user = useTracker(() => Meteor.user());
 
+  const chartOfAccounts = useTracker(() =>
+    ChartOfAccountsCollection.find({}).fetch()
+  );
+
+  const allMetrics = chartOfAccounts
+    .map((coa) => ({
+      ...coa,
+      metrics: coa.metrics.map((metric) => ({
+        ...metric,
+        coaName: coa.name,
+        coaId: coa._id,
+      })),
+    }))
+    .reduce(
+      (prevMetric, currentCoa) => [...prevMetric, ...currentCoa.metrics],
+      []
+    );
+
   const history = useHistory();
 
   // metricData is uploaded metrics sheets and worked data before saving
@@ -58,10 +77,6 @@ export const ImportData = () => {
   const possibleAllocationSegmentNames = segments
     .filter((segment) => ![GL_CODE, SUB_GL_CODE].includes(segment.description))
     .map((segment) => segment.description);
-
-  const barLoaderCSS = `
-    margin-top: 2em;
-  `;
 
   useEffect(() => {
     if (metricData.length === 0) {
@@ -150,6 +165,7 @@ export const ImportData = () => {
       ) {
         // Clear metric upload file input
         setMetricFileInputKey(new Date());
+        setLoading(false);
         return alert("No segments are detected, check file and upload again");
       }
       setMetricData((metricData) => {
@@ -269,6 +285,12 @@ export const ImportData = () => {
   };
 
   const handleCompleteOnboard = () => {
+    if (allMetrics.length + confirmedMetricData.length > user.metricLimit) {
+      return alert(
+        `Your current metric limit is ${user.metricLimit}, please contact Redsky Innovations for additional metrics`
+      );
+    }
+
     setCompleteLoading(true);
 
     Meteor.call("chartOfAccounts.insert", coaName, (error, result) => {

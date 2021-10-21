@@ -8,7 +8,6 @@ table {
   border-collapse: collapse;
   width: 100%;
 }
-
 td,
 th {
   border: 1px solid #dddddd;
@@ -753,6 +752,153 @@ input[type="file"] {
 .userSettingsPermissionsContainer {
   margin-top: 20px;
 }
+
+.topBlockContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 70%;
+  padding: 2em;
+}
+
+.topBlock {
+  display: flex;
+  flex-direction: column;
+  height: 15em;
+  width: 28em;
+  /* border: gray solid 0.5px; */
+  border-radius: 15px;
+  background-color: white;
+  padding: 15px;
+}
+
+.settingSelect {
+  width: 15em;
+}
+
+.selectRowTopBlock {
+  padding: 15px;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  align-items: center;
+}
+
+.subContainerTopBlock {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 15px;
+  overflow: auto;
+}
+
+.bottomBlockContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 70%;
+}
+
+.tableContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  width: 100%;
+  /* border: gray 0.5px solid; */
+  border-radius: 15px;
+  padding: 15px;
+}
+
+.userManagementTable {
+  border-top: none;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.userManagementTable tr {
+  border-top: 1px solid #dddddd;
+  background-color: white;
+  border-bottom: none;
+}
+
+.userManagementTable th {
+  border: none;
+}
+
+.userManagementTable td {
+  border: none;
+}
+
+.userDropDownButton {
+  width: 25px;
+  height: 25px;
+  border-radius: 25px;
+  border: solid 1px #3597fe;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.userDropDownButton:hover {
+  cursor: pointer;
+}
+
+.userDropDownContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: absolute;
+  background-color: white;
+  width: 140px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  padding: 12px 16px;
+  z-index: 1;
+  border-radius: 10px;
+}
+
+.userDropDownOption {
+  color: #3597fe;
+}
+
+.userDropDownOption:hover {
+  cursor: pointer;
+}
+
+.addUserButton {
+  width: 100px;
+  height: 40px;
+  border-radius: 8px;
+  border-width: 0px;
+  background-color: #3597fe;
+  color: white;
+  margin-left: 10px;
+}
+
+.addUserButton:hover {
+  cursor: pointer;
+}
+
+.updateChartOfAccountsButton {
+  width: 150px;
+  height: 40px;
+  border-radius: 8px;
+  border-width: 0px;
+  color: white;
+  margin-left: 10px;
+}
+.updateChartOfAccountsButton:hover {
+  cursor: pointer;
+}
+
+.segmentsUpdateContainer {
+  overflow: auto;
+  height: 70px;
+  padding: 5px;
+  margin-top: 5px;
+  border: solid black thin;
+}
+
 /* Util Styles */
 
 .buttonDisabled {

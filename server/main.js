@@ -1,4 +1,5 @@
 import { Meteor } from "meteor/meteor";
+import { Accounts } from "meteor/accounts-base";
 // API
 import "/imports/api/ChartOfAccountMethods";
 import "/imports/api/UserMethods";
@@ -29,6 +30,10 @@ Meteor.methods({
   },
 });
 
+Accounts.emailTemplates.siteName = "Redsky Innovations - Allocation Tool";
+Accounts.emailTemplates.from =
+  "Redsky Innovations <accounts@redskyinnovations.com>";
+
 Accounts.onCreateUser((options, user) => {
   // User's actual name, used in Journal Entries
   user.name = options.name;
@@ -46,6 +51,10 @@ Accounts.onCreateUser((options, user) => {
     user.adminId = options?.adminId || "";
     // Users that aren't admins need permissions
     user.permissions = options?.permissions || [];
+  } else {
+    // Paywalls for # of users and metrics for users that are created on the registration page
+    user.userLimit = options.userLimit;
+    user.metricLimit = options.metricLimit;
   }
 
   return user;

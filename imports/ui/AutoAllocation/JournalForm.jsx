@@ -65,9 +65,6 @@ export const JournalFormParent = () => {
     return allowedChartOfAccounts;
   });
 
-  console.log("chartOfAccounts", chartOfAccounts);
-  console.log("user", user);
-
   if (!user) {
     return <Redirect to="/login" />;
   }
@@ -79,6 +76,7 @@ export const JournalFormParent = () => {
       </div>
     );
   }
+
   return (
     <div>
       <Header />
@@ -99,12 +97,14 @@ const JournalForm = ({ user, chartOfAccounts }) => {
   );
   const segments = selectedChartOfAccounts.segments;
   const metrics = selectedChartOfAccounts.metrics;
-  const allocations = selectedChartOfAccounts.metrics
-    .map((m) => m._id)
-    .includes(selectedMetric._id)
-    ? selectedChartOfAccounts.metrics.find(
-        (metric) => metric._id === selectedMetric._id
-      ).allocations
+  const allocations = selectedMetric
+    ? selectedChartOfAccounts.metrics
+        .map((m) => m._id)
+        .includes(selectedMetric._id)
+      ? selectedChartOfAccounts.metrics.find(
+          (metric) => metric._id === selectedMetric._id
+        ).allocations
+      : []
     : [];
   const templates = selectedChartOfAccounts.templates;
 
@@ -134,9 +134,11 @@ const JournalForm = ({ user, chartOfAccounts }) => {
   const [allocationLoading, setAllocationLoading] = useState(false);
   const [templateLoading, setTemplateLoading] = useState(false);
 
-  const metricSegments = segments
-    .filter((s) => selectedMetric.metricSegments.includes(s.description))
-    .sort((a, b) => a.chartFieldOrder - b.chartFieldOrder);
+  const metricSegments = selectedMetric
+    ? segments
+        .filter((s) => selectedMetric.metricSegments.includes(s.description))
+        .sort((a, b) => a.chartFieldOrder - b.chartFieldOrder)
+    : [];
 
   const selectedTemplate = templates.find(
     (template) => template._id === selectedTemplateId
@@ -150,7 +152,6 @@ const JournalForm = ({ user, chartOfAccounts }) => {
       selectedSubSegment: bas.subSegments[0],
     })),
     selectedAllocationSegment: glCodeSegment.subSegments[0],
-    // selectedSubGLSegment
     subGLSegment: {
       balance: subGLCodeSegment.subSegments.find(
         (s) => Number(s.segmentId) === 0
@@ -170,15 +171,19 @@ const JournalForm = ({ user, chartOfAccounts }) => {
     metricSegments, // Used to dynamically create the chart order in workbook
   });
 
-  const nonMetricSegments = segments.filter(
-    (s) =>
-      !selectedMetric.metricSegments.includes(s.description) &&
-      !GLSegmentNames.includes(s.description)
-  );
+  const nonMetricSegments = selectedMetric
+    ? segments.filter(
+        (s) =>
+          !selectedMetric.metricSegments.includes(s.description) &&
+          !GLSegmentNames.includes(s.description)
+      )
+    : [];
 
-  const availableMethods = selectedMetric.columns.filter((c) =>
-    selectedMetric.validMethods.includes(c.title)
-  );
+  const availableMethods = selectedMetric
+    ? selectedMetric.columns.filter((c) =>
+        selectedMetric.validMethods.includes(c.title)
+      )
+    : [];
 
   const readyToAllocate =
     selectedAllocation &&
@@ -311,15 +316,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
   }, [readyToAllocate]);
 
   useEffect(() => {
-    if (selectedTemplate) {
-      // TODO: WTF is this?
-      console.log("New Selected Template", selectedTemplate);
-    }
-  }, [selectedTemplate]);
-
-  useEffect(() => {
     if (selectedTemplateId !== "0" && selectedTemplate) {
-      console.log("selectedTemplate", selectedTemplate);
       // Apply template to form
       setSelectedMetric(
         metrics.find((m) => m._id === selectedTemplate.metricToAllocate)
@@ -391,9 +388,8 @@ const JournalForm = ({ user, chartOfAccounts }) => {
       (err, res) => {
         if (err) {
           console.log("Error Deleting Allocation", err);
-          alert(err);
+          alert(err.reason);
         } else {
-          console.log("Deleted Alloction", res);
         }
         setAllocationLoading(false);
       }
@@ -552,7 +548,6 @@ const JournalForm = ({ user, chartOfAccounts }) => {
 
   const createTemplate = (name) => {
     const template = createTemplateObject(name);
-    console.log("Template Object", template);
 
     setTemplateLoading(true);
 
@@ -563,7 +558,7 @@ const JournalForm = ({ user, chartOfAccounts }) => {
       (err, res) => {
         if (err) {
           console.log(err);
-          alert("Unable to save template: " + err.reason);
+          alert(`Unable to save template: ${err.reason}`);
         } else {
           // TODO: Decide if the modal should still close if the save failed
           console.log(res);
@@ -606,7 +601,6 @@ const JournalForm = ({ user, chartOfAccounts }) => {
       // Show Nesting Modal
       openNestedAllocationModal();
     }
-    console.log(formData);
     CreateWorkbook(formData);
   };
 
@@ -714,9 +708,9 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                           (template) => template.value === selectedTemplateId
                         ) || { value: "0", label: "No Template" }
                     }
-                    onChange={(selected) =>
-                      setSelectedTemplateId(selected.value)
-                    }
+                    onChange={(selected) => {
+                      setSelectedTemplateId(selected.value);
+                    }}
                     options={[
                       { value: "0", label: "No Template" },
                       ...selectedChartOfAccounts.templates.map((template) => ({
@@ -789,12 +783,15 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                   Select Metric to Allocate with:
                 </label>
                 <Select
-                  value={metrics
-                    .map((metric) => ({
-                      value: metric._id,
-                      label: metric.description,
-                    }))
-                    .find((metric) => metric.value === selectedMetric._id)}
+                  value={
+                    metrics
+                      .map((metric) => ({
+                        value: metric._id,
+                        label: metric.description,
+                      }))
+                      .find((metric) => metric.value === selectedMetric?._id) ||
+                    null
+                  }
                   onChange={handleMetricChange}
                   className="journalFormInputSelect"
                   options={metrics.map((metric) => ({
@@ -818,15 +815,17 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                     }}
                   >
                     <Select
-                      value={allocations
-                        .map((allocation) => ({
-                          value: allocation._id,
-                          label: allocation.name,
-                        }))
-                        .find(
-                          (allocation) =>
-                            allocation.value === selectedAllocation?._id
-                        )}
+                      value={
+                        allocations
+                          .map((allocation) => ({
+                            value: allocation._id,
+                            label: allocation.name,
+                          }))
+                          .find(
+                            (allocation) =>
+                              allocation.value === selectedAllocation?._id
+                          ) || null
+                      }
                       onChange={handleAllocationChange}
                       className="journalFormInputSelect"
                       options={allocations.map((allocation) => ({
@@ -892,14 +891,14 @@ const JournalForm = ({ user, chartOfAccounts }) => {
                     css={``}
                   />
                 </div>
-              ) : (
+              ) : selectedMetric ? (
                 <button
                   onClick={openAllocationModal}
                   className="journalFormAllocationButton"
                 >
                   Create new Allocation Technique
                 </button>
-              )}
+              ) : null}
             </div>
           </div>
 

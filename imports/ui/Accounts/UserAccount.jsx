@@ -32,11 +32,11 @@ export const UserAccount = () => {
     const name = e.target.name.value;
     const email = e.target.email.value;
 
-    Meteor.call("user.name.update", name, (err, res) => {
+    Meteor.call("user.name.update", user._id, name, (err, res) => {
       if (err) {
         alert(`Unable to update name: ${err.reason}`);
       }
-      Meteor.call("user.email.update", email, (err, res) => {
+      Meteor.call("user.email.update", user._id, email, (err, res) => {
         if (err) {
           alert(`Unable to update email: ${err.reason}`);
         }

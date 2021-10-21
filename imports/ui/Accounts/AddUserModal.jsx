@@ -45,7 +45,6 @@ export const AddUserModal = ({ open, handleClose }) => {
 
   const [registerForm, setRegisterForm] = useState(initialRegisterForm);
   const [registerError, setRegisterError] = useState("");
-  const [registerSuccess, setRegisterSuccess] = useState(false);
 
   const passwordsMatch =
     registerForm.password === registerForm.confirmPassword ||
@@ -203,7 +202,7 @@ export const AddUserModal = ({ open, handleClose }) => {
               className={`registerButton ${!formReady ? "buttonDisabled" : ""}`}
               disabled={!formReady}
             >
-              Register
+              Create
             </button>
             <div style={{ color: registerError ? "red" : "#fff" }}>
               {registerError ? registerError : "Error message placeholder"}

@@ -3,7 +3,7 @@ import React from "react";
 import { Meteor } from "meteor/meteor";
 import { useTracker } from "meteor/react-meteor-data";
 // Router
-import { Link, Redirect, useHistory, useLocation } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 // DB
 import { ChartOfAccountsCollection } from "../db/ChartOfAccountsCollection";
 // Material UI
@@ -17,11 +17,13 @@ export const Header = ({
   selectedChartOfAccountsId,
   setSelectChartOfAccountsId,
 }) => {
-  // Current user logged in
-  const user = useTracker(() => Meteor.user());
   // Subscriptions
   Meteor.subscribe("chartOfAccounts");
   Meteor.subscribe("Meteor.user.admin");
+  Meteor.subscribe("Meteor.user.details");
+
+  // Current user logged in
+  const user = useTracker(() => Meteor.user());
 
   const chartOfAccounts = useTracker(() =>
     ChartOfAccountsCollection.find({}).fetch()
@@ -87,12 +89,15 @@ export const Header = ({
             <label style={{ marginRight: 5 }}>Chart of Accounts:</label>
             <Select
               className="journalFormInputSelect"
-              value={chartOfAccounts
-                .map((coa) => ({
-                  label: coa.name,
-                  value: coa._id,
-                }))
-                .find((coa) => coa.value === selectedChartOfAccountsId)}
+              value={
+                chartOfAccounts
+                  .map((coa) => ({
+                    label: coa.name,
+                    value: coa._id,
+                  }))
+                  .find((coa) => coa.value === selectedChartOfAccountsId) ||
+                null
+              }
               onChange={handleChartOfAccountChange}
               options={chartOfAccounts.map((coa) => ({
                 label: coa.name,
