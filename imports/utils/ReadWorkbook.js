@@ -15,7 +15,6 @@ const getWorkbookData = async (file) => {
     sheets: [],
   };
 
-  // TODO: Accept csv or xlsx
   const workbook = new Workbook();
   await workbook.xlsx.load(file);
   workbook.eachSheet((worksheet, sheetId) => {
@@ -52,5 +51,3 @@ const getWorkbookData = async (file) => {
 
   return excelData;
 };
-
-
