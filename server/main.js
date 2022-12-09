@@ -30,8 +30,8 @@ Meteor.methods({
   },
 });
 
-Accounts.emailTemplates.siteName = "Redsky Innovations - Allocation Tool";
-Accounts.emailTemplates.from = "Redsky Innovations <accounts@redsky.support>";
+Accounts.emailTemplates.siteName = "Redsky - Allocation Tool";
+Accounts.emailTemplates.from = "Redsky <accounts@redsky.support>";
 
 Accounts.onCreateUser((options, user) => {
   // User's actual name, used in Journal Entries

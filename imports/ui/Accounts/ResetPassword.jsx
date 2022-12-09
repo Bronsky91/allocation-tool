@@ -47,9 +47,7 @@ export const ResetPassword = () => {
   return (
     <div className="loginContainer">
       <form onSubmit={submit} className="loginFormContainer">
-        <div style={{ fontSize: 24 }}>
-          RedSky Innovations Journal Entry Tool
-        </div>
+        <div style={{ fontSize: 24 }}>RedSky Journal Entry Tool</div>
         <div className="loginInnerContainer">
           <div className="loginInputContainer">
             <label className="loginText" htmlFor="username">

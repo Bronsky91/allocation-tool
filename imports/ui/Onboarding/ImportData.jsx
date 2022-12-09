@@ -287,7 +287,7 @@ export const ImportData = () => {
   const handleCompleteOnboard = () => {
     if (allMetrics.length + confirmedMetricData.length > user.metricLimit) {
       return alert(
-        `Your current metric limit is ${user.metricLimit}, please contact Redsky Innovations for additional metrics`
+        `Your current metric limit is ${user.metricLimit}, please contact Redsky for additional metrics`
       );
     }
 
@@ -577,11 +577,7 @@ export const ImportData = () => {
                         {data.columns.map((column, i) => {
                           if (possibleAllocationSegmentNames.includes(column)) {
                             return (
-                              <li
-                                key={i}
-                                style={{ fontWeight: "bold" }}
-                                key={i}
-                              >
+                              <li key={i} style={{ fontWeight: "bold" }}>
                                 {column}
                               </li>
                             );

@@ -71,7 +71,7 @@ export const RegisterForm = () => {
     <div className="loginContainer">
       <form onSubmit={submit} className="registerFormContainer">
         <div style={{ fontSize: 24, marginTop: 10 }}>
-          RedSky Innovations Journal Entry Tool
+          RedSky Journal Entry Tool
         </div>
         {registerSuccess ? (
           <div className="registerInnerContainer">

@@ -249,7 +249,7 @@ export const UserSettings = () => {
       setAddMetricModalOpen(true);
     } else {
       alert(
-        `Your current metric limit is ${user.metricLimit}, please contact Redsky Innovations for additional metrics`
+        `Your current metric limit is ${user.metricLimit}, please contact Redsky for additional metrics`
       );
     }
   };
