@@ -53,6 +53,9 @@ export const UserSettings = () => {
     ChartOfAccountsCollection.find({}).fetch()
   );
 
+  console.log("user", user);
+  console.log("chartOfAccounts", chartOfAccounts);
+
   const allMetrics = chartOfAccounts
     .map((coa) => ({
       ...coa,
@@ -66,6 +69,12 @@ export const UserSettings = () => {
       (prevMetric, currentCoa) => [...prevMetric, ...currentCoa.metrics],
       []
     );
+
+  // ** TESTING
+  const integrations = [
+    { type: "chartOfAccounts", name: "QuickBooks" },
+    { type: "metric", name: "Dayforce" },
+  ];
 
   const initialChartOfAccountsDataToConfirm = {
     segments: [],
@@ -845,6 +854,167 @@ export const UserSettings = () => {
                   </ul>
                 </div>
               ) : null}
+            </div>
+          </div>
+        </div>
+        <div className="integrationBlockContainer">
+          <div className="tableContainer">
+            <div style={{ fontWeight: "bold", fontSize: 18 }}>Integrations</div>
+            <div className="integrationContainer">
+              <div className="integrationBlock">
+                <div
+                  style={{
+                    fontWeight: "bold",
+                    fontSize: 16,
+                    alignSelf: "center",
+                  }}
+                >
+                  Chart of Accounts
+                </div>
+                <div className="integrationDetails">
+                  <div className="selectRowTopBlock">
+                    <Select
+                      // value={
+                      //   integrations
+                      //     .map((metric) => ({
+                      //       value: metric._id,
+                      //       label: `${metric.description} - ${metric.coaName}`,
+                      //     }))
+                      //     .find(
+                      //       (metricOption) =>
+                      //         metricOption.value === selectedMetric?._id
+                      //     ) || null
+                      // }
+                      // onChange={handleMetricChange}
+                      className="settingSelect"
+                      options={integrations
+                        .filter(
+                          (integration) => integration.type == "chartOfAccounts"
+                        )
+                        .map((integration) => ({
+                          value: integration.type,
+                          label: integration.name,
+                        }))}
+                    />
+                    <IconButton
+                      color="inherit"
+                      // onClick={openAddMetricModal}
+                      style={{ color: "#3597fe" }}
+                    >
+                      <AddIcon fontSize="default" />
+                    </IconButton>
+                    <IconButton
+                      color="inherit"
+                      // onClick={() => {
+                      //   metricssEditInputRef.current.click();
+                      // }}
+                      style={{ color: "#60cead" }}
+                    >
+                      <EditIcon fontSize="small" />
+                      {/* <input
+                        type="file"
+                        accept=".xls,.xlsx"
+                        ref={metricssEditInputRef}
+                        onChange={handleMetricFile}
+                        key={metricFileInputKey}
+                      /> */}
+                    </IconButton>
+                    <IconButton
+                      color="inherit"
+                      // onClick={handleMetricDelete}
+                      style={{ color: "#f54747" }}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                    {/* {metricsLoading ? (
+                      <ClipLoader
+                        color={BLUE}
+                        loading={metricsLoading}
+                        size={25}
+                        css={`
+                          margin-left: 10px;
+                        `}
+                      />
+                    ) : null} */}
+                  </div>
+                </div>
+              </div>
+              <div className="integrationBlock">
+                <div
+                  style={{
+                    fontWeight: "bold",
+                    fontSize: 16,
+                    alignSelf: "center",
+                  }}
+                >
+                  Metrics
+                </div>
+                <div className="integrationDetails">
+                  <div className="selectRowTopBlock">
+                    <Select
+                      // value={
+                      //   integrations
+                      //     .map((metric) => ({
+                      //       value: metric._id,
+                      //       label: `${metric.description} - ${metric.coaName}`,
+                      //     }))
+                      //     .find(
+                      //       (metricOption) =>
+                      //         metricOption.value === selectedMetric?._id
+                      //     ) || null
+                      // }
+                      // onChange={handleMetricChange}
+                      className="settingSelect"
+                      options={integrations
+                        .filter((integration) => integration.type == "metric")
+                        .map((integration) => ({
+                          value: integration.type,
+                          label: integration.name,
+                        }))}
+                    />
+                    <IconButton
+                      color="inherit"
+                      // onClick={openAddMetricModal}
+                      style={{ color: "#3597fe" }}
+                    >
+                      <AddIcon fontSize="default" />
+                    </IconButton>
+                    <IconButton
+                      color="inherit"
+                      // onClick={() => {
+                      //   metricssEditInputRef.current.click();
+                      // }}
+                      style={{ color: "#60cead" }}
+                    >
+                      <EditIcon fontSize="small" />
+                      {/* <input
+                        type="file"
+                        accept=".xls,.xlsx"
+                        ref={metricssEditInputRef}
+                        onChange={handleMetricFile}
+                        key={metricFileInputKey}
+                      /> */}
+                    </IconButton>
+                    <IconButton
+                      color="inherit"
+                      // onClick={handleMetricDelete}
+                      style={{ color: "#f54747" }}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                    {/* {metricsLoading ? (
+                      <ClipLoader
+                        color={BLUE}
+                        loading={metricsLoading}
+                        size={25}
+                        css={`
+                          margin-left: 10px;
+                        `}
+                      />
+                    ) : null} */}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

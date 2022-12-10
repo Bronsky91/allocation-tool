@@ -52,8 +52,10 @@ Accounts.onCreateUser((options, user) => {
     user.permissions = options?.permissions || [];
   } else {
     // Paywalls for # of users and metrics for users that are created on the registration page
-    user.userLimit = options.userLimit || 1;
-    user.metricLimit = options.metricLimit || 1;
+    user.userLimit = options?.userLimit || 1;
+    user.metricLimit = options?.metricLimit || 1;
+    // User admin integrations
+    user.integrations = options?.integrations || [];
   }
 
   return user;

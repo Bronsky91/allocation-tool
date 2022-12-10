@@ -799,6 +799,37 @@ input[type="file"] {
   width: 70%;
 }
 
+.integrationBlockContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 70%;
+  padding: 2em;
+}
+
+.integrationContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.integrationBlock {
+  display: flex;
+  flex-direction: column;
+  /* border:#343a40 solid 1px; */
+  width: 45%;
+  align-items: center;
+}
+
+.integrationDetails {
+  display: flex;
+  flex-direction: column;
+  height: 10em;
+  justify-content: space-between;
+
+}
+
 .tableContainer {
   display: flex;
   flex-direction: column;

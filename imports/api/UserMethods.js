@@ -70,6 +70,42 @@ Meteor.methods({
     }
     Meteor.users.remove({ _id: id });
   },
+  "user.integrations.create": function (data) {
+    // Only admins can create integrations
+    if (!this.userId || !Meteor.user()?.admin) {
+      throw new Meteor.Error("Not authorized.");
+    }
+
+    // Initial integration data
+    const { name } = data;
+
+    return Meteor.users.update(
+      { _id: this.userId },
+      {
+        $set: {
+          name,
+        },
+      }
+    );
+  },
+  "user.integrations.update": function (data) {
+    // Only admins can update integrations
+    if (!this.userId || !Meteor.user()?.admin) {
+      throw new Meteor.Error("Not authorized.");
+    }
+
+    // Initial integration data
+    const { name } = data;
+
+    return Meteor.users.update(
+      { _id: this.userId },
+      {
+        $set: {
+          name,
+        },
+      }
+    );
+  },
   "user.name.update": function (id, name) {
     return Meteor.users.update(
       { _id: id },
