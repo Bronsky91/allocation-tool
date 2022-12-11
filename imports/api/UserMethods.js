@@ -77,13 +77,19 @@ Meteor.methods({
     }
 
     // Initial integration data
-    const { name } = data;
+    const { name, type, accessToken, refreshToken } = data;
 
     return Meteor.users.update(
       { _id: this.userId },
       {
-        $set: {
-          name,
+        $push: {
+          integrations: {
+            _id: new Mongo.ObjectID()._str,
+            name,
+            type,
+            accessToken,
+            refreshToken,
+          },
         },
       }
     );
@@ -94,15 +100,18 @@ Meteor.methods({
       throw new Meteor.Error("Not authorized.");
     }
 
-    // Initial integration data
-    const { name } = data;
-
+    // TODO: TEST THIS
     return Meteor.users.update(
       { _id: this.userId },
       {
         $set: {
-          name,
+          "integrations.$[i]": {
+            ...data,
+          },
         },
+      },
+      {
+        arrayFilters: [{ "i._id": data._id }],
       }
     );
   },
