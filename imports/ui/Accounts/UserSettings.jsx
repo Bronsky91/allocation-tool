@@ -53,6 +53,9 @@ export const UserSettings = () => {
     ChartOfAccountsCollection.find({}).fetch()
   );
 
+  console.log("user", user);
+  console.log("chartOfAccounts", chartOfAccounts);
+
   const allMetrics = chartOfAccounts
     .map((coa) => ({
       ...coa,
@@ -66,6 +69,12 @@ export const UserSettings = () => {
       (prevMetric, currentCoa) => [...prevMetric, ...currentCoa.metrics],
       []
     );
+
+  // ** TESTING
+  const integrations = [
+    { type: "chartOfAccounts", name: "QuickBooks" },
+    { type: "metric", name: "Dayforce" },
+  ];
 
   const initialChartOfAccountsDataToConfirm = {
     segments: [],
@@ -249,7 +258,7 @@ export const UserSettings = () => {
       setAddMetricModalOpen(true);
     } else {
       alert(
-        `Your current metric limit is ${user.metricLimit}, please contact Redsky Innovations for additional metrics`
+        `Your current metric limit is ${user.metricLimit}, please contact Redsky for additional metrics`
       );
     }
   };
@@ -746,6 +755,12 @@ export const UserSettings = () => {
                 />
               ) : null}
             </div>
+            <div style={{ display: "flex" }}>
+              <div>
+                Managed by{" "}
+                <span style={{ fontWeight: "bold" }}>Quickbooks</span>
+              </div>
+            </div>
             <div className="subContainerTopBlock">
               {selectedCoa ? (
                 <div>
@@ -821,6 +836,12 @@ export const UserSettings = () => {
                   `}
                 />
               ) : null}
+            </div>
+            <div style={{ display: "flex" }}>
+              <div>
+                Managed by <span style={{ fontWeight: "bold" }}>Dayforce</span>
+              </div>
+              {/* <button>Manage Integration</button> */}
             </div>
             <div className="subContainerTopBlock">
               {selectedMetric ? (

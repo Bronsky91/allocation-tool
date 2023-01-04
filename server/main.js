@@ -3,6 +3,7 @@ import { Accounts } from "meteor/accounts-base";
 // API
 import "/imports/api/ChartOfAccountMethods";
 import "/imports/api/UserMethods";
+import "/imports/api/Endpoints";
 // Publications
 import "/imports/api/ChartOfAccountPublications";
 import "/imports/api/UserPublications";
@@ -30,8 +31,8 @@ Meteor.methods({
   },
 });
 
-Accounts.emailTemplates.siteName = "Redsky Innovations - Allocation Tool";
-Accounts.emailTemplates.from = "Redsky Innovations <accounts@redsky.support>";
+Accounts.emailTemplates.siteName = "Redsky - Allocation Tool";
+Accounts.emailTemplates.from = "Redsky <accounts@redsky.support>";
 
 Accounts.onCreateUser((options, user) => {
   // User's actual name, used in Journal Entries
@@ -52,8 +53,10 @@ Accounts.onCreateUser((options, user) => {
     user.permissions = options?.permissions || [];
   } else {
     // Paywalls for # of users and metrics for users that are created on the registration page
-    user.userLimit = options.userLimit || 1;
-    user.metricLimit = options.metricLimit || 1;
+    user.userLimit = options?.userLimit || 1;
+    user.metricLimit = options?.metricLimit || 1;
+    // User admin integrations
+    user.integrations = options?.integrations || [];
   }
 
   return user;

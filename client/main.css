@@ -411,6 +411,42 @@ input[type="file"] {
   cursor: pointer;
 }
 
+.integrationListContainer{
+ display: flex;
+ flex-direction: row;
+ align-items: center;
+ align-self: center;
+ justify-content: space-between;
+ flex-wrap: wrap;
+}
+
+.integration {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 2em;
+  justify-items: center;
+  align-items: center;
+  justify-content: space-around;
+  /* border: black solid 2px; */
+  width: 7.5em;
+  position: relative;
+}
+
+.integration:hover{
+  cursor: pointer;
+}
+
+.integrationLogoContainer{
+  display:flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.integrationLogo {
+  height: 3em;
+  width: 3em;
+}
+
 .journalFormParent {
   background-color: #f1f5f7;
   /* background-color: #ebf4ff; */
@@ -797,6 +833,37 @@ input[type="file"] {
   flex-direction: row;
   justify-content: space-between;
   width: 70%;
+}
+
+.integrationBlockContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 70%;
+  padding: 2em;
+}
+
+.integrationContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.integrationBlock {
+  display: flex;
+  flex-direction: column;
+  /* border:#343a40 solid 1px; */
+  width: 45%;
+  align-items: center;
+}
+
+.integrationDetails {
+  display: flex;
+  flex-direction: column;
+  height: 10em;
+  justify-content: space-between;
+
 }
 
 .tableContainer {
