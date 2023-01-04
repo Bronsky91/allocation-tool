@@ -411,6 +411,42 @@ input[type="file"] {
   cursor: pointer;
 }
 
+.integrationListContainer{
+ display: flex;
+ flex-direction: row;
+ align-items: center;
+ align-self: center;
+ justify-content: space-between;
+ flex-wrap: wrap;
+}
+
+.integration {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 2em;
+  justify-items: center;
+  align-items: center;
+  justify-content: space-around;
+  /* border: black solid 2px; */
+  width: 7.5em;
+  position: relative;
+}
+
+.integration:hover{
+  cursor: pointer;
+}
+
+.integrationLogoContainer{
+  display:flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.integrationLogo {
+  height: 3em;
+  width: 3em;
+}
+
 .journalFormParent {
   background-color: #f1f5f7;
   /* background-color: #ebf4ff; */

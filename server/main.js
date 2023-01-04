@@ -3,6 +3,7 @@ import { Accounts } from "meteor/accounts-base";
 // API
 import "/imports/api/ChartOfAccountMethods";
 import "/imports/api/UserMethods";
+import "/imports/api/Endpoints";
 // Publications
 import "/imports/api/ChartOfAccountPublications";
 import "/imports/api/UserPublications";

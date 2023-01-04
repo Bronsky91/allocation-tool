@@ -28,6 +28,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import { Header } from "../Header";
 // Packages
 import BarLoader from "react-spinners/BarLoader";
+import { IntegrationModal } from "./IntegrationModal";
 
 export const ImportData = () => {
   // Subscriptions
@@ -72,6 +73,7 @@ export const ImportData = () => {
   const [metricFileInputKey, setMetricFileInputKey] = useState(new Date());
   const [loading, setLoading] = useState(false);
   const [completeLoading, setCompleteLoading] = useState(false);
+  const [integrationModalIsOpen, setIntegrationModalIsOpen] = useState(false);
 
   // Segments possible for allocation
   const possibleAllocationSegmentNames = segments
@@ -85,6 +87,10 @@ export const ImportData = () => {
       setShowMetricOnboard(true);
     }
   }, [metricData]);
+
+  const closeIntegrationModal = () => {
+    setIntegrationModalIsOpen(false);
+  };
 
   const handleChartOfAccountsFile = async (e) => {
     setLoading(true);
@@ -344,6 +350,10 @@ export const ImportData = () => {
   return (
     <div style={{ height: "100vh", backgroundColor: "#F1F5F7" }}>
       <Header />
+      <IntegrationModal
+        open={integrationModalIsOpen}
+        handleClose={closeIntegrationModal}
+      />
       <div className="onboardPageContainer">
         <div className="onboardContainer">
           <div className="onboardHeaderContainer">
@@ -387,11 +397,24 @@ export const ImportData = () => {
               </div>
               <div
                 className="onboardTitle"
-                style={{ display: coaName ? "block" : "none" }}
+                style={{
+                  display: coaName ? "block" : "none",
+                  marginBottom: "2em",
+                }}
               >
-                Upload a Chart of Accounts
+                Import Chart of Accounts
               </div>
 
+              <button
+                style={{
+                  marginBottom: "1em",
+                  display: coaName ? "block" : "none",
+                }}
+                onClick={() => setIntegrationModalIsOpen(true)}
+              >
+                Connect with Integration
+              </button>
+              <div style={{ display: coaName ? "block" : "none" }}>--or--</div>
               <label
                 htmlFor="file-upload"
                 className="onboardFileInput"
